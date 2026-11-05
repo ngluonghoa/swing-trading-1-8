@@ -9,7 +9,7 @@
 
 ## Read first
 
-1. [Master Handoff snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt): latest decision order, especially §27.18 and §27.15.
+1. [Master Handoff snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt): latest decision order, especially §27.20 (Python-first), §27.19 and §27.18.
 2. [Master Specification](docs/source-snapshots/01_MASTER_SPEC_v1.0_DRAFT.txt): §24 and §24.14.
 3. [Data Contract / Cache](docs/source-snapshots/05_GD3_DATA_CONTRACT_SMART_CACHE_ARCH.txt): §2, §17–18.
 4. [Early Detection](docs/source-snapshots/06_GD3_EARLY_DETECTION_M15_M5_ARMED.txt): §14–16.
@@ -35,7 +35,10 @@ SSI B01–B08, unapproved P01–P17 thresholds, clock and calibration, data lice
 
 - [Current engineering status](docs/CURRENT_STATUS.md)
 - [Architecture decision: MOCHI independence](docs/ADR_0001_MOCHI_INDEPENDENCE.md)
-- [On-demand private Google Colab smoke](docs/COLAB_QUICKSTART.md) — **not a real market backtest**
-- [Colab smoke notebook](notebooks/p0_foundation_smoke.ipynb)
+- [Execution priority: Python-first; Colab optional](docs/ADR_0002_PYTHON_FIRST.md)
 
-MOCHI backup/synchronization is **deferred** until the machine is online. All GitHub CI tests are independent of MOCHI and Colab.
+### Optional tool (not part of the work plan)
+
+The existing [Colab notebook](notebooks/p0_foundation_smoke.ipynb) and [runbook](docs/COLAB_QUICKSTART.md) are **on hold and optional**. They are retained for potential future experiments only, require no setup now, and do not participate in CI, required backtest workflow, or plugin runtime. No Colab connection or token has been configured.
+
+MOCHI backup/synchronization is **deferred** until the machine is online. All standard GitHub CI tests are independent of MOCHI and Colab. ChatGPT Python is for on-demand analysis when inputs are accessible; GitHub Actions is the reproducible testing baseline. Neither is a persistent live runtime.

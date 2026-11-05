@@ -18,7 +18,7 @@ Other design sources: [Master Specification](docs/source-snapshots/01_MASTER_SPE
 
 Use **ChatGPT Python** for permitted on-demand analysis, fixtures and calculations. The Python session is temporary, resource-limited and has no direct Internet access; it is not a persistent service. Use **GitHub Actions** for reproducible automated tests against committed source on Python 3.11/3.12. Neither environment is a continuously running plugin backend. A future scheduled/live runtime and durable cache require a separate approved architecture.
 
-No auxiliary notebook service, external runtime token or powered-on MOCHI is needed for baseline code tests or current engineering work.
+No additional hosted execution service, extra access token or powered-on MOCHI is needed for baseline code tests or current engineering work.
 
 ## Local setup
 

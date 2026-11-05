@@ -30,3 +30,12 @@ Python ≥3.11; standard library only for the initial scaffold. GitHub Actions w
 ## Current blockers
 
 SSI B01–B08, unapproved P01–P17 thresholds, clock and calibration, data licenses, executable detectors, cost/settlement/fill simulator, historical OOS evidence, performance benchmarks, renderer and release tests remain OPEN. The framework must not produce ACTION_ELIGIBLE decisions while these remain unresolved.
+
+## GĐ4/P0.0 next steps (2026-11-06)
+
+- [Current engineering status](docs/CURRENT_STATUS.md)
+- [Architecture decision: MOCHI independence](docs/ADR_0001_MOCHI_INDEPENDENCE.md)
+- [On-demand private Google Colab smoke](docs/COLAB_QUICKSTART.md) — **not a real market backtest**
+- [Colab smoke notebook](notebooks/p0_foundation_smoke.ipynb)
+
+MOCHI backup/synchronization is **deferred** until the machine is online. All GitHub CI tests are independent of MOCHI and Colab.

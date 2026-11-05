@@ -1,23 +1,31 @@
 # CURRENT_STATUS — 2026-11-06
 
-## Provenance and approvals
+## Canonical source and implementation boundary
 
-Read `docs/source-snapshots/00_MASTER_HANDOFF.txt` §27.18 before further implementation. Source documents in Drive remain canonical. GitHub snapshots are read-only representations of the fetched text on the day of import.
+- Original Google Drive documents remain **canonical** for project design. See 00 §27.18, 01 §24/§24.14, 05 §2/§18, 06 §14–16, UI 02, and QA 09 §14.
+- GitHub is authoritative for executable Python source / CI; `docs/source-snapshots` is a fixed text snapshot, **not** auto-synchronized.
+- MOCHI is **OFFLINE / DEFERRED**; design requires **MOCHI-INDEPENDENT** core and future plugin operations.
+- Google Colab only on-demand engineering execution; not operational cache or live trading runtime.
 
-## Phase status
+## What this code implements
 
-- GĐ1: 16 B/S detector design identifiers specified, executable formulas and calibrated thresholds still pending.
-- GĐ2: UI-1.0 visual approved and **design locked**; renderer and UI tests not implemented.
-- GĐ3: data/calendar/cache/replay architecture specified; SSI B01–B08 and source licensing open.
-- GĐ4/P0.0: repository scaffold and runnable unit fixtures introduced here; **not yet equivalent** to full specifications.
-- Backtest: typed harness and synthetic tests only. BT-01..BT-16 acceptance suite NOT_RUN. No historical results, OOS or release proof.
+- P0.0: typed **partial** v1.2 market bar / provider observation / revision contracts; basic quality validation.
+- Revision `first_known_time_utc` checks and fail-closed, typed, deterministic replay fixture.
+- Unimplemented 16 B/S zones return UNVERIFIED, never a confirmed trading decision.
+- Synthetic tests in GitHub Actions on Python 3.11/3.12; a private Colab smoke notebook is present but has **NOT** been executed in Colab.
+- No broker API, no real historical backtest, no detector numerical thresholds, no source feed nor trade simulator.
 
-## Next engineering work (not automatically approved by this commit)
+## NOT_IMPLEMENTED / OPEN
 
-1. Build faithful v1.2 market-bar and provider-observation identity contracts, candle quality, session calendar and correction/version policy.
-2. Implement shared indicators, risk and rule registry only after explicit executable predicate formulas and evidence contracts are reviewed.
-3. Expand synthetic/negative tests to all acceptance IDs and ensure CI logs are reviewed.
-4. Validate SSI B01–B08, clock policy, data retention/licensing before using historical candles.
-5. Run first historical backtest only with an executable tested detector, verified eligible data and realistic fill/fees/slippage/settlement.
+SSI B01–B08 source parity and entitlement, executable predicates and P01–P17 calibration, real exchange calendar, time semantics and session policy, quality gates / source corrections, full L1–L5 Smart Cache, eight-step engine + UI binding/renderer, valid cost/slippage/tax/settlement simulation, BT-01..BT-16 acceptance and OOS/walk-forward, persistent runtime, monitoring/SLO and recovery.
 
-`CI passing` is never synonymous with `HISTORICAL_VALIDATED` or `RELEASE_ELIGIBLE`.
+**CI PASS means engineering foundation tests only. Historical and release readiness are NOT_RUN / BLOCKED.** Do not use synthetic fixtures as claims of signal profitability.
+
+## Next steps
+
+1. Review this branch and CI result, then merge when green.
+2. Reconcile full 05 §2 contracts and build versioned calendar/session fixtures; implement exact minimum eligibility gates.
+3. Expand negative and deterministic replay tests including corrections/dedup and M15/M5.
+4. Validate source B01–B08 / rights before any SSI-backed backtest.
+5. Approve one executable detector and simulator before first historical backtest.
+6. When MOCHI later comes online, clone repository and configure safe sync + Drive document backup, no impact to runtime.

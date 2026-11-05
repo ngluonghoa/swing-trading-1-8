@@ -1,44 +1,34 @@
 # Swing Trading 1.8
 
-**Status: PRE-CODE SPECIFICATION → GĐ4/P0.0 FOUNDATION IN PROGRESS.** This repository is a starting scaffold, **not** a validated trading system.
+**GĐ4/P0.0 ENGINEERING FOUNDATION — NOT a validated trading system.**
 
-- SHORT (3–10 trading sessions) and SWING (10–60 sessions)
-- Strict eight-step decision pipeline and 16 B/S zone identifiers
-- Fail-closed signals; no broker integration, live orders, or confirmed trade recommendations
-- Backtest harness is established alongside shared domain contracts, but **no real historical backtest has been completed**
+The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.
 
-## Read first
+## Source of truth
 
-1. [Master Handoff snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt): latest decision order, especially §27.20 (Python-first), §27.19 and §27.18.
-2. [Master Specification](docs/source-snapshots/01_MASTER_SPEC_v1.0_DRAFT.txt): §24 and §24.14.
-3. [Data Contract / Cache](docs/source-snapshots/05_GD3_DATA_CONTRACT_SMART_CACHE_ARCH.txt): §2, §17–18.
-4. [Early Detection](docs/source-snapshots/06_GD3_EARLY_DETECTION_M15_M5_ARMED.txt): §14–16.
-5. [Locked UI](docs/source-snapshots/02_REPORT_UI_v1.0_APPROVED_LOCKED.txt): preserve design UI-1.0.
-6. [QA Gap Register](docs/source-snapshots/09_INDEPENDENT_QA_AUDIT_GAP_REGISTER.txt): §14.
+- **Python code, repeatable unit tests and CI:** this private GitHub repository.
+- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.21.
+- **Source snapshots:** [docs/source-snapshots](docs/source-snapshots/00_MASTER_HANDOFF.txt) are point-in-time text exports. They are not automatically synchronized and do not replace the original documents.
+- **Approved market data and experiment evidence:** Google Drive where access, licensing, retention and source quality are explicitly verified.
+- **MOCHI:** secondary code clone and document backup, deferred while the device is offline. The plugin must remain independent of MOCHI.
 
-The contents of `docs/source-snapshots/` are text snapshots of documents on Google Drive; they are **not** authoritative live synchronization. See [source index](docs/SOURCE_INDEX.md). Never confuse DOC_FIXED / design PASS with software PASS. Unrun tests are NOT_RUN.
+Other design sources: [Master Specification](docs/source-snapshots/01_MASTER_SPEC_v1.0_DRAFT.txt) §24, [Data Contract](docs/source-snapshots/05_GD3_DATA_CONTRACT_SMART_CACHE_ARCH.txt) §2/§18, [Early Detection](docs/source-snapshots/06_GD3_EARLY_DETECTION_M15_M5_ARMED.txt), [UI-1.0 locked](docs/source-snapshots/02_REPORT_UI_v1.0_APPROVED_LOCKED.txt), [QA Register](docs/source-snapshots/09_INDEPENDENT_QA_AUDIT_GAP_REGISTER.txt) §14.
 
-## Developer setup
+## Runtime and testing policy
+
+Use **ChatGPT Python** for permitted on-demand analysis, fixtures and calculations. The Python session is temporary, resource-limited and has no direct Internet access; it is not a persistent service. Use **GitHub Actions** for reproducible automated tests against committed source on Python 3.11/3.12. Neither environment is a continuously running plugin backend. A future scheduled/live runtime and durable cache require a separate approved architecture.
+
+No auxiliary notebook service, external runtime token or powered-on MOCHI is needed for baseline code tests or current engineering work.
+
+## Local setup
 
 ```bash
 python3 -m pip install -e .
 python3 -m unittest discover -s tests -v
 ```
 
-Python ≥3.11; standard library only for the initial scaffold. GitHub Actions will execute these same tests on pushes/PRs. No dependency on MOCHI, M15001, SSI data, or Google Colab for baseline tests.
+## Current work and blockers
 
-## Current blockers
+Read [CURRENT_STATUS](docs/CURRENT_STATUS.md), [ADR-0001](docs/ADR_0001_MOCHI_INDEPENDENCE.md) and [ADR-0002](docs/ADR_0002_PYTHON_FIRST.md) before new code.
 
-SSI B01–B08, unapproved P01–P17 thresholds, clock and calibration, data licenses, executable detectors, cost/settlement/fill simulator, historical OOS evidence, performance benchmarks, renderer and release tests remain OPEN. The framework must not produce ACTION_ELIGIBLE decisions while these remain unresolved.
-
-## GĐ4/P0.0 next steps (2026-11-06)
-
-- [Current engineering status](docs/CURRENT_STATUS.md)
-- [Architecture decision: MOCHI independence](docs/ADR_0001_MOCHI_INDEPENDENCE.md)
-- [Execution priority: Python-first; Colab optional](docs/ADR_0002_PYTHON_FIRST.md)
-
-### Optional tool (not part of the work plan)
-
-The existing [Colab notebook](notebooks/p0_foundation_smoke.ipynb) and [runbook](docs/COLAB_QUICKSTART.md) are **on hold and optional**. They are retained for potential future experiments only, require no setup now, and do not participate in CI, required backtest workflow, or plugin runtime. No Colab connection or token has been configured.
-
-MOCHI backup/synchronization is **deferred** until the machine is online. All standard GitHub CI tests are independent of MOCHI and Colab. ChatGPT Python is for on-demand analysis when inputs are accessible; GitHub Actions is the reproducible testing baseline. Neither is a persistent live runtime.
+SSI B01–B08 source verification, licensed history, exchange calendar/time semantics, calibrated detectors, full L1–L5 cache, eight-step engine/report binding, realistic fill/fees/settlement model, BT-01..BT-16 acceptance, independent OOS and a hosted runtime are **OPEN**. Synthetic tests do not constitute real historical backtesting, proof of profitability or authorization to place orders.

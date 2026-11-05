@@ -7,7 +7,7 @@ The system design specifies two separate strategies — SHORT (3–10 trading se
 ## Source of truth
 
 - **Python code, repeatable unit tests and CI:** this private GitHub repository.
-- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.21.
+- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.22; see [Handoff status and sync limitations](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
 - **Source snapshots:** [docs/source-snapshots](docs/source-snapshots/00_MASTER_HANDOFF.txt) are point-in-time text exports. They are not automatically synchronized and do not replace the original documents.
 - **Approved market data and experiment evidence:** Google Drive where access, licensing, retention and source quality are explicitly verified.
 - **MOCHI:** secondary code clone and document backup, deferred while the device is offline. The plugin must remain independent of MOCHI.

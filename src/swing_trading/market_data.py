@@ -121,8 +121,10 @@ class CanonicalCandle:
         if self.bar_end_utc <= self.market_bar_key.bar_start_utc:
             raise ValueError("bar_end_utc must follow bar_start_utc")
         values = (self.open, self.high, self.low, self.close)
-        if any(not isinstance(v, Decimal) or not v.is_finite() for v in values):
-            raise TypeError("OHLC must be finite Decimal values")
+        if any(not isinstance(v, Decimal) for v in values):
+            raise TypeError("OHLC must use Decimal values")
+        if any(not v.is_finite() for v in values):
+            raise ValueError("OHLC must be finite")
         if self.low > min(self.open, self.close) or self.high < max(self.open, self.close):
             raise ValueError("OHLC ordering violation")
         if self.low < 0:

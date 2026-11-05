@@ -1,20 +1,18 @@
-# ADR-0002 — Python-first execution; Google Colab optional
+# ADR-0002 — Python-first computation and reproducible automated testing
 
-**Status: APPROVED — 2026-11-06.** Supersedes plans implying Colab is needed for Swing Trading 1.8 development or backtesting.
+**Status: APPROVED — 2026-11-06.** Governs the current source-code and experiment workflow.
 
 ## Decision
 
-1. **ChatGPT Python** is preferred for interactive, on-demand algorithm tests and analysis when inputs are accessible. It is ephemeral, resource-limited and has no direct Internet access; it is not a continuous trading plugin host or persistent cache.
-2. **GitHub Actions CI** runs versioned Python 3.11/3.12 tests after code changes for repeatable engineering checks. CI PASS is neither live-source correctness, OOS/profit evidence nor continuous hosting.
-3. **GitHub Private** remains canonical for code; **Google Drive** remains canonical for Master Handoff/specifications and approved data/evidence.
-4. **Colab** is *not connected, not run and not necessary*. Retain `notebooks/p0_foundation_smoke.ipynb` and `docs/COLAB_QUICKSTART.md` only as optional/on-hold utilities. Do not request a token, Colab sign-in or Colab session as part of the current plan. Colab-specific notebook syntax checks are outside default CI. Colab is not a milestone, dependency, release gate or requirement for the first real historical backtest.
-5. **MOCHI** remains offline; clone and local backup are deferred. Runtime architecture must remain MOCHI-independent.
-6. A future scheduled/always-on plugin needs an independently selected and approved reliable runtime with persistence and monitoring. ChatGPT Python, GitHub Actions, Colab and MOCHI are not substitutes for that deployment.
+1. **ChatGPT Python** is the preferred environment for ad hoc calculations, algorithm development experiments, synthetic fixtures and qualified on-demand backtests when permitted data can be provided. This Python runtime is ephemeral, resource-limited and lacks direct network access. It does not host a live service or permanent market-data cache.
+2. **GitHub Actions CI** automatically runs code-based tests on Python 3.11/3.12 for versioned commits. CI is a reproducible engineering gate, not proof of source parity, market signal efficacy, profitability, out-of-sample performance or production readiness.
+3. **GitHub Private** is canonical for executable source. **Google Drive** is canonical for Handoff/specifications and separately authorized data/evidence storage. Store sensitive credentials in approved systems only; never in source, fixtures, or outputs.
+4. Only the Python package, its real engineering test fixtures and approved runtime interfaces belong in the active build/test path. Auxiliary notebook-hosting artifacts are not necessary and have been removed from the active tree. Previous Git history is retained for audit.
+5. **MOCHI** is offline and optional for later source clone/document backup. It must not be on the critical runtime path.
+6. A future scheduled/always-on plugin requires a separately selected stable runtime, storage, security and monitoring; the chat's Python session and GitHub Actions jobs are not such a service.
 
 ## Acceptance boundary
 
-- Standard code tests must succeed without Colab, MOCHI or credentials.
-- Optional notebook remains in source control with no saved outputs/secrets; optional manual validation available if requested.
-- Real historical backtesting requires tested executable detector, licensed verified history, validated event/calendar clock and fill/fees/settlement simulator. The UI-1.0 design is locked; CK 2.0, FX 2.0 and Scanner remain unchanged.
-
-Google Drive Master Handoff §27.20 governs this latest execution decision.
+- Engineering unit tests operate without external notebook services, tokens, MOCHI or external cloud runtime credentials.
+- Historical simulation requires at least one executable tested detector, validated/licensed market history, causal clock/calendar and realistic fill/fees/slippage/settlement.
+- UI-1.0 remains DESIGN_LOCKED; other trading projects must not be changed. All unverified B/S zones must remain fail-closed.

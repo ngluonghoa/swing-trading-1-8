@@ -2,7 +2,7 @@
 
 ## Latest decisions
 
-- Google Drive Master Handoff §27.21 is the latest execution decision. Previous infrastructure proposals in §27.19–20 are superseded where they conflict.
+- Google Drive Master Handoff §27.22 is the latest execution update (P0.1 session-boundary contracts and passing main CI). Earlier decisions remain subject to latest-decision precedence. The full GitHub 00 snapshot is only current through §27.21; see [Handoff latest pointer](source-snapshots/HANDOFF_LATEST_POINTER.md) and read the original Drive document.
 - GitHub is the only authoritative **code** repository. GitHub Actions CI is the repeatable test environment; ChatGPT Python handles on-demand local calculations when inputs can be provided.
 - The ChatGPT Python environment is ephemeral and has no direct network access. GitHub Actions is not a 24/7 server. A persistent production/plugin runtime and cache must be independently approved and verified.
 - Unused auxiliary execution utilities and their token instructions have been removed from the current repository tree; they are not required, connected or part of the test/release workflow. Historical Git commits are not rewritten.

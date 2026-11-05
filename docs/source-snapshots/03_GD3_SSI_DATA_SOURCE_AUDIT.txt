@@ -1,0 +1,102 @@
+﻿GĐ3 · SSI DATA SOURCE AUDIT v0.1
+
+
+Swing Trading 1.8 · Kiểm tra nguồn dữ liệu thực tế · 05/11/2026 · READ-ONLY / NO CORE CHANGES
+
+
+CHỈ DẪN HIỆN HÀNH / BẢN CHỨNG CỨ LỊCH SỬ — GĐ3/B1, NGÀY 05/11/2026: Đây là ảnh chụp kết quả truy vấn SSI tại thời điểm kiểm tra, KHÔNG phải trạng thái dự án hiện tại. Những câu “bước 2–5 chưa làm”, “NEXT B2/B3” và “MASTER_SPEC/HANDOFF không thay đổi trong lượt này” chỉ đúng TẠI THỜI ĐIỂM báo cáo cũ. Công việc B2–B5 về tài liệu đã được thực hiện sau đó; chỉ đạt CONDITIONAL DESIGN, không phải runtime/data acceptance. B01–B08 vẫn OPEN. Định nghĩa dữ liệu kỹ thuật HIỆN HÀNH là tài liệu 05 (Data Contract v1.1 ở mục 2); đường đi tiếp dự án xem MASTER_HANDOFF mục mới nhất + báo cáo 09. Giữ nguyên số liệu gốc và provenance, không suy ra bất kỳ blocker nào đã khắc phục.
+0. KẾT LUẬN ĐIỀU HÀNH
+
+
+Trạng thái GĐ3/Bước 1: ĐÃ THỰC HIỆN KIỂM TRA MẪU THỰC TẾ, CHƯA ĐẠT CHỨNG NHẬN NGUỒN CHO FULL ENGINE. SSI MCP đang kết nối và cho phép truy vấn OHLCV D1, intraday 1 phút gần đây, VN-Index D1, một phần intraday index, ngành và thông tin công ty, corporate actions, adjustment factors. Tuy nhiên lịch sử intraday xa hơn ~1 tháng trong các thử nghiệm trả về rỗng; endpoint intraday đầy đủ liên tục lỗi DOWNSTREAM_UNAVAILABLE; sector OHLC benchmark, năng lực lịch sử backtest nhiều tháng và realtime streaming chưa được chứng minh.
+Không được đánh đồng kết nối SSI MCP được xác minh ở đây với một tài khoản FastConnect V3 đầy đủ (API Key/Secret + quyền truy cập REST/WebSocket). Tài liệu chính thức của FastConnect nêu 1m/5m/15m/1h và lịch sử intraday dài hơn, nhưng CHƯA trực tiếp đăng nhập/call FastConnect riêng. Việc hỗ trợ trên giấy không chứng tỏ user có entitlement hay volume quota.
+Từ kết quả này, có thể TIẾP TỤC thiết kế data contract/cache và kiểm tra chế độ 5-min bằng dữ liệu gần đây; CHƯA THỂ nghiệm thu M5/M15 long backtest hay live streaming. Chưa có nến của dự án được lưu cache hoặc bộ lõi nào được chạy. Giao diện UI-1.0 vẫn DESIGN LOCKED, KHÔNG thay đổi.
+
+
+1. PHẠM VI, MẪU TEST VÀ NGUỒN
+
+
+Nguồn thực tế: Plugin MCP_SSI read-only với các tool marketdata_list_stock_daily_data, marketdata_list_daily_stock_infor, marketdata_list_intraday_stock_infor, marketdata_list_stock_infor, marketdata_list_index_daily_data, marketdata_list_company_profile, marketdata_list_company_in_same_industry, marketdata_list_corporate_actions, marketdata_list_adjusted_rate. Không truy cập tài khoản giao dịch, không đặt lệnh.
+Mã kiểm tra D1: SSI (HOSE), SHS (HNX), VGI (UPCoM). Intraday và dữ liệu ngành: SSI; index: VNINDEX. Các ngày test intraday: 04/11/2026, 20/10/2026, 15/10/2026, 07/10/2026, 05/10/2026, 02/10/2026, 01/10/2026, 30/09/2026, 25/09/2026, 15/09/2026, 05/08/2026, 15/06/2026. Đây là các điểm kiểm tra MẪU, không phải đo bao phủ toàn bộ thị trường hoặc mọi mã.
+Thời điểm kiểm tra: khoảng 19:50–20:00 theo giờ Việt Nam ngày 05/11/2026 (truy vấn sau phiên; timestamps của nguồn nằm trong phản hồi). Số liệu và độ trễ nội phiên cần kiểm lại khi thị trường đang giao dịch.
+
+
+2. KẾT QUẢ TRUY VẤN ĐÃ XÁC MINH
+
+
+2.1 D1 (SSI): Truy vấn 3 tháng OHLCV thành công, giá/volume được trả dạng chuỗi số; trang 1 có ngày 05/11/2026. Truy vấn 1 năm phân trang được 200 dòng ở page 1, 49 dòng ở page 2 (249 phiên, từ 05/11/2025 đến 05/11/2026). Truy vấn max_range 730 ngày: các trang 1 và 3 trả 200 và 98 dòng, 3 trang xấp xỉ 498 phiên nếu trang 2 tương ứng 200; dữ liệu page 3 từ 28/03/2025 đến 05/11/2024. NOTE: tổng 498 là theo phân trang kiểm tra, không đồng nghĩa tất cả mã đều đủ 498 dòng.
+2.2 D1 đa sàn: SHS ở HNX và VGI ở UPCoM đều trả OHLCV thành công cho 05/11/2026 và 04/11/2026; hồ sơ VGI trả exchange=UPCOM. Điều này xác minh cơ bản 3 sàn ở mức mẫu, chưa kiểm status/tạm ngừng giao dịch toàn diện.
+2.3 SSI D1 chi tiết: endpoint daily_stock_infor cho cùng ngày trả open/high/low/close/volume, ceiling/floor/ref, avg_price, total_match_volume, total_match_value, khối ngoại, close_price_adjusted, raw OHLC. Trường nào có giá 0 phải kiểm ý nghĩa, không tự coi zero thành dữ liệu thật hoàn chỉnh.
+2.4 VNINDEX D1: thành công cho 05/11 và 04/11/2026, và chuỗi 1 năm 249 điểm. Trường ref_price/avg_price của index có thể là 0 theo tài liệu; không dùng nó làm benchmark thay close.
+2.5 SSI intraday 04/11/2026: endpoint intraday_stock_infor(range=1d) trả 226 bản ghi, từ 09:15 đến 14:45. 135 bản ghi 09:15–11:29, 90 bản ghi 13:00–14:29, 1 bản ghi 14:45 sau ATC. Dữ liệu gồm OHLC, volume, trading_date, ref_price, avg_price. Tổng volume phút = 47.036.100 cổ phiếu, TRÙNG với volume D1 cùng ngày của SSI; đó là parity mẫu thành công, không suy ra mọi ngày đều tuyệt đối đúng.
+2.6 SSI intraday 20/10/2026: 226 bản ghi, volume sum 13.109.700, khớp volume D1 đã kiểm. Phiên 15/10, 07/10 và 05/10 cũng trả 226 bản ghi mỗi ngày. Đặc điểm: trường tên 'ticks' thực tế với SSI trong mẫu giống 1-minute OHLCV bars, KHÔNG phải mỗi bản ghi là 1 giao dịch khớp lệnh. Phải sử dụng lịch giao dịch thay vì đoán đơn vị.
+2.7 SSI intraday 01/10 và 02/10/2026: trả status='ok', ticks=[] (rỗng). 30/09, 25/09, 15/09, 05/08, 15/06 cũng rỗng. Đây không phải chắc chắn 'SSI không có giao dịch các ngày đó'; chỉ chứng minh nguồn MCP thử nghiệm không trả dữ liệu lịch sử. Các kết quả phù hợp với giới hạn thực tế khoảng 1 tháng, nhưng ngày cutoff chính xác và tính ổn định cần xác minh.
+2.8 Endpoint marketdata_list_stock_infor (intraday đầy đủ có sysToken + raw OHLC) đã thử 04/11 và 05/11: cả hai đều báo DOWNSTREAM_UNAVAILABLE. KHÔNG dựa vào endpoint này cho pipeline cho đến khi phục hồi và kiểm lại.
+2.9 Index intraday: VNINDEX latest được truy vấn thành công lúc sau phiên với close 1740,73, nhưng open/high/low=0 trong latest snapshot => không thể dùng response này như một nến intraday đầy đủ. VNINDEX lịch sử 04/11 trả 228 bản ghi, nhiều hơn stock SSI 226 do có mốc ranh giới (11:30/14:30). Tổng minute volume index 785.061.420 khác D1 volume 785.061.515 (chênh 95). Cần rule index normalization riêng, không áp dụng y nguyên stock tick session.
+2.10 Hồ sơ ngành/peers: company_profile(SSI) trả exchange=HOSE, ngành/sector/subsector. company_in_same_industry(SSI, similarLevel=4, pageSize=10) trả danh sách 10 peer kèm giá/volume giao dịch gần nhất; CHƯA có chuỗi chỉ số giá ngành lịch sử đúng ICB. Để tính RS vs ngành cần chỉ số ngành được xác minh hoặc thiết kế benchmark tổng hợp có thể tái lập.
+2.11 Corporate actions SSI (3 tháng): thành công, 6 thông báo (bao gồm niêm yết thêm và BCTC). adjusted_rate (1 tuần) trả 30 bản ghi hệ số điều chỉnh toàn thị trường; ví dụ có symbol/date/rate/received date. Cần đối chiếu ý nghĩa tỷ lệ điều chỉnh và ngày nhận với giá raw/adjusted; không tự dùng rate_adjusted='0.6667' như phép chia/nhân đã được xác minh.
+2.12 Timestamp bất đồng format: daily và historical intraday thường là DD/MM/YYYY; latest intraday trả '11/05/2026 14:45:00' theo MM/DD/YYYY (nghĩa 05/11/2026). Data Validator phải có parser theo endpoint + tests cho trường hợp ngày/tháng đều <=12, tuyệt đối không parse theo locale mặc định.
+2.13 Latency/streaming: latest sau phiên trả cuối phiên, KHÔNG đo được latency trong giao dịch; REST MCP không chứng minh có push realtime hay API delta M5. Metadata 'asOfUtc' là thời gian tạo phản hồi, KHÔNG phải bar-close time hoặc bảo đảm quote live.
+
+
+
+
+3. MA TRẬN HỖ TRỢ SO VỚI NHU CẦU SWING 1.8
+
+
+D1 OHLCV / stocks / HOSE,HNX,UPCOM => VERIFIED (chỉ mẫu 3 mã); lịch sử gần 2 năm trong MCP có thể phân trang (SSI).
+W1 => DERIVABLE FROM D1 (thiết kế), CHƯA tính/kiểm parity.
+M1 bars intraday gần đây => VERIFIED trên SSI với 226 records/ngày; không có guarantee toàn bộ mã/sàn.
+M5, M15, M30, H1 => DERIVABLE FROM M1 (cần bộ gộp phiên chuẩn, test OHLCV/parity); SSI FastConnect độc lập có API nến trực tiếp theo tài liệu nhưng kết nối MCP hiện tại không exposes direct tf methods.
+VNINDEX D1 => VERIFIED; VNINDEX intraday => PARTIAL, index special session bars / 95 volume difference require QA.
+ICB industry membership => VERIFIED; industry historical price index => NOT VERIFIED.
+Raw-adjusted D1, corporate actions & adjustment factors => PARTIAL/VERIFIED INTERFACES, chưa đối chiếu đầy đủ factor/corporate action semantic.
+RVOL-TOD 20 phiên => PARTIAL, cần ít nhất 20 phiên đồng nhất cùng slot và dữ liệu thiếu/holiday. History hiện hữu gần ~1 tháng không đủ cho backtest dài hạn.
+Session VWAP / Anchored VWAP exact => NOT VERIFIED vì chưa có per-minute traded value riêng được xác minh; có avg_price field chưa rõ định nghĩa cumulative và rolling; dự toán OHLC typical_price*volume chỉ là xấp xỉ, không được gọi exact VWAP.
+Realtime streaming / quote latency / tick bid-ask => NOT VERIFIED trong MCP. FastConnect có tài liệu WebSocket nhưng cần tài khoản/entitlement triển khai riêng.
+Intraday long backtesting => NOT VERIFIED bằng MCP; khả năng FastConnect V3 dài 1 năm theo tài liệu, CHƯA kiểm bằng account.
+Rate limits + permission + max throughput => NOT MEASURED. Có headers limit của FastConnect theo docs, nhưng không hiển thị qua MCP tool.
+Liquidity/order size/lot/circuit limit => D1 detail cung cấp ceiling/floor/traded volume/value; cần thiết kế rule riêng theo sàn và trạng thái thực tế.
+
+
+4. KHÁC BIỆT SSI MCP VS FASTCONNECT V3 — KHÔNG ĐƯỢC NHẦM
+
+
+SSI MCP hiện đang kết nối qua ChatGPT: read-only marketdata tools đã thử. Các tool intraday chỉ cho lấy tối đa 1m trong một request; một số khoảng ngày xa trả rỗng. Không có tool native trả trực tiếp candles 5m/15m, không có quyền start WebSocket ongoing tự động được chứng minh trong ChatGPT.
+SSI FastConnect V3 là kênh API DEVELOPER khác: nguồn docs chính thức trình bày OHLC 1m/5m/15m/1h, historical, WebSocket, limit headers; trang môi trường ghi 1 năm lịch sử intraday. Đó là tiềm năng của nguồn và có yêu cầu tài khoản/đăng ký/phê duyệt API, chưa tự động tương ứng với MCP SSI connected. Tài liệu hướng dẫn Go SDK ghi GetOHLC1WeekHistorical; tài liệu Python tutorial lại có ghi một số historical week/month không được hỗ trợ, nên quy tắc W1 tốt nhất là derive từ D1 sau kiểm chứng.
+Nguồn web chính thức đã tham khảo:
+https://mcp.ssi.com.vn/docs/huong-dan-tool/
+https://mcp.ssi.com.vn/docs/en/huong-dan-tool/
+https://developers.ssi.com.vn/docs/getting-started/terms-and-environments
+https://developers.ssi.com.vn/docs/tutorials/ohlc
+https://developers.ssi.com.vn/docs/sdk/go/service-classes
+https://guide.ssi.com.vn/ssi-products/fastconnect-data/api-specs
+https://guide.ssi.com.vn/ssi-products/fastconnect-data/streaming-data
+Không đưa credential/API key vào docs. Không gọi endpoint trading. Nếu cần FastConnect, phải kiểm access riêng theo cách user cho phép.
+
+
+5. QUY TẮC THIẾT KẾ DATA CONTRACT / CÁC HARD GATE TỪ KẾT QUẢ
+
+
+5.1 Dữ liệu nến chuẩn mỗi bar: exchange, symbol, timeframe, open/close time timezone Asia/Ho_Chi_Minh, closed/provisional, open/high/low/close/volume, optional value, provider, raw/adjusted, adjustment_revision, received_at/as_of, quality flags, source_id/response timestamp.
+5.2 Parser endpoint-specific cho dạng ngày; latest US date MM/DD/YYYY vs historical VN DD/MM/YYYY; phải cài test ngày 05/11, 11/05 để không đảo tháng.
+5.3 M1 -> M5/M15/M30/H1 theo trading session, không tổng hợp xuyên 11:30–13:00; bảo toàn OHLCV và session auction. Nến ATC 14:45 tách quy tắc hoặc mapping đã định nghĩa, không tự chia đều thành 15 phút. VNINDEX có special bars 11:30/14:30; timezone/venue-specific normalization.
+5.4 Source coverage per timeframe và provider: status VALID/STALE/UNVERIFIED; không tạo candle giả để bù ngày intraday bị rỗng; báo rõ unable to backtest M5 beyond available history.
+5.5 D1 có adjusted, raw; intra chưa kiểm raw/adjusted; không trộn adjusted D1 cho trend với raw minute event levels mà không nêu chỉnh giá/timestamp/snapshot. Điều chỉnh giá muộn invalidate indicator/zone cache.
+5.6 Volume parity: kiểm tổng minute_volume vs daily_match_volume, lưu sai số; không ép parity với volume bao gồm thoả thuận; index volume không tự suy từ stocks. Cơ chế cảnh báo mismatch cho khoảnh thời gian có special auction.
+5.7 Từng lần quét sau 5 phút: cached M1 closed bars / provisional bar, delta fetched only when provider supports; endpoint hiện phải lấy cả ngày để detect delta trong nhiều trường hợp => thiết kế delta-on-client và đo API overhead; chưa hứa đạt call economy/live latency.
+5.8 Không đánh dấu score và xác nhận B/S dựa trên unavailable RVOL-TOD/VWAP/sector index; dùng UNVERIFIED, WARN hoặc Hard Fail theo dependency rule. Không false positive vì thiếu feature.
+
+
+
+
+
+
+6. ĐỀ XUẤT HƯỚNG THỰC HIỆN CÁC BƯỚC GĐ3 CÒN LẠI
+
+
+Bước 2: Kiểm tra đầy đủ các TF và tính parity qua dữ liệu đã lấy (trên nhiều ngày/mã): W1 từ D1, M5/M15/M30/H1 từ M1, xử lý nghỉ trưa, ATO/ATC và index exception. Nếu có FastConnect credentials theo quyền được cấp, đo nến native vs aggregate 1m, history retention/latency/headers và streaming; nếu không, ghi blocker.
+Bước 3: Thiết kế L1 raw/adjusted candle/source store, L2 indicator state, L3 structure, L4 zones/signals, L5 audit/history; cache per symbol/TF/provider + dependency/version hash; partial re-compute and automatic invalidation.
+Bước 4: Điều kiện M5 ARMED + clock state; incremental update, provisional vs closed; RVOL-TOD only when enough same-slot histories; VWAP only with reliable matched value.
+Bước 5: GĐ3 acceptance + các blocker rõ; khi data contract xác nhận mới vào GĐ4 code core và GĐ6 backtest. Nếu thiếu intraday long history phải lựa chọn nguồn bổ sung đủ license hoặc tích lũy cache trong dài hạn (không tự trích nguồn ngoài chưa kiểm chứng).
+Tại ngày 05/11/2026: mới kiểm tra nguồn bước 1; các bước 2–5 CHƯA làm. MASTER_SPEC và HANDOFF không thay đổi trong lượt kiểm tra này. UI-1.0 APPROVED/DESIGN LOCKED không thay đổi.

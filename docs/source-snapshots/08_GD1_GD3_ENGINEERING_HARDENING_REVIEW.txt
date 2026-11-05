@@ -1,0 +1,116 @@
+﻿SWING TRADING 1.8 — ENGINEERING HARDENING REVIEW: GĐ1–GĐ3
+
+
+Review v0.1 · 05/11/2026 · Audit & Contract Amendments · Not a production release
+
+
+CẬP NHẬT SAU REVIEW v0.1 — XEM MỤC 11 CUỐI TÀI LIỆU: Những nhận xét “mới chỉ append phụ lục” trong các mục trước phản ánh thời điểm lập review. Sau đó, định nghĩa candle v1.1, M15 dedup/TTL và strict gate đã được chỉnh trực tiếp trong các mục chính của 01/05/06; UI 02 chỉ bổ sung điều kiện QA phi hình thức. Giữ nguyên phần lịch sử review để truy vết, áp dụng các bản chính hiện hành. Không có code/CI/đầu tư live được nghiệm thu.
+0. QUYẾT ĐỊNH / KẾT LUẬN
+
+
+User explicitly requested professional rework of phases 1–3, instead of restricting all improvements to Phase 4. This review records actual amendments to canonical spec, locked UI implementation acceptance, GĐ3 B3 Data Contract and GĐ3 B4 Early Detection. Historical SSI read-only source and aggregation reports B1/B2 remain immutable historical evidence. No strategy outcomes or UI visual layout changed. No code repository created nor trading system executed by this review.
+Decision: GĐ1–GĐ3 are REVISED AT DESIGN-CONTRACT LEVEL, NOT CERTIFIED IMPLEMENTED. Reconfirm GĐ3 audit conclusion: CONDITIONAL DESIGN PASS; market data B01–B08 open, Python runtime NOT IMPLEMENTED, backtest/CI/rollback NOT TESTED. Revision should be versioned, traced and tested in GĐ4 before claiming software acceptance.
+
+
+1. NGUYÊN TẮC REFACTOR CHUYÊN NGHIỆP
+
+
+Source of truth priority: (1) 01_MASTER_SPEC + later normative amendments for rule/indicator/strategy specification; (2) 02_UI_APPROVED_LOCKED for visual contract; (3) 05_CACHE_ARCH + technical amendment for data/schema/cache; (4) 06_EARLY + amendment for M15/M5 policy; (5) 03/04/07 reports for historical evidence, not latest instructions; (6) 00_MASTER_HANDOFF as chronological history + active next action, not independent source of conflicting definitions.
+An amendment in any source is DRAFT until it has explicit owner/approval, implementation test and release version; historical source paragraphs are intentionally preserved to protect traceability. Any later spec conflict is resolved by explicitly versioned supersession, never silent replacement or handoff paragraph guesswork.
+Engineering DoD = requirements and risk -> typed contract -> test fixture -> implementation -> unit/integration tests -> source quality verification -> performance/restart/security where applicable -> release candidate/approval -> post-deploy monitoring/rollback drills. Never treat a JS synthetic proof (40/40,15/15,6/6) as production acceptance.
+
+
+2. GĐ1 — ĐẶC TẢ CHIẾN LƯỢC, 16 RULES VÀ GATES
+
+
+Actual edit: appended Section 22 “ENGINEERING HARDENING AMENDMENT v0.1” to 01_MASTER_SPEC_v1.0_DRAFT. Adds immutable run snapshot versions, per-detector required-vs-optional dependency manifest, independent execution/coverage/decision-eligibility gates, causal right-bars/no-lookahead, 8-step execution + 8 separate audit topics, SHORT/SWING branches, risk hard fails, stale/price-basis UNVERIFIED, evidence for no-signal and candidate, release/rollback reference.
+GĐ1 acceptance conditions NOT YET RUN in repo: SPEC-T01..SPEC-T10, positive/negative/edge fixtures for each B1–B8,S1–S8 including ambiguous overlaps, missing data, provisional bar, split, alternate TF, audit, no lookahead. Parameters P01–P17 remain candidate; no claims about winrate, calibration, profitability.
+Keep original GĐ1 rules/history; don't change numeric thresholds without reviewed ADR+versioned registry and backtest on held-out data.
+
+
+3. GĐ2 — KHÓA UI-1.0 VÀ TEST CONTRACT
+
+
+Actual edit: appended Section 8 “ENGINEERING ACCEPTANCE ANNEX — NON-VISUAL” to the existing 02_REPORT_UI_v1.0_APPROVED_LOCKED. Original [A]–[I] visual structure, colors, labels, legend 16 B/S and 8-step checklist before audit are NOT changed. Renderer must consume typed AnalysisSnapshot with UI_VERSION=UI-1.0/template hash; no-signal, source error, all-unverified, 7/8, 15/16, no-position, provisional, mobile/desktop have golden fixtures and audit evidence. Accessibility and regressions are runtime tasks, not current PASS.
+No new visual approval requested, no renderer generated. If accessibility QA demands a design change, produce an explicit UI-1.1 proposal and seek user approval before visual modification.
+
+
+4. GĐ3 — SOURCE REPORTS B1/B2 GIỮ LÀM BẰNG CHỨNG, KHÔNG BIÊN TẬP LẠI
+
+
+Source Audit 03 and TF Parity 04 are retained as immutable historical results, including: W1 full-vs-incremental 132/132, M5/M15/M30/H1 16/16 tested symbol×TF internal parity, not native provider parity. Record source issues B01–B08: SHS 12,300 vs 12,400 D1 open, VGI 74,500 vs 75,000 D1 open, VNINDEX daily volume 95 above minute sum, UPCOM/HNX missing minute slots, event/afterhours/native TF uncertainty, short intraday history, missing sector history/VWAP exact, D1 adjusted vs raw M1.
+Do not rewrite findings into PASS. An actual remediation must be appended with new source/revision/time and independent repeatable tests. Existence of cached data does not prove source entitlement/live streaming or true server-side delta.
+Data warmup: 249 D1 from a one-year SSI sample was below spec minimum >=250 (prefer >=400 for MA200 warm-up); provider may offer deeper pagination but sufficient history must be tested per symbol/feature.
+
+
+5. GĐ3/B3 — SỬA LỖI LOGIC THIẾT KẾ CANONICAL CANDLE
+
+
+Actual edit: appended Section 16 “ENGINEERING REVISION v0.1” to 05_GD3_DATA_CONTRACT_SMART_CACHE_ARCH. The old CanonicalCandle.close_status mixed three orthogonal properties and could imply a finalized bar has complete trustworthy source minutes. New proposed v1.1 contract uses:
+- lifecycle_state OPEN|CLOSED (clock/cutoff only)
+- coverage_state COMPLETE|SESSION_PARTIAL|RANGE_PARTIAL|SPARSE_UNVERIFIED|UNKNOWN|INVALID (data coverage/calendar)
+- quality_state VERIFIED|WARN|UNVERIFIED|BLOCKED (source/adjustment/provenance)
+Example: CLOSE + SPARSE_UNVERIFIED + UNVERIFIED is valid and must not generate a confirmed B/S signal. Session-partial may be verified when calendar confirms expected session cutoff. OPEN + observed COMPLETE is still not confirmed until proper source/clock cutoff. Explicit schema migration from legacy enum required in code.
+Cache L1–L5 cover all inputs outside candles too: index/sector/quotes/corporate actions/indicators/structure/zones/audit; track source & normalized digest, release/schema fingerprints, stale and revision, no corrupt cross-release reuse. Reused evidence must be revalidated by dependency snapshots and freshness. No persistent runtime cache implemented.
+B3 acceptance checklist DC-01..DC-10 is a PLAN, not completed Python tests.
+
+
+6. GĐ3/B4 — PHÁT HIỆN BUG TRONG THỬ NGHIỆM M15 ARMED
+
+
+Actual edit: appended Section 14 “ENGINEERING REVISION v0.1” to 06_GD3_EARLY_DETECTION. Prior B4 JS synthetic 40/40 tests were accurate for the scenarios listed but did not test repeated 5-minute scans over the SAME closed M15 bar. Old state incremented farCount on every invocation with m15Closed=true, potentially disarming after re-reading the same bar twice. Must instead increment only once per unique CLOSED M15 bar ID (deduplicated by canonical key and revision); if bar corrected, replay from prior checkpoint rather than count new event.
+Proposed state must carry bar_id, last_evaluated_closed_m15_bar_id, unique event ids, zone_id+revision, source/canonical bar revision, position/release/rule/param/calendar version; idempotency and attempt bounded Step03→Step05 flow. TTL/hold/cooldown must use a defined calendar-aware clock (active trading minutes or wall time, approved/versioned); lunch/overnight/holidays cannot silently expire a zone. Price-basis/source invalid: no confirmed M5; position protection warnings must still be surfaced with reliable fallback evidence.
+New POC design regression: 6/6 synthetic JS cases PASS (same closed bar read twice only counts once; second unique bar increments; bad source doesn't increment; CLOSED+SPARSE can coexist; OPEN+COMPLETE can coexist; clean CLOSED+COMPLETE+VERIFIED distinct). This is NOT an executed Python suite and should not be mixed into the historical 40/40 result.
+
+
+7. ENGINEERING PROCESS: REPO, ADR, QUALITY GATES, RELEASE
+
+
+Before production work: establish standalone repository/package named SwingTrading1.8, versioned requirements and developer guide, build/test in clean reproducible environment, Git or another equivalent reviewed version-control system (remote/local choice not yet authorized), strict boundaries from CK2/FX2/Scanner, secrets outside repository, dependency lock and vulnerability scans, test data licenses/privacy, review & traceable release tags.
+Proposed directories (design only): src/swingtrading18/{data,calendars,indicators,structure,zones,strategies,audit,report,cache,release}; tests/{unit,integration,contract,replay,regression}; fixtures/{source_sample,synthetic,golden}; docs/{architecture,adr,runbooks,release}; pyproject.toml and CI workflow. File names and deployment paths will be confirmed when the repo is created on an authorized machine.
+Requirement ID -> spec revision -> ADR -> test IDs/fixtures -> code commit -> release manifest -> rollback target. For every change: impact assessment on source/calendar/data-schema/cache/rules/UI, code review, test evidence, performance and compatibility check, release notes. Last Known Good release must be immutable, with code+rule+params+adapter+schema/UI hashes and safe rollback preflight; never restore old market prices as live or erase history. Production deploy/rollback only with user approval. Initial acceptance levels must be explicitly separated: SPECIFIED, CODED, TESTED, INTEGRATED, RELEASED, MARKET_VALIDATED.
+
+
+8. GAP REGISTER & BARRIERS
+
+
+GAP-01 / CRITICAL: No Python core persisted/CI tests. Need GĐ4 implementation and repeatable testing.
+GAP-02 / HIGH: Rule quality-source eligibility separate from coverage counter; ensure A01 revised gate in code. 8/8 steps and 16/16 evaluated ≠ verified signals.
+GAP-03 / HIGH: Legacy single enum candle status ambiguous; implement three orthogonal states and migration tests.
+GAP-04 / HIGH: B4 repeated closed-M15 read can double count; implement bar-id dedup/revision replay.
+GAP-05 / HIGH: SSI source quality B01–B08 unresolved; feature-specific fail closed, no invented native/realtime coverage.
+GAP-06 / HIGH: Runtime storage/cache source of truth, atomic publication and rollback not implemented.
+GAP-07 / HIGH: Per-release version registry, immutable manifest, last-known-good and rollback dry-run not implemented.
+GAP-08 / MEDIUM: UI golden snapshots and deterministic renderer not implemented despite design lock.
+GAP-09 / HIGH: P01–P17 thresholds uncalibrated, no OOS/WF; never claim edge.
+GAP-10 / MEDIUM: docs spread across eight files; each topic now has canonical source + amendment, but governance index and current status must be maintained.
+Risk treatment: Record owner, priority, test/proof needed, target phase and resolution evidence; update status only after implementation/tests. No blocker waived implicitly.
+
+
+9. DO NOT REPEAT / NEXT ACTION
+
+
+GĐ1: DESIGN AMENDED, tests still pending; GĐ2 UI design remains approved/locked, technical QA annex added, no renderer; GĐ3 B1/B2 archived as source evidence with B01–B08 open; B3/B4 engineering contracts amended and 6 synthetic design tests passed, still no production; B5 conditional design audit unchanged.
+NEXT: GĐ4/P0.0 Engineering Foundation (subtask before P0.1) with repo skeleton, quality/test plan, ADR/manifest/version contract, source schema v1.1/legacy migration and M15 dedup tests. Then GĐ4/P0.1–P0.5 as prior backlog; link tests to rules and automate quality gates. No deploy/trading/background automations or UI redesign without approval.
+When user says 'Cập nhật Handoff', append review and references to existing 00_MASTER_HANDOFF, not create a new handoff. Keep historical documents and exact source status, and note that this review is an engineering alignment update, not software release.
+
+
+10. DOCUMENTS MODIFIED / REFERENCE LINKS
+
+
+01_MASTER_SPEC_v1.0_DRAFT — new Section 22 (spec engineering hardening): https://docs.google.com/document/d/1-b74XetjzJVLB3nIpB1tReQTAq828Bpp3GmNOBFU9fY/edit?usp=drivesdk
+02_REPORT_UI_v1.0_APPROVED_LOCKED — new Section 8 (nonvisual acceptance annex): https://docs.google.com/document/d/1BG29hocmOOGHkosJ_WU-m4An1-OBzfnlf1t1mtGKbuk/edit?usp=drivesdk
+05_GD3_DATA_CONTRACT_SMART_CACHE_ARCH — new Section 16 (3-axis state normalization): https://docs.google.com/document/d/1ognZgcBfnPd6C1u0FyTYWSq9r-2YC9kZUV4sHWfiA_Y/edit?usp=drivesdk
+06_GD3_EARLY_DETECTION — new Section 14 (closed-M15-idempotency): https://docs.google.com/document/d/1aAQnS07zfsal9J-B0ZGDzWiiJpohWEbh9rfWQ_d3gOE/edit?usp=drivesdk
+03 SSI source audit and 04 timeframe test remain unchanged archival evidence.
+07 Architecture Acceptance Audit remains unchanged historical conditional review: https://docs.google.com/document/d/1ZPaew619YeMTKgCUEeih1kgf1AnNSmvxOf5jR2SwooM/edit?usp=drivesdk
+00_MASTER_HANDOFF remains chronological governance hub: https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit?usp=drivesdk
+Drive project folder: https://drive.google.com/drive/folders/1s2IHW-hUngcQ49YLIG-iuB0js5y5s2GX
+
+
+
+
+11. HẬU KIỂM TOÁN — HỢP NHẤT TRỰC TIẾP VÀO CANONICAL DOCUMENTS
+11.1. Các thiếu sót đã được xử lý ở cấp ĐẶC TẢ: 01 MASTER_SPEC đã sửa ngay §§10,14,19 và P16, thêm §23 traceability matrix B1–B8/S1–S8 và phân loại mandatory/optional; 05 CACHE đã thay legacy CanonicalCandle.close_status trong mục chính bằng v1.1 ba trục lifecycle/coverage/quality, sửa ví dụ nến, thêm §17 về acceptance B01–B08; 06 EARLY đã sửa PRIO 5 HYSTERESIS + P16 TTL tại nội dung chính, thêm §15 kiểm thử M15 dedup/revision/clock; 02 UI vẫn DESIGN_LOCKED A–I, chỉ tăng cường điều kiện hiển thị source quality và golden QA; 03/04/07 giữ toàn bộ kết quả thí nghiệm, thêm banner lịch sử.
+11.2. Không áp dụng blanket-PASS. Thiết kế chuẩn hóa KHÔNG có nghĩa các test cases DC-01..DC-15, M15-01..12, Z-B1..S8, 8 pipeline/8 audits, REL-01..12 đã chạy. Chưa có Python engine/pytest/CI/SSI live source parity/backtest/rollback; B01–B08 vẫn OPEN. Trạng thái P0-01..03 ở mức DESIGN-CONTRACT CONSOLIDATED; P0-04..06 còn việc thực thi/vận hành. Không tự giả mã code hoặc sửa lịch sử các số POC.
+11.3. Trang điều phối mới nhất là HANDOFF mục 27; ma trận bằng chứng và trạng thái kiểm toán ở 09 mục 10. Không chỉnh sửa các dự án CK 2.0, FX 2.0, Scanner hoặc UI visual; không tạo file trên Mac.

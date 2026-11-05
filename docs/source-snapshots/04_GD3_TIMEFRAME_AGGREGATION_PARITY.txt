@@ -1,0 +1,145 @@
+﻿GĐ3 / BƯỚC 2 — KIỂM THỬ TỔNG HỢP 6 KHUNG THỜI GIAN
+
+
+Swing Trading 1.8 · Test W1 từ D1, M5/M15/M30/H1 từ M1 · Ngày 05/11/2026 · BẢN NGHIỆM THU KỸ THUẬT CÓ ĐIỀU KIỆN
+
+
+CHỈ DẪN HIỆN HÀNH / BẢN CHỨNG CỨ LỊCH SỬ — GĐ3/B2: Giữ nguyên phép so sánh W1 132/132 và M5/M15/M30/H1 16/16 trên mẫu dữ liệu nội bộ tại thời điểm kiểm tra; KHÔNG phải xác minh parity native SSI, đủ lịch sử, đầy đủ phút hoặc production readiness. Mọi hướng dẫn “NEXT GĐ3/B3” trong báo cáo này là lịch sử, không còn là lệnh hiện hành; đọc MASTER_HANDOFF mục mới nhất + QA 09. Hợp đồng Candle phải dùng ba trạng thái độc lập trong 05 mục 2 (v1.1); chưa có bộ source fixtures + SHA-256/CI tái lập được. B01–B08 giữ OPEN, không thay đổi các số liệu hay kết luận đã quan sát.
+0. KẾT LUẬN & CÁCH ĐỌC TRẠNG THÁI
+
+
+GĐ3/BƯỚC 2: PARTIAL PASS / CONDITIONAL — ĐÃ THỰC HIỆN GHÉP NẾN VÀ CHẠY KIỂM TRA THỰC TẾ TRÊN SSI MCP, nhưng CHƯA ĐỦ ĐIỀU KIỆN NGHIỆM THU CHUNG TOÀN BỘ THỊ TRƯỜNG.
+ĐÃ XÁC MINH bằng xử lý thực tế: W1 từ D1 cho SSI, SHS, VGI, VNINDEX; M5/M15/M30/H1 từ 1-minute data cho SSI, SHS, VGI, VNINDEX. Replay full-vs-incremental của W1 có 0 khác biệt trên 52+14+14+52=132 nến tuần được tổng hợp từ dữ liệu mẫu; M5/M15/M30/H1 có 16/16 phép so sánh full-vs-incremental PASS trên cùng các snapshot 04/11/2026. Kiểm toán OHLCV-to-D1 phát hiện 2 trường hợp lệch OPEN (SHS, VGI) và sai khác 95 cổ phiếu giữa minute-volume VNINDEX và D1. Dữ liệu rỗng theo phút ở một số slot phải được phân biệt 'không có giao dịch' với 'mất dữ liệu' bằng kiểm chứng nguồn.
+NGUYÊN TẮC: PASS tính toán cùng thuật toán KHÔNG phải chứng nhận tương đương với candles M5/H1 native của SSI FastConnect hay đủ toàn bộ dữ liệu cần cho 16 detector. Chưa triển khai code sản phẩm, cache bền vững, dữ liệu long intraday backtest hoặc real-time scheduler. Mẫu UI-1.0 APPROVED/DESIGN LOCKED KHÔNG sửa.
+
+
+1. DỮ LIỆU NGUỒN VÀ PHẠM VI
+
+
+Dữ liệu được lấy qua SSI MCP trực tiếp (read-only) trong phiên kiểm tra ngày 05/11/2026.
+INTRADAY (04/11/2026): SSI HOSE 226 phút, SHS HNX 235 phút, VGI UPCoM 143 phút, VNINDEX 228 phút. SSI (20/10/2026) thêm 226 phút để kiểm tra lặp lại. Tất cả là records có OHLCV và timestamp trong phản hồi "ticks"; dữ liệu không phải từng tick khớp đơn lẻ.
+DAILY: SSI 249 nến D1 trên một năm (05/11/2025–05/11/2026, phân trang 200+49); SHS 62 D1 và VGI 62 D1 trên 3 tháng; VNINDEX 249 D1 trong 1 năm. Các chuỗi D1 theo ngày DD/MM/YYYY và có thể là GIÁ ĐÃ ĐIỀU CHỈNH; series intraday trong ví dụ là mức giá báo về từng phút (raw/adjusted semantic cần xác minh). Không trộn các loại giá một cách âm thầm.
+Phạm vi thử chỉ 3 mã và 1 chỉ số, 1–2 ngày intraday và 3 tháng đến 1 năm D1. Ngày nghỉ, nến điều chỉnh giá lịch sử và dữ liệu native TF từ nhà cung cấp chưa được nghiệm thu.
+
+
+2. HỢP ĐỒNG GHÉP NẾN THỬ NGHIỆM — SESSION-AWARE
+
+
+BAR NORMALIZATION: parse trading_date theo định dạng endpoint, convert minute-of-day trong Asia/Ho_Chi_Minh, sort theo thời gian, phát hiện timestamp trùng/out of order/volume âm/low>open,close hoặc high<open,close; không 'fill missing minute' bằng OHLC giả.
+AGGREGATE theo candle [start,end): Open=first observed bar's open, High=max highs, Low=min lows, Close=last observed bar's close, Volume=sum volumes; riêng special boundary/auction được giữ ở cấu trúc SessionEvent riêng. Full bar chỉ có thể CONFIRMED sau khi đến end time, đã kiểm snapshot/candle close và source đủ dữ liệu. W1 tổng hợp từ các D1 dates đã đóng, theo tuần ISO Monday–Friday trong calendar chứng khoán; tuần đang chạy là PROVISIONAL dù D1 của ngày hiện tại đã đóng.
+CẤU HÌNH SESSION ĐANG THỬ (cần kiểm chứng lịch sàn và nguồn sau này):
+- HOSE/SSI: ATO 09:00–09:15 (minute source thường bắt đầu 09:15), continuous AM 09:15–11:30, PM 13:00–14:30, kết quả ATC xuất hiện thành bar riêng tại 14:45. Không tự khẳng định nguồn 09:15 đã bao gồm tất cả volume ATO nếu chưa đối chiếu cấp khớp lệnh.
+- HNX/SHS: continuous AM 09:00–11:30, PM 13:00–14:30; nguồn có bar tại 14:45 sau phiên liên tục. Sàn còn giao dịch sau giờ theo cơ chế PLO, cần nghiên cứu chính xác ý nghĩa bar 14:45 theo provider, không giả label thành ATC/PLO nếu chưa kiểm.
+- UPCOM/VGI: continuous AM 09:00–11:30, PM 13:00–15:00; nhiều phút không có bản ghi; KHÔNG có ATC như HOSE. Cần phân biệt không phát sinh khớp với thiếu dữ liệu.
+- VNINDEX: giống AM/PM continuous của HOSE ở mức mẫu, có special rows 11:30, 14:30, 14:45, và 95 đơn vị chênh lệch volume D1, vì thế cần INDEX_SPECIFIC normalizer.
+M5: 5 phút theo mốc đầu từng session; M15: 15 phút; M30: 30 phút; H1: 60 phút (session-anchored). Sau giờ nghỉ thì RESET candle boundary, không ghép một nến kéo dài xuyên nghỉ trưa. Những bar cuối session không tròn 30/60 phút = SESSION_PARTIAL (đủ phút của phiên nhưng không phải full 30/60 phút), không được xem như full-duration H1. Định nghĩa này CHƯA được chứng minh đồng nhất với native H1 của provider: cần compare hoặc chốt rõ tính tương thích trong Data Contract.
+Nguồn tham chiếu quy tắc giao dịch (không thay thế quan sát API):
+https://tuyendung.ssi.com.vn/khach-hang-ca-nhan/quy-dinh-giao-dich-tai-hsx
+https://tuyendung.ssi.com.vn/khach-hang-ca-nhan/quy-dinh-giao-dich-tai-hnx
+https://upcom.hnx.vn/vi-vn/hoi-dap.html
+
+
+3. KẾT QUẢ W1 TỪ D1 — KIỂM TRA ĐÃ CHẠY
+
+
+SERIES / DAILY COUNT / W1 GROUP COUNT / FULL-vs-STREAMING MISMATCH
+SSI / 249 D1 / 52 W1 / 0
+SHS / 62 D1 / 14 W1 / 0
+VGI / 62 D1 / 14 W1 / 0
+VNINDEX / 249 D1 / 52 W1 / 0
+TỔNG: 622 daily bars, 132 W1 aggregate bars, tất cả W1 kiểm khớp chính xác O/H/L/C/V giữa cách duyệt toàn tập theo nhóm tuần và cách cập nhật tăng dần từng ngày trên CHÍNH nguồn D1 này.
+Ví dụ tuần ĐÃ KẾT THÚC 26/10–30/10/2026, SSI W1 (giá D1 đã điều chỉnh): O=20.000; H=20.100; L=19.300; C=19.300; V=64.469.200; 5 nến D1.
+Ví dụ tuần HIỆN HÀNH 02/11–05/11/2026 (Thứ Năm): SSI W1 PROVISIONAL O=19.250; H=21.000; L=18.500; C=20.400; V=122.717.100; 4 nến D1 cho đến ngày 05/11. Không được đánh dấu W1 cuối tuần đã đóng. Tuần đầu của range 1y của SSI chỉ có dữ liệu 05–07/11/2025, là RANGE_PARTIAL; không được coi nến W1 đầu range là một tuần lịch sử đầy đủ.
+Bản thực nghiệm không có native W1 SSI để so sánh, và chưa kiểm calendar nghỉ lễ; do đó PARITY W1 chỉ chứng minh thuật toán nội bộ chính xác với cùng dữ liệu đầu vào.
+
+
+4. KẾT QUẢ 4 KHUNG NỘI PHIÊN — GHÉP TỪ 1M
+
+
+Cách đọc bảng dưới: số đầu tiên là số nến tổng hợp có dữ liệu M1 từ các phiên liên tục, số sau '+X' là event boundary/auction RIÊNG, không phải candle liên tục cùng độ dài. Với UPCOM có những ô M5 trống, không tự tạo bar 0-volume khi chưa xác minh semantics.
+SSI (HOSE, 04/11; 226 M1):
+  M5 = 45 nến liên tục + 1 sự kiện 14:45 = 46 kết quả; tất cả 45 nến liên tục có đủ 5 record.
+  M15 = 15 nến liên tục + 1 sự kiện 14:45 = 16 kết quả; 15 nến có đủ 15 record.
+  M30 = 8 nến liên tục + 1 sự kiện 14:45 = 9 kết quả; 7 full 30m + 1 session-partial 15m buổi sáng.
+  H1 = 5 nến liên tục + 1 sự kiện 14:45 = 6 kết quả; 3 full 60m + session-partial 15m cuối sáng và 30m cuối chiều.
+SSI (20/10; 226 M1): có cùng cấu trúc đếm 45 M5 / 15 M15 / 8 M30 / 5 H1 + event14:45; volume đối chiếu D1 đạt.
+SHS (HNX, 04/11; 235 M1):
+  M5 = 48 nến có dữ liệu liên tục + 1 event14:45 = 49; có 6 phút không xuất hiện dữ liệu, tập trung buổi sáng ở 3 M5 buckets.
+  M15 = 16 + 1 event = 17; 15/16 buckets đủ 15 bản ghi, 1 bucket đầu buổi sáng có 9/15.
+  M30 = 8 + 1 event = 9; 7/8 full record, 1 bucket 24/30.
+  H1 = 5 + 1 event = 6; 2 nến full 60m, 2 session-partial, 1 nến đầu chỉ 54/60 M1 quan sát.
+VGI (UPCoM, 04/11; 143 M1):
+  M5 = 49/54 slot có ít nhất một bản ghi, còn 5 slot trống không có record; 6/54 slot đủ 5 bản ghi; 127/270 phút trong phiên liên tục không có bản ghi.
+  M15 = 18/18 slot có dữ liệu nhưng không slot nào đủ 15 bản ghi.
+  M30 = 9/9 slot có dữ liệu nhưng không slot nào đủ 30 bản ghi.
+  H1 = 5/5 slot có dữ liệu, không slot nào đủ 60 bản ghi; một bar cuối sáng chỉ dài 30 phút cấu trúc.
+  CHÚ Ý: 127/270 không có minute records là số minute-slots 'NOT OBSERVED', không đủ chứng cứ kết luận mất dữ liệu. Với mã thanh khoản thấp, có thể là phút không khớp lệnh.
+VNINDEX (04/11; 228 M1):
+  M5 = 45 nến liên tục + 3 event rows (11:30,14:30,14:45) = 48.
+  M15 = 15 + 3 = 18; M30 = 8 + 3 = 11; H1 = 5 + 3 = 8.
+  Volume các segment liên tục = 737.546.796; special rows thêm volume để thành minute total 785.061.420; D1 index volume 785.061.515, lệch +95 ở D1.
+QUY ƯỚC CẤM: nếu aggregator bỏ qua event special/auction, tổng volume M5/M15/M30/H1 sẽ thiếu so D1. Nếu gộp các event vào continuous bucket không có rule công bố, sẽ gây tăng volume và distort candle confirmation theo thuật toán không nhất quán. Cần quyết định canonical candle event mapping và native candle compare ở GĐ3 trước release.
+
+
+5. ĐỐI CHIẾU OHLCV M1 → D1: KIỂM TRA ĐỘ TIN CẬY NGUỒN
+
+
+SYMBOL / DATE / OPEN-LOW-HIGH-CLOSE MATCH / VOLUME MATCH / CHI TIẾT
+SSI / 04/11/2026 / PASS cả O,H,L,C / PASS 47.036.100 == 47.036.100.
+SSI / 20/10/2026 / PASS cả O,H,L,C / PASS 13.109.700 == 13.109.700.
+SHS / 04/11/2026 / OPEN FAIL: O M1=12.300 vs O D1=12.400; HIGH=13.300, LOW=12.300, CLOSE=13.200 đều PASS; VOLUME PASS: 23.341.400 == 23.341.400.
+VGI / 04/11/2026 / OPEN FAIL: O M1=74.500 vs O D1=75.000; HIGH=76.000, LOW=74.100, CLOSE=75.600 PASS; VOLUME PASS: 190.200 == 190.200.
+VNINDEX / 04/11/2026 / OPEN/HIGH/LOW/CLOSE PASS; VOLUME FAIL nhỏ: tổng M1=785.061.420 vs D1=785.061.515 (D1 nhiều hơn 95).
+ĐÁNH GIÁ: 5/5 kiểm volume stock across 4 sample dates? Chính xác: 4/4 stock-date samples (SSI×2, SHS, VGI) khớp V và 1 index-date không khớp. Sự khác biệt về OPEN của SHS và VGI chưa giải thích được: có thể do quy tắc xác định Open của D1 hoặc dữ liệu phút đầu phiên/giá điều chỉnh; phải làm root-cause, không tự sửa để đạt parity. Sai số volume index 95 là quan sát thực, không làm tròn/ép bằng nhau.
+PROTOCOL: phát hành Data Quality Flags = D1_OPEN_MISMATCH (SHS,VGI), INDEX_VOLUME_MISMATCH (VNINDEX), SOURCE_MINUTE_SPARSE (VGI/SHS) khi applicable; chưa gắn 'VALID ALL TF' trên các trường hợp đó. Khi có source chính thức của native TF, so khớp trước nghiệm thu.
+
+
+6. KIỂM TRA FULL VS INCREMENTAL & NEGATIVE-PATH
+
+
+6.1 W1 full group từ D1 versus streaming reducer mỗi D1: PASS 132/132 W1 bars, 0 mismatches trên 4 series; chú ý đây là equivalence của thuật toán trong test local, không phải cache production.
+6.2 M5/M15/M30/H1 full group từ 1M versus incremental update theo timestamp trên cùng snapshot: PASS 16/16 tổ hợp (4 symbols × 4 TFs). Không có nhóm nào tự kéo nến xuyên qua giờ nghỉ 11:30–13:00. Tổng volumes của tất cả groups + special-events bằng đúng tổng M1 cho từng series (không đồng nghĩa index D1 phải bằng M1).
+6.3 PROVISIONAL: mô phỏng thời điểm 04/11/2026 10:12 (giả sử M1 10:12 đã nhận): slot M5 10:10–10:14 chỉ có 3/5 bản ghi => PROVISIONAL, không được gửi 'confirmed close'. Slot 10:05–10:09 đủ 5/5 => closed/eligible CONFIRMED sau khi source đã hoàn tất. Đây là test về điều kiện bar closure, không phải minh chứng realtime tick latency.
+6.4 Synthetic negative checks PASS logic phát hiện: out-of-order timestamps; duplicate timestamps; không gộp 11:29 với 13:00; negative volume. Test fixture thực nghiệm nhỏ chứ chưa phải bộ unit tests tích hợp trong mã dự án.
+6.5 Bar example SSI 04/11 M5 đầu phiên 09:15–09:19: O=19.250 H=19.300 L=19.200 C=19.250 V=508.100. M15 09:15–09:29: O=19.250 H=19.300 L=19.200 C=19.300 V=1.039.000. M30 09:15–09:44: O=19.250 H=19.450 L=19.200 C=19.400 V=2.840.500. H1 09:15–10:14: O=19.250 H=19.600 L=19.200 C=19.550 V=7.197.400.
+6.6 Bars không đủ số M1 quan sát không thể tự nhận source-missing hay no-trade nếu chưa đối chiếu tick source/native API. Một công thức M5 trên UPCoM có gaps đòi rule riêng về close timestamp, 0-volume and previous-close carry-forward. Không fake signal nếu dữ liệu đầu vào UNCERTAIN.
+
+
+7. QUYẾT ĐỊNH KIẾN TRÚC GỢI Ý CHO DATA CONTRACT / CACHE
+
+
+NORMALIZER cần interface per exchange: session schedule, auction events, afterhours, bar closure, no-trade handling và date parsing per endpoint; hỗ trợ status loại bar = CONTINUOUS_FULL, SESSION_PARTIAL, AUCTION_OR_SPECIAL_EVENT, PROVISIONAL, UNVERIFIED_DATA.
+Mỗi candle gồm source_record_ids, provenance, raw/adjusted status, inclusive start/exclusive end, exchange/calendar version, observed/expected minute counts, event ids, flags; không bỏ qua event volume. W1 từ D1 có week_start, last_confirmed_daily_date, week_final boolean dựa trên lịch giao dịch, không đoán 'đủ 5 nến = tuần đủ'.
+Cần định nghĩa H1: session-anchored 60 phút hay provider-native H1 theo clock. Nến H1 session-partial (15/30 phút) không nên được xem là một H1 full cho indicators; có thể ghép chính sách khác sau validation, nhưng phải version contract và kiểm thử parity. Cũng cần policy candle ATC: tách event riêng hay cập nhật last M5/H1 close/value dựa trên source-native contract; chốt qua dữ liệu provider/native tf.
+Đừng coi missing 1-minute records trên VGI là missing data trước khi xác minh no-trade semantics; store observed_count và missing-slot_count, dùng DEPENDENCY_UNVERIFIED khi signal cần full-duration candle/volume.
+L1 Data Manager/Validator: store full snapshot+source revision; downstream L2–L5 invalidate khi đổi calendar, split/adjusted prices hoặc sửa 1m history; replay full-vs-incremental parity với các ngưỡng numerical tolerance và trạng thái zone/audit EXACT. Logic nguồn SSI MCP hiện tại không chứng minh true delta API hoặc long-history M5.
+Khóa UI-1.0: không sửa bố cục/đổi nhãn; báo lỗi source/gaps trong các field evidence đã được duyệt, không tự thay template.
+
+
+8. CHECKLIST NGHIỆM THU GĐ3/BƯỚC 2
+
+
+[x] Lấy D1 SSI/SHS/VGI/VNINDEX, intraday phút các mã đại diện.
+[x] W1 từ D1: 132 nến tuần theo 4 series mẫu, 0 mismatch full-versus-incremental.
+[x] M5/M15/M30/H1 từ minute: 16/16 nhóm test equivalence trên cùng dữ liệu source.
+[x] Kiểm thời gian AM, PM, lunch, auction/special; không gộp qua nghỉ trưa.
+[x] D1 OHLCV parity: phát hiện rõ 2 OPEN mismatch SHS,VGI; 1 index volume mismatch 95.
+[x] Phát hiện 6 minute-slots không quan sát ở SHS và 127 ở VGI, không tự tạo nến giả.
+[x] Test provisional bar 10:12 và 4 synthetic negative-path checks.
+[ ] CHƯA nghiệm thu native M5/M15/M30/H1 vs SSI FastConnect cùng phiên.
+[ ] CHƯA tìm root cause OPEN mismatch SHS,VGI, index volume mismatch.
+[ ] CHƯA xác minh 127 UPCoM gaps là no-trade hay source gaps, chưa kiểm toàn bộ HNX after-hours/HOSE auction semantics.
+[ ] CHƯA có benchmark ngành lịch sử, long intraday history, streaming latency/market depth.
+[ ] CHƯA xây stateful cache, runnable unit test suite trong repo hoặc core plugin.
+ĐÁNH GIÁ: GĐ3/BƯỚC 2 'PARTIAL PASS' trong phạm vi thử nghiệm, CÓ BLOCKERS. Không chốt DONE toàn bộ và không cho core phát confirmed signals nếu critical dependencies chưa đạt.
+
+
+9. CÔNG VIỆC TIẾP THEO / HẠN CHẾ KHÔNG ĐƯỢC BỎ QUA
+
+
+Đề xuất tiếp tục GĐ3/BƯỚC 3 — DATA CONTRACT & 5-LAYER CACHE DEPENDENCY PLAN, đồng thời giữ danh sách blocker từ bước 2. Mục tiêu: typed schema raw M1/D1/W1/M5/M15/M30/H1, per-exchange calendars and auction mappings, source parity QA, scope historical/adjusted prices, L1–L5 fingerprint/revision/invalidation DAG, full vs incremental replay with session-safe updates. Không coi Bước 2 đã nghiệm thu hoàn toàn.
+Đối chiếu dữ liệu native TF từ một API có entitlement nếu người dùng cho phép/kết nối; kiểm căn nguyên OHLCV mismatch và xác định giá trị vào cuối phiên. Đừng xây code thực thi lệnh hay backtest trên dữ liệu chưa đạt.
+Nhóm tài liệu tham chiếu trong Google Drive:
+00_MASTER_HANDOFF — mục 20 (GĐ3 Bước 1); 01_MASTER_SPEC_v1.0_DRAFT — mục 14–21 (Rule Matrix); 02_REPORT_UI_v1.0_APPROVED_LOCKED (giao diện); 03_GD3_SSI_DATA_SOURCE_AUDIT_v0.1 (bằng chứng nguồn).
+Tài liệu này là báo cáo kỹ thuật BƯỚC 2, không phải HANDOFF. Khi user yêu cầu 'Cập nhật Handoff', chèn bản ghi đầy đủ kết quả này vào file 00_MASTER_HANDOFF cũ và cập nhật NEXT STEP thành GĐ3 Bước 3.
+NO MODIFICATIONS TO UI / CK 2.0 / FX 2.0 / Scanner.

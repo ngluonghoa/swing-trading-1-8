@@ -1,0 +1,209 @@
+﻿GĐ3 — BƯỚC 4: EARLY DETECTION — M15 BASELINE / M5 ARMED
+
+
+Swing Trading 1.8 · Policy & Test Report v0.1 · 05/11/2026 · DESIGN + SYNTHETIC POC, NOT PRODUCT IMPLEMENTATION
+
+
+CHỈ DẪN HIỆN HÀNH — M15/M5 STATE POLICY v0.2 06/11/2026 (DESIGN ONLY): §§2/14/15 định nghĩa base, §16 chuẩn deterministic state T-01..T-09, MarketBarKey for CLOSED M15 BarId, correction replay, bounded M5 activation, missing source/clock fail closed. Synthetic 40/40 + 6/6 JS là lịch sử POC, KHÔNG chứng minh Python/runtime. Phạm vi trạng thái M15 chỉ cho phép chuyển bằng source/calendar/clock-policy verified; time-based TTL chưa chốt. Per-detector dependencies: 01 §24; architecture/perf: 05 §18; UI không thay đổi. NEXT GĐ3/B5 ở mục 12 là lịch sử, xem 00 §27.10–27.17 và QA 09 §14.
+0. KẾT LUẬN, RANH GIỚI VÀ TRẠNG THÁI
+
+
+Đã hoàn thành bản thiết kế chi tiết M15 baseline và M5 ARMED có điều kiện; viết và chạy thử mô hình logic trong phiên xử lý 05/11/2026. Bộ thử đầu 34/35 PASS do lỗi cấu trúc kết quả nhánh nguồn không tin cậy; đã sửa nhánh và chạy lại bộ thử mở rộng 40/40 PASS, không có case fail. Toàn bộ 40 case dùng synthetic deterministic fixtures, KHÔNG phải backtest cổ phiếu thật, KHÔNG chạy 16 detector thật, KHÔNG có Python production, KHÔNG có scheduler/background automation.
+Quyết định kiến trúc: M15 làm nhịp quan sát và xác định cấu trúc sớm; M5 không bắt buộc tải/phân tích ở tất cả mã, chỉ ARMED khi giá gần Watch Zone, M15 xuất hiện early candidate, hoặc một vị thế cần EXIT PROTECTION. M5 là công cụ tối ưu thời điểm, không biến một cú nảy 5 phút thành đáy/đỉnh dài hạn nếu W1/D1/H1 không xác nhận.
+Bảo toàn cấu trúc UI-1.0 APPROVED/DESIGN_LOCKED, 8 pipeline stages, 16 detectors B1..B8/S1..S8, 2 strategies SHORT/SWING, 8 audit topics riêng biệt. Không sửa MASTER_SPEC, MASTER_HANDOFF, CK 2.0, FX 2.0, Scanner hoặc broker orders trong bước này.
+GĐ3/B4 = DESIGN READY v0.1 + SYNTHETIC LOGIC POC PASS; GĐ3 tổng thể vẫn IN PROGRESS và còn 8 blockers dữ liệu từ bước B2/B3. Bước tiếp theo là GĐ3/B5 kiến trúc/acceptance có điều kiện, không được tự chốt green nếu nguồn dữ liệu chưa đủ.
+
+
+1. ĐẦU VÀO / PHÂN TẦNG CỦA EARLY DETECTION
+
+
+Inputs minimum: project/version, symbol/exchange, decision_time (UTC+07), current market session and calendar version, last confirmed M15/H1/D1/W1, M15 structure/pivots/support-resistance, candidate WatchZones with zone_id + revision + timeframe + expiry timestamp, last traded price and timestamp with trusted price_basis, ATR D1 computed from compatible series, position_context, source quality and provisional source snapshot. Optional features: M5 stream/history (only if armed), same-slot RVOL history, matched trade value/VWAP, market/sector state.
+M15 baseline ALWAYS under analysis engine scope when available; closed M15 can support causal HH/HL/BOS/CHoCH, trend, support/rejection and candidate watch; still flag missing data. Prior L3/L4 watch zones from last run may be reused VALIDATED. Cold start: coarse watch candidates are constructed from D1/H1/M15 structure without requiring M5 so no cyclic dependency.
+M5 adds micro price action only when ARMED; independent 16 detector registry evaluation MUST NOT be skipped when OFF. If required TF/trigger unknown, corresponding zone output UNVERIFIED/NOT_DETECTED according to actual dependencies (NOT_DETECTED only if enough higher-TF negative evidence). B1/S1 major zone definitions must not be based only on M5. Output carries source revisions and per-TF closed status.
+
+
+2. STATE MACHINE VÀ CÁC NHÁNH ƯU TIÊN
+
+
+Proposed M5 mode states: IDLE, ARMED, ARMED_PROTECTION, COOLDOWN, EXPIRED; quality VALID/STALE/UNVERIFIED/BLOCKED is ORTHOGONAL, not a false zone state. Each state is per symbol + zone_id + zone_revision + session/calendar_version + strategy/position scope, versioned in cache, with explicit transition event timestamp.
+PRIORITY 1 SOURCE VALIDITY: verify trusted price/source, compatible D1 ATR/price basis, clock and calendar. If missing/STALE, do not create confirmed M5 trigger; retain state for inspection with quality UNVERIFIED and reason. No new zone arm based on untrusted price. A current protective position still requires safety review/fallback based on reliable higher-TF information and position; never invent a verified exit.
+PRIORITY 2 POSITION PROTECTION — OPEN_VERIFIED PositionContext với verified risk/protection reason → ARMED_PROTECTION (ưu tiên cả khi BUY zone far/EXPIRED/cooldown unapproved). Step04 kiểm vị thế và source/as_of; NOT_PROVIDED→NO_POSITION_CHECKED không có nghĩa flat, STALE/CONFLICTING→POSITION_UNVERIFIED + warning/BLOCK position-dependent action, không giả được bảo vệ khi thiếu source. Priority 2 độc lập trạng thái ARM cho BUY zone và không đặt lệnh broker.
+PRIORITY 3 ZONE EXPIRY / STRUCTURAL INVALIDATION — NORMATIVE v0.3: Khi có sự kiện vô hiệu hóa cấu trúc VERIFIED (price basis/session/as-of phù hợp), đánh dấu zone_revision hiện tại INVALIDATED và state=EXPIRED ngay, kèm event_id. Riêng điều kiện decision_at >= zoneExpiresAt CHỈ được chuyển EXPIRED nếu clock_policy_version (WALL_CLOCK hoặc TRADING_ACTIVE_MINUTES), lịch sàn, phiên và nguồn thời gian đã APPROVED + TESTED, threshold TTL đã được phê duyệt. Nếu clock/TTL còn UNAPPROVED, không chuyển EXPIRED vì đồng hồ; ghi time_expiry_eligibility=UNVERIFIED, tiếp tục kiểm tra structural safety/position và không phát hành confirmed time-based decision. EXPIRED của revision đã bị vô hiệu hóa là terminal; chỉ zone_id/revision MỚI có sự kiện candidate VERIFIED độc lập được khởi tạo scope mới ở IDLE, không hồi sinh cùng revision vì giá lại gần zone. Ưu tiên ARMED_PROTECTION đối với OPEN_VERIFIED position không bị tắt vì zone EXPIRED.
+PRIORITY 4 NEAR-ZONE / M15 EARLY: validated quote-to-zone distance<=armThreshold×verified ATR_D1 hoặc M15 CLOSED+VERIFIED candidate event có thể tạo ARMED từ IDLE qua T-01, subject to approved source/zone eligibility. Một provisional/open M15 hoặc provisional quote chỉ có thể phát bounded FETCH_PREVIEW_REQUEST với quality tag và NO CONFIRMED ARM/TRADE, không tạo state transition/duplicate semantic arm alert; chỉ chuyển chính thức khi evidence validated và clock/candidate gate hợp lệ. COOLDOWN/EXPIRED không bypass T-01 limitations qua provisional price.
+PRIORITY 5 HYSTERESIS — QUY TẮC HIỆN HÀNH (v1.1): Giữ ARMED giữa armThreshold và disarmThreshold. Chỉ chuyển COOLDOWN khi giá xa zone > disarmThreshold trên HAI bar M15 KHÁC NHAU, LIÊN TIẾP THEO ORDINAL CỦA LỊCH SÀN, ĐÃ CLOSED+VERIFIED và đã qua minHold hợp lệ. Mỗi M15MarketBarId=MarketBarKey (05 §2; định nghĩa đầy đủ ở 06 §15.1) được xử lý đúng MỘT LẦN cho cùng state_version; người dùng quét M5 nhiều lần trong cùng bar M15 không tăng farCount. Identity của bar không chứa source_revision; revision mới của bar đã đánh giá phải yêu cầu deterministic replay từ checkpoint, không tăng như bar mới. Khi gặp một M15 CLOSED nhưng thiếu nguồn hay sparse/unverified, chuỗi verified-consecutive bị ngắt và phải ghi reason; open bar không được đếm. Nếu bar đã đánh giá xuất hiện lại không đổi thì idempotent. Nếu nến tới sai thứ tự hoặc thiếu ordinal, không xác nhận tính liên tiếp khi chưa đối soát lịch; fallback safe hold/UNVERIFIED. Reset farCount khi giá quay gần zone theo dữ liệu đủ chất lượng. Nếu minHold/clock policy chưa được kiểm chứng thì hai nến far có thể được ghi nhận làm bằng chứng nhưng KHÔNG tự chuyển COOLDOWN; COOLDOWN expiry chỉ được xác nhận theo phiên bản clock policy đã nghiệm thu; rearm đòi live zone/candidate hợp lệ.
+PRIORITY 6 MARKET CLOSED: new M5 history fetch should stop/TTL evolve based on exchange calendar. Source revision/event id changes invalidate previous micro evidence, with no duplicate early alert event for same confirmed event_id.
+System must distinguish active watch state vs M5 confirmed trigger. ARMED does not mean DETECTED; DETECTED is only a detector outcome with its own evidence.
+
+
+3. PARAMETER REGISTRY B4 v0.1 — ĐỀ XUẤT CHƯA BACKTEST
+
+
+P03 distance armThreshold = 0.40 x ATR(D1) compatible price basis, computed to nearest zone boundary; use max(0, gap) and avoid averaging price percent with ATR units.
+P16 disarmThreshold = 0.70 x ATR(D1) (larger than arm to prevent flapping).
+P16 minHold = 15 phút là CANDIDATE chưa duyệt; chỉ áp dụng khi clock_policy_version được nghiệm thu cùng lịch sàn, không mặc định dùng elapsed wall time.
+P16 disarm requires 2 consecutive CLOSED M15 bars beyond 0.70 ATR.
+P16 cooldown = 10 phút là CANDIDATE chưa duyệt; COOLDOWN không được rearm tự động vì giá gần vùng; cần approved clock + verified same-revision live candidate, hoặc tạo zone_revision mới từ verified structural event. OPEN_VERIFIED position protection luôn được xử lý độc lập.
+P16 CANDIDATE zoneTTL = 45 phút là THAM SỐ THỬ NGHIỆM CHƯA BACKTEST, KHÔNG phải quy tắc đã được duyệt để xác nhận hoặc hết hạn tự động. TTL/hold/cooldown sử dụng TRADING_ACTIVE_MINUTES hay WALL_CLOCK hiện CHƯA CHỐT: phải versioned per-exchange calendar và được kiểm thử qua nghỉ trưa, ATO/ATC/PLO, ngày nghỉ, phiên rút ngắn và qua đêm. Cho đến khi có quyết định phiên bản clock policy được nghiệm thu, không tự đổi sang EXPIRED chỉ dựa trên 45 phút trôi qua; gắn trạng thái UNVERIFIED về time-based eligibility. Tăng độ mới quote không được gia hạn zone vô thời hạn; chỉ structural update có chứng cứ mới cho phép xem xét update tuổi của zone.
+P15 RVOL_TOD reference = 20 prior valid comparable trading sessions at same exact session slot; not necessarily the last 20 calendar days. Wrong/missing slot => UNVERIFIED.
+P14 VWAP exact = matched traded value / matched traded volume within verified session; matched_value semantics and volume parity must be verified; avg_price or typical_price*volume is a proxy, never exact.
+These are INITIAL CANDIDATE THRESHOLDS, not calibrated or approved optimal. Future tests A/B/C compare M30-only vs M15 baseline vs adaptive M5, alert timeliness, false-alert rate, signal quality, latency/API calls and R:R after trading constraints. Parameter changes version P03/P16 and invalidate only relevant caches.
+
+
+4. TRIỂN KHAI LOGIC TRONG PIPELINE 8 BƯỚC — TRÁNH VÒNG LẶP
+
+
+Step01 DATA MANAGER: resolve symbol/source/cached latest closed TF M15,D1,H1,W1, clock, position, quota; prepare request scope and valid source digests.
+Step02 DATA VALIDATOR: check calendar, price basis compatibility, confidence, matched source gap/duplicates, provider age. Weak/incomplete source => branch with evidence.
+Step03 ANALYSIS ENGINE PHASE A (pre-screen): refresh/reuse M15 baseline, D1/H1 support/resistance and cached prior L3/L4 Watch Zones; produce WATCH CANDIDATE independent of current M5 so no circular dependency.
+Step03 PHASE B (conditional M5): apply state machine; on ARMED fetch/reuse M5 data and compute micro indicators from closed M5 state + provisional overlay. If M5 unavailable, record quality and preserve M15-only analysis. Expensive history fetch only if cache/source capability requires; SSI MCP may require full-day 1m network request followed by client-side delta.
+Step04 EXIT PROTECTION: assess position, stop/limit/settlement risk, risk override ARMED_PROTECTION if needed. If position state changes after pre-screen, reconcile M5 fetch at most once more during this run and record reentry; run must not claim Step04 COMPLETE before position evidence is final.
+Step05 ZONE DETECTION: evaluate/REUSED_VALIDATED all B1..B8 and S1..S8 using finalized available features and source quality. If a zone found near boundary needs mandatory M5 and was not armed in pre-screen, perform a BOUNDED IN-RUN ESCALATION (fetch M5 if source permits, re-run affected Step03/05 processing) before committing Step05. No infinite pass loop; if missing, mark UNVERIFIED with reason. Never mark Stage05 Complete only because a cache was accessed.
+Step06 SIGNAL ENGINE: separate SHORT/SWING, entry/SL/TP1/TP2/max chase/R:R/exit protection; early vs confirmed states; no short sale.
+Step07 AUDIT & DECISION: 8 topics per candidate, 16-zone coverage evidence, source provider/closed bars/risk.
+Step08 REPORT/HISTORY: stage, validate, commit idempotent snapshot, mark 8th step COMPLETE, then publish UI v1.0 FULL only if all mandatory gates met. Otherwise INCOMPLETE/ERROR with exact blocker.
+Output indicators must distinguish RECOMPUTED, UPDATED, REUSED_VALIDATED, UNVERIFIED. Source quality may cause incomplete analysis while still reporting readable diagnostics; no fictional trading action.
+
+
+5. STRICT CANDLE CLOSE & NO LOOK-AHEAD
+
+
+One M5 bucket [10:10,10:15) has source minute 10:10, 10:11, 10:12 at decision time 10:12, hence OPEN_PROVISIONAL even if provisional price crosses a pivot. ARMED may show WATCH/EARLY warning, never confirmed on unclosed candle. Only when close_time<=decision_time and provider quality confirms all required trade/session records may M5 close evidence become CONFIRMED. Some UPCoM slots contain no minute record; elapsed wall clock alone does not prove completeness.
+M15 confirmed structural pivot needs its required right bars that were already closed; M5 cannot retroactively turn an unconfirmed D1 pivot into confirmed. Each alert must carry event_id, source cutoff, zone revision, candle status, model/code version, quality, alert/dedup key. During replay, indicator or zone first-known time must be <= decision_at. Provisional indicator preview computed from last confirmed state and discarded/rebuilt on revision, not smoothed repeatedly as close.
+Zone ID revision, source adjustment and calendar version change invalidate microstructure and prior armed state if applicable; no duplicate alert when querying the same 5-minute snapshot twice.
+
+
+6. RVOL-TOD — LỌC ĐÚNG SLOT, KHÔNG ĐOÁN
+
+
+Define (for a CLOSED current slot) RVOL_TOD = current verified slot volume / average verified prior N=20 volumes at same exchange, session, exact intraday time bucket, matching duration and comparable trading regime. For cumulative session RVOL vs per-slot RVOL use distinct named feature and version; do not mix.
+Eligibility requires 20 valid comparable prior sessions (not counting current), same exchange, same bucket clock anchor, native/derived session policy compatible, no unresolved sparse-slot gap, volume unit consistent, confidence that 0-volume means confirmed no trades. Exclude holidays, session partial/auction mismatch, adjustments and missing source. Denominator zero or sample count <20 -> UNVERIFIED, not numeric 0; current slot open -> PREVIEW (if used) but not confirmed.
+POC fixture: 20 historical slots of 100 shares and current CLOSED slot=120 => RVOL_TOD=1.20. With 19 slots, one different clock slot, sparse ambiguous slot or current open, return UNVERIFIED. Fixture synthetic; SSI MCP long intraday retention and real slot completeness still have blockers.
+
+
+7. VWAP, ANCHORED VWAP & LIQUIDITY GATES
+
+
+VWAP exact eligibility = sum(verified matched traded value) / sum(matched traded volume) over same verified session with provider-defined semantics; price quote avg_price field not automatically trade-weighted VWAP, OHLC typical-price approximation cannot be labeled exact. VWAP source on SSI intraday M1 has not yet been verified with matched_value semantics, so mark VWAP_VALUE_MISSING/UNVERIFIED for strict exact feature. Anchored VWAP requires causal anchor event/time and event revision, not hindsight-optimized anchor; invalidate on corporate action/late source correction.
+For M5 Early trigger requiring VWAP/RVOL to assert CONFIRMED and unavailable, mark that feature UNVERIFIED and apply rule-specific gating; do not upgrade merely from price cross. Features not mandatory for an independent D1 rule should not blanket-block the entire stock if other evidence is sufficient; still report warnings.
+Liquidity, ceiling/floor and trade settlement constraints are separate execution gates; no assumed executable trade simply because synthetic trigger conditions look true.
+
+
+8. CACHE L1–L5 VÀ 5-PHÚT RECALL — ĐÚNG KỲ VỌNG USER
+
+
+Cache applies to ALL reusable assets, not just candles: M1/W1/D1/M5/M15/M30/H1, market/index/sector/context, corporate actions, technical indicators, structure, all 16 B/S zones, strategies, audits and report history. On user recall after ~5 min:
+L1 reuse confirmed historical bars/events, detect append/revise from provider; may FETCH full-day M1 if SSI MCP doesn't support server-side delta, but only recompute changed canonical bars locally.
+L2 EMA/ATR/RSI/volume features reuse previous checkpoint for unchanged confirmed bars, M15 update when new input closes, M5 micro state only when armed and source permits; provisional overlay separate from closed state.
+L3 structural pivots/events unaffected by revisions reuse valid results; source adjustment, calendar, market/sector changes invalidate affected paths.
+L4 all 16 detector entries and SHORT/SWING decision must be evaluated or REUSED_VALIDATED; when M5 off and detector does not need it, no forced M5 fetch, but M5-dependent confirmation remains UNVERIFIED.
+L5 each user query gets an audit run_id, step/zone evidence, cache counters and ERROR/INCOMPLETE if source mandatory unavailable. Do not blindly reuse prior decision as a new confirmed trade because price moved while cache remained unchanged.
+No background refresh/scheduler has been created or approved. M5 'auto arm' means conditional behavior DURING A REQUESTED SCAN, not an always-on service unless user later separately authorizes a scheduler. No broker trade execution.
+
+
+9. SYNTHETIC TESTS — FULL SET OF 40 PASSED (AFTER BUG FIX)
+
+
+First POC run: 35 scenarios, 34 PASS and 1 FAIL. Fail was the shape of return value for source-invalid branch (nested state instead of string), not a market data failure. Corrected return shape and reran expanded deterministic suite: 40 cases, 40 PASS, 0 FAIL. Scope: state-machine logic, RVOL eligibility, VWAP eligibility, gating fixtures. These tests are not integrated unit tests and don't execute a real B1–S8 detector.
+State/hysteresis (17 tests PASS): ARM_NEAR; NO_ARM_FAR; HYSTERESIS_MIDDLE; ONE_CLOSED_FAR_HOLD; TWO_CLOSED_FAR_COOLDOWN; COOLDOWN_GUARD; COOLDOWN_RECOVER; POSITION_ALWAYS_ARM; M5_MISSING_STILL_WATCH; WATCH_EXPIRES; UNVERIFIED_SOURCE_CANNOT_ARM; RAW_ADJUSTED_MISMATCH_BLOCK; SOURCE_STALE_WHILE_ARMED_BLOCKS_TRIGGER; NEW_ZONE_REV_REARMS; M15_OPEN_CANNOT_DISARM; M15_EARLY_CAN_ARM; NO_ACTIVE_WATCH.
+Candles/gate to eligibility (5 tests PASS): M5_OPEN_PROVISIONAL, M5_CLOSED_ELIGIBLE, M5_UNAVAILABLE_BLOCKS_DEPENDENT_RULE, M5_NOT_REQUIRED_NO_BLOCK, M15_OPEN_PROVISIONAL. Here ELIGIBLE_FOR_RULE_CONFIRMATION is not a confirmed stock signal, only a precondition.
+RVOL_TOD (5 tests PASS): 20 comparable slots example 1.2, 19 slots unverified, wrong slot, unclosed current bar, sparse historical slot unverified.
+VWAP (4 tests PASS): missing matched value, quote average not equal exact, good fully synthetic matched_value fixture, bad session.
+Report/coverage gating (9 tests PASS): complete synthetic 8+16+8+2 fixture, reject 7 stages, 15/16 zones, duplicate zone IDs, 7 audit topics, missing strategy, invalid mandatory source, failed history commit, missing position check.
+Số lượng: 17 + 5 + 5 + 4 + 9 = 40. No test used live market decision or approved a real trade. Trạng thái mua/bán trong fixture KHÔNG có B/S detectors chạy thật. Strict source gating remains mandatory and report '8/8' is only a synthetic fixture value during this test.
+
+
+10. DATA QUALITY BLOCKERS CÒN GIỮ TỪ GĐ3/B1–B3
+
+
+B01 SHS D1 open 12.400 vs minute initial open 12.300 (04/11): unresolved.
+B02 VGI D1 open 75.000 vs minute initial open 74.500 (04/11): unresolved.
+B03 VNINDEX D1 volume 785.061.515 vs sum minute 785.061.420, diff +95 (04/11): unresolved.
+B04 HNX 6/240 source minute slots absent; UPCoM 127/270 absent, unknown no-trade vs missing data semantics.
+B05 Native M5/M15/M30/H1 provider candle parity and H1 partial/HOSE auction/HNX PLO/UPCoM afterhours still not verified.
+B06 SSI MCP historical intraday returns empty for sampled earlier dates, insufficient long M5 backtests; FastConnect V3 actual entitlement, streaming, latency, quotas not checked.
+B07 industry historical benchmark, corporate action adjustment rates direction/semantics, exact matched-value for VWAP not established.
+B08 D1 adjusted vs M1 raw/unknown pricing basis must be reconciled before comparing ATR-based distances/watch zones across TF.
+New B4 open concerns: P03/P16 thresholds uncalibrated; TTL after lunch/holiday semantics unresolved, provider freshness during session not measured; early alert/RSI performance never backtested. All 8 original blockers must persist into GĐ3/B5, no auto waiver.
+
+
+11. B4 ACCEPTANCE MATRIX & PASS/FAIL
+
+
+B4-L01 State machine deterministic transition tests: PASS 17/17 in synthetic fixture.
+B4-L02 Provisional/closed and independent TF gating: PASS 5/5 in synthetic fixture.
+B4-L03 RVOL_TOD eligibility and comparable same slots: PASS 5/5 in synthetic fixture.
+B4-L04 VWAP exact matched-value gating: PASS 4/4 synthetic fixture.
+B4-L05 Strict manifest/zone/audit/strategy gate: PASS 9/9 synthetic fixture.
+TOTAL POC: 40/40 PASS. This is design-logic-level acceptance ONLY. It does not prove branch coverage beyond named fixtures.
+B4-P01 Production M5 ARM/DISARM integrated with SSI MCP data and persisted zone/position state: NOT DONE.
+B4-P02 Real-world replay chronological M15 baseline vs M5 adaptive across multiple symbols and sàn: NOT DONE.
+B4-P03 Actual RVOL_TOD 20 comparable sessions using provider verified intraday slots: NOT VERIFIED.
+B4-P04 Exact VWAP via verified matched value and session semantics: NOT VERIFIED.
+B4-P05 8-step pipeline real execution + 16 detectors and 8 audit topics on market data, error gates/renderer: NOT DONE.
+B4-P06 Performance/cold warm cache/API bandwidth baseline: NOT MEASURED.
+Thus B4 can be described 'DESIGN + SYNTHETIC POC PASS'; not 'READY LIVE / RELEASE'.
+
+
+12. NEXT — GĐ3/B5 KIỂM TOÁN KIẾN TRÚC CUỐI GIAI ĐOẠN
+
+
+Next GĐ3/B5: audit completeness of GĐ3/B1..B4 and acceptance evidence; reconcile Data Contract, source blocking matrix, 6 TF aggregation & M5 ARMED policy, strict pipeline and cache dependency contract. Establish conditional 'Design Review PASS' vs 'Data Verified' vs 'Production Implemented' statuses, do not merge them. Check source blockers B01–B08 and B4 threshold/TTL/calendar gaps; if unresolved, mark CONDITIONAL/BLOCKED for relevant live/backtest capabilities, not false fully DONE. Determine exact GĐ4 implementation backlog for Python core, validation/fixtures, storage/deploy decision, performance & long-history source.
+Continue project with user command 'Làm tiếp': do GĐ3/B5 ARCHITECTURE ACCEPTANCE AUDIT (not re-design UI; not code core prematurely). Keep design document 06 in existing Google Drive project folder.
+When user says 'Cập nhật Handoff', append full B4 results/conditions to existing 00_MASTER_HANDOFF and update NEXT ACTION to GĐ3/B5, do not shrink detail, do not create a new handoff. Do not edit 01_MASTER_SPEC, 02_REPORT_UI_v1.0_APPROVED_LOCKED, CK2.0, FX2.0, Scanner without instruction.
+
+
+13. PROJECT DOCUMENT LINKS (VERIFIED PRIOR)
+
+
+Folder: https://drive.google.com/drive/folders/1s2IHW-hUngcQ49YLIG-iuB0js5y5s2GX
+HANDOFF: https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit?usp=drivesdk
+MASTER_SPEC: https://docs.google.com/document/d/1-b74XetjzJVLB3nIpB1tReQTAq828Bpp3GmNOBFU9fY/edit?usp=drivesdk
+UI-1.0 LOCKED: https://docs.google.com/document/d/1BG29hocmOOGHkosJ_WU-m4An1-OBzfnlf1t1mtGKbuk/edit?usp=drivesdk
+Source audit B1: https://docs.google.com/document/d/1qkFBGwxD6gJxt-_OH8slZee7NscZ478uktZVbUI1dRU/edit?usp=drivesdk
+TF aggregation B2: https://docs.google.com/document/d/1HYysZY3tqOEXz2kiQWQL1-OTx89Vbc5LkcBv-SvVyQw/edit?usp=drivesdk
+Cache architecture B3: https://docs.google.com/document/d/1ognZgcBfnPd6C1u0FyTYWSq9r-2YC9kZUV4sHWfiA_Y/edit?usp=drivesdk
+
+
+
+
+14. ENGINEERING REVISION v0.1 — M15 DEDUP/CALENDAR-AWARE ARMED STATE — 05/11/2026
+Trạng thái: design correction after a retrospective review, NOT code or trading-system deployment. Historical 40/40 synthetic pass remains accurately documented but DID NOT test repeated observations of the same CLOSED M15 bar.
+14.1. Phát hiện M15 duplication (LỊCH SỬ PHÁT HIỆN, QUY TẮC ĐÃ CHỈNH NGAY Ở MỤC 2): Trong mô hình trước, farCount có nguy cơ tăng mỗi lần e.m15Closed=true, kể cả quét lại cùng nến. Vì vậy bắt buộc lưu canonical_closed_m15_bar_id và last_evaluated_bar_id; bar_id KHÔNG BAO GỒM source_revision. Mỗi nến M15 đã CLOSED+VERIFIED và đúng ordinal lịch sàn chỉ được xét tăng farCount MỘT LẦN. source_revision là phiên bản nội dung của nến đã biết, dùng để kiểm tra correction/invalidation; một revision mới của bar đã xét PHẢI phát lại state từ checkpoint có kiểm chứng, KHÔNG tạo bar ID thứ hai hay tăng đếm. Nến đến trễ/out-of-order, sparse/unverified hoặc thiếu calendar ordinal phải đưa về trạng thái an toàn, không chứng nhận hai nến CLOSED VERIFIED liên tiếp nếu thiếu chứng cứ. Mục 15 quy định acceptance test cụ thể; 40/40 synthetic POC trước đó không bao gồm đầy đủ trường hợp đọc lặp/hiệu chỉnh.
+14.2. Ghi timestamp/canonical times: TRADING_ACTIVE_MINUTES vs WALL_CLOCK cho TTL/hold/cooldown phải được quyết định và versioned theo sàn, nghỉ trưa, holiday, ATO/ATC/PLO. Trong khi chưa nghiệm thu semantic, time-based signal eligibility không tự coi là VERIFIED; P03/P16 numeric candidate vẫn thử nghiệm. Quote/source INVALID -> fail closed cho confirmation; nếu có vị thế cần Exit Protection thì vẫn đưa risk warning bằng evidence tin cậy còn lại thay vì lặng im hoặc giả M5 trigger.
+14.3. STATE AND ALERT KEYS — QUY TẮC CHUẨN v1.2, THAY ĐỊNH NGHĨA StateKey CŨ: StateScopeKey=(instrument_id,exchange,zone_id,zone_revision,strategy,position_scope_id|null,rule_version,param_version,calendar_version,aggregation_policy_version,price_basis). Stable scope không chứa position_revision hay source_revision; bản cập nhật vị thế hoặc source là EVENT thay đổi trạng thái, không tạo namespace mới âm thầm. M15MarketBarId=MarketBarKey theo 05 §2, KHÔNG chứa provider_id/origin/source_revision, nhưng resolved input phải có ProviderObservationKey+ObservationRevision và quality VERIFIED. SemanticAlertKey=(StateScopeKey,MarketBarKey,trigger_type,phase,rule_version); stable across repeated run_id, fetch timestamp và source_snapshot khác không thay đổi ngữ nghĩa. AlertContentRevision=(SemanticAlertKey,source_revision,decision_snapshot_digest), chỉ tạo phiên bản/supersedes/retraction khi chứng cứ thay đổi; không phát lại thông báo giống hệt. Step03 pre-screen/Step04 position refresh/Step05 bounded escalation đều idempotent, phải ghi attempts/evidence. Những định nghĩa StateKey/alert dedup theo source_revision/snapshot trước §14.3 đã được SUPERSEDED, KHÔNG sử dụng để tạo trạng thái/alert mới.
+14.4. Bổ sung sáu synthetic design checks 05/11/2026: same closed M15 read twice does not increment; two distinct closed M15 increment exactly twice; unverified-source return doesn't increment; closed+SPARSE_UNVERIFIED can coexist; OPEN+COMPLETE observed can coexist; CLOSED+COMPLETE+VERIFIED distinct — all 6/6 PASS in an isolated JS prototype. KHÔNG gọi đây là production unit tests, không hợp nhất vào 40/40 vì đó là bộ thử lịch sử khác.
+14.5. Acceptance B4 thật GĐ4: M15 unique-bar idempotency, changes/revisions/out-of-order, lunch/overnight calendar, quote freshness, protection warning independent of M5, full vs incremental, 16 detectors eligibility, 8 stages/8 audits, no signal duplicate, UI-1.0. Backtest P03/P16 before optimized thresholds; B01–B08 remain OPEN.
+
+
+15. CURRENT STATE-MACHINE ACCEPTANCE MATRIX — DESIGN ONLY
+15.1. NORMATIVE M15 IDENTITY v1.2: M15MarketBarId = MarketBarKey từ 05 §2=(instrument_id,exchange,STOCK|INDEX,TF=M15,session_period_id,bar_start_utc,price_basis,calendar_version,aggregation_policy_version). Bar ID độc lập provider/nguồn/origin/source_revision. ProviderObservationKey phân biệt các bản SSI-native/derived/provider, ObservationRevision phân biệt nội dung đã sửa; một canonical bar có thể có nhiều provider observations. Rule M15 chỉ được đánh giá trên ResolvedBarSnapshot với source reconciliation+closed+coverage+quality verified. Cùng M15MarketBarId chỉ consumed một lần trong StateScopeKey; reread same observation/revision là idempotent, sửa cùng bar hoặc nguồn khác/conflict phải replay từ checkpoint theo event-time, không xem như bar mới. Calendar ordinal liên tiếp chỉ khi cùng chính sách và lịch phiên đã được kiểm; missing ordinal/late event => UNVERIFIED cho chuyển trạng thái đòi liên tiếp. Event-time khác arrival-time, lưu cả hai.
+15.2 Verified consecutiveness: farCount yêu cầu hai bar M15 CLOSED+quality VERIFIED, coverage đủ và calendar ordinal liên tiếp hợp lệ. Gặp bar CLOSED nhưng SPARSE_UNVERIFIED/UNVERIFIED => ngắt chuỗi verified-consecutive, không tăng; gap không được nhảy ordinal âm thầm. OPEN/provisional bar dùng để ARM fetch/preview nhưng không để CONFIRM/DISARM. Giá quay gần zone reset farCount theo bằng chứng. ARMED_PROTECTION có vị thế luôn ưu tiên đánh giá risk/exit và không lặng im vì dữ liệu M5 lỗi.
+15.3 Time policy NORMATIVE v0.3: P03/P16, 45-minute TTL/minHold/cooldown CANDIDATE. Chưa nghiệm thu clock (WALL_CLOCK vs TRADING_ACTIVE_MINUTES), không cho chuyển EXPIRED, COOLDOWN theo thời gian hay COOLDOWN→IDLE bằng timer; đánh dấu time-dependent eligibility UNVERIFIED. Structural invalidation VERIFIED có thể đóng EXPIRED riêng; reset/next-zone được xác minh không phải expire bởi timer. HOSE/HNX/UPCoM/VNINDEX sessions, lunch/auction/PLO/holiday/early close/overnight require versioned tests. Không tổng hợp nến thiếu thành 0-volume để lấp lịch.
+15.4 Test matrix: M15-01 same verified closed bar read repeatedly; M15-02 two unique verified adjacent closed bars; M15-03 unverified closed bar breaks consecutive; M15-04 OPEN bar no increment; M15-05 same bar source-revised requires replay; M15-06 older/out-of-order source event requires replay; M15-07 gap in calendar ordinal cannot be marked consecutive; M15-08 lunch/ATO/ATC/PLO/holiday/overnight; M15-09 overlap zone revision/position change/strategy independence; M15-10 alert event_id dedup and corrected-event invalidation; M15-11 verified ARMED_PROTECTION with missing M5; M15-12 FULL vs incremental parity and cache revision. Status tất cả SPECIFIED, chưa có Python/runtime tests trong tài liệu Drive. 40/40 B4 và 6/6 JS POC là kết quả mô phỏng của các bộ khác nhau, không được gộp hay gọi production.
+15.5 Production readiness gates: no background scheduler by default; user-triggered recall checks source freshness. Không triển khai hoặc phát tín hiệu giao dịch xác nhận khi mandatory M15/time policy/source chưa verified. Report Error/Incomplete qua UI-1.0, không thêm kiểu giao diện mới. Chi tiết Data Contract xem 05 §2 và Master Spec 01 §14/19/22/23.
+
+
+16. PRE-CODE STATE-MACHINE FREEZE v0.2 — DETERMINISTIC EVENTS, M5 EFFICIENCY & FAILURE SAFETY — 06/11/2026
+16.1. Scope and contract invariants
+M15 is mandatory baseline analysis cadence and source for early structure; M5 is adaptive OPTIONAL fetch/feature stage, never a gate that prevents all 16 B/S detector IDs being evaluated. M5 can ARM by near validated Watch Zone, verified M15 early candidate, or independently by OPEN_VERIFIED position protection. A tentative quote/open M15 can ARM fetch/preview, cannot confirm or count toward verified consecutive CLOSED M15 disarm. Every decision references one consistent as_of snapshot (bar IDs, source revisions, calendar and position snapshot), never future pivot/price.
+16.2. State machine (per StateScopeKey v1.2 tại §14.3; MarketBarKey/ObservationRevision tại 05 §2). Mỗi zone/strategy có state riêng, position_scope_id là ID ổn định khi có vị thế, KHÔNG dùng position_revision/source_revision tạo state mới. calendar/aggregation/price-basis/rule/param version change => migration checkpoint có kiểm chứng, fail closed nếu không thể replay; không reset bất thường để kích hoạt lại tín hiệu.
+States IDLE, ARMED, ARMED_PROTECTION, COOLDOWN, EXPIRED; separate quality_status VERIFIED|WARN|UNVERIFIED|BLOCKED and eligibility WATCH_ONLY|ACTION_ELIGIBLE|BLOCKED. Priority ORDER: source invalidation/safety quarantine > explicit position protection > verified candidate/near zone ARM > valid hysteresis DISARM > time-based cooldown/expiry (only when approved calendar policy) > IDLE. ARMED_PROTECTION persists for OPEN_VERIFIED position while risk check requires it; missing M5 yields warning/blocked confirmed micro-trigger, NEVER fake safe exit; if position not supplied, do not assume flat.
+16.3. Event identity / revision / replay
+UniqueBarId/M15MarketBarId = MarketBarKey (05 §2) trên TF=M15; không chứa provider_id, origin, source_revision, run_id hoặc position_revision. ProviderObservationKey + ObservationRevision chỉ ghi provenance/reconciliation. StateScopeKey từ §14.3 giữ scope ổn định. SemanticAlertKey=(StateScopeKey,M15MarketBarId,trigger_type,phase,rule_version); AlertContentRevision=(SemanticAlertKey,observation_revision_or_resolved_digest,as_of_decision_snapshot). Với cùng SemanticAlertKey và cùng chứng cứ, quét 5 phút hay retry không tạo sự kiện mới; correction hoặc nguồn thay đổi phải replay, cập nhật linked supersedes/RETRACTED nếu kết luận thay đổi, không phát lại cùng lời cảnh báo chỉ vì source_snapshot khác. Nếu không replay được/không xác minh provider parity thì UNVERIFIED, không confirmed disarm/entry. M15 farCount chỉ tăng khi có HAI MarketBarKey khác nhau và ordinal liên tiếp CLOSED+VERIFIED, không do dữ liệu khác revision.
+16.4. Guard table — required event → transition → side effect
+T-01 IDLE + validated near-zone OR verified M15 candidate (cùng source/price-basis/calendar, zone_revision đang hiệu lực) → ARMED/watch; tạo semantic arm event và M5 fetch scope theo bounded policy. COOLDOWN KHÔNG rearm chỉ vì giá NEAR: chỉ khi clock_policy_version đã duyệt và cooldown đủ thời gian, candidate/zone còn hợp lệ thì COOLDOWN→IDLE→ARMED; khi chính sách thời gian chưa duyệt, giữ COOLDOWN với time_rearm_eligibility=UNVERIFIED. EXPIRED không được trực tiếp → ARMED: cần structural event mới được xác minh tạo zone_revision mới và StateScopeKey mới ở IDLE, sau đó mới chạy T-01. OPEN_VERIFIED position protection theo T-02 có quyền ưu tiên, nhưng không mặc nhiên tái kích hoạt vùng BUY cũ; identical event không phát alert lần hai.
+T-02 ANY + OPEN_VERIFIED position with active protection reason → ARMED_PROTECTION; position refresh takes priority even if zone far/TTL passed; Step04 checks risk with verified data and emits warning if blocked.
+T-03 ARMED + new distinct calendar-adjacent VERIFIED CLOSED M15 far beyond disarmThreshold, minHold policy verified → farCount=1; stay ARMED; same M15 ID re-read => no mutation.
+T-04 ARMED + second distinct VERIFIED CLOSED M15 far, ordinal adjacent to first, minHold policy verified → COOLDOWN; prevent new M5 fetch unless protection/valid rearm; all 16 B/S still evaluated.
+T-05 ARMED + near zone verified CLOSED event → farCount=0; stay ARMED; if farCount interrupted by unverified CLOSED candle or missing ordinal, set verified-consecutive count=0 and preserve safety status (no forced cooldown).
+T-06 ARMED/COOLDOWN + source revised/zone revised/out-of-order → REPLAY_REQUIRED checkpoint; do not add event to live counters until deterministic replay passes.
+T-07 ARMED/COOLDOWN + exchange session boundary, holiday, lunch, auction or missing clock semantics → preserve state with time-based expiry eligibility UNVERIFIED, no unapproved EXPIRED transition. If unverified source makes M5 unsafe, block confirmed M5 trigger but continue independent M15/position warning.
+T-08 ARMED/COOLDOWN + verified/approved time policy, valid session clock, approved zone TTL threshold, no protection/active candidate → EXPIRED with event id + clock version + elapsed trading/wall minutes. Không có clock evidence thì giữ trạng thái trước đó, ghi UNVERIFIED, không tự hết hạn. Structural invalidation VERIFIED theo PRIORITY 3 có thể EXPIRED dù TTL chưa chốt. COOLDOWN timer hết không đồng nghĩa trực tiếp ARMED; chỉ COOLDOWN→IDLE sau cooldown approved và candidate/zone còn live; T-01 mới đánh giá ARM. EXPIRED revision không được tái dùng.
+T-09 ARMED + missing or stale M5 → keep M15 baseline result, output M5-dependent rule phase UNVERIFIED; no full-response false 'NO SIGNAL'.
+16.5. M5 bounded fetch and alert efficiency
+Step03 phase A uses cached last verified L3 zone and M15+D1/H1 evidence. On ARM, check M5 source data capability; read cached valid M5 or fetch only missing window when provider permits. If provider only supports full-day M1, coalesce requests per symbol+session+source revision and derive M5 locally, measure requests and quota, never assume every 5-min recall gets a server delta. Step05 detector requiring newly armed M5 may trigger at most one bounded in-run escalation and re-evaluation of affected DAG nodes, not an unlimited loop. If M5 source remains inadequate, output UNVERIFIED for affected phase with exact reason; rest of zones evaluate normally. Alert dedup by event identity and evidence hash; watch proximity can send early alert before confirmed but must include explicit provisional/quality label.
+16.6. Test cases & executable Definition of Done
+M15-01..12 in §15 plus: M15-13 two scans same MarketBarKey across different run_id produce one semantic disarm increment; M15-14 corrected same bar far→near replays/retracts old alert, no extra bar; M15-15 unverified CLOSED bar breaks verified-consecutive sequence; M15-16 valid ordinal adjacency across lunch/holiday only if calendar declares same condition; M15-17 new zone_revision does not inherit stale old state; M15-18 OPEN_VERIFIED position overrides expired watch scope for safety without reusing invalidated BUY zone; M15-19 missing M5 leaves verified M15 branch usable but blocks M5-dependent confirmed; M15-20 cold/warm/restart replay semantic equality.
+M15-21 verified structural invalidation leads current zone_revision→EXPIRED even if TTL/clock unapproved, with audit event; same expired revision NEVER re-arms from near-price. M15-22 clock/TTL unapproved: decision_at >= zoneExpiresAt does NOT expire; preserves state, status time_expiry_eligibility=UNVERIFIED, no confirmed time-based decisions. M15-23 COOLDOWN + quote NEAR with unapproved cooldown clock DOES NOT re-arm; approved time completion + still-live validated candidate transitions COOLDOWN→IDLE→ARMED without repeated alert. M15-24 new verified structural event/zone_revision after prior EXPIRED creates a NEW StateScopeKey in IDLE (not revival of old revision); OPEN_VERIFIED protection remains independent and safety warning works. All M15-01..M15-24 SPECIFIED/NOT_RUN in Python; synthetic JS POC 40/40 + 6/6 cannot count as these tests. Negative cases must cover weekend/lunch/auction, corrected old source and repeated scans under quota.
+16.7. Explicit unresolved decisions — v0.3: WALL_CLOCK vs TRADING_ACTIVE_MINUTES và các ngưỡng TTL/minHold/cooldown/disarm P03/P16 vẫn là CANDIDATE/UNAPPROVED, cần calendar/auction/lunch/holiday/overnight fixtures và nghiệm thu versioned. Khi chưa APPROVED, không tự thực hiện time-based expiry/rearm/disarm; giữ trạng thái an toàn, ghi UNVERIFIED cho eligibility phụ thuộc clock, vẫn ưu tiên OPEN_VERIFIED position protection và các cảnh báo cấu trúc không phụ thuộc clock. Phải kiểm thử T-01/03/04/07/08 theo ma trận M15-21..M15-24 trước khi đánh dấu verified. Không có broker orders/background scheduler. Cross-ref 01 §24, 05 §18, 00 §27.
+Clock type WALL_CLOCK vs TRADING_ACTIVE_MINUTES and numerical expiry/minHold/disarm thresholds P03/P16 still require exchange calendar fixtures and approved version. Until approved, algorithm must disable time-based expiry for trading decisions and tag that eligibility UNVERIFIED, while continuing position protection and verified non-time-dependent warnings. No automatic broker order, no scheduler by default. Cross-references: 01 §24 for each detector R_E/R_F and signal quality, 05 §18 for runtime design/performance.

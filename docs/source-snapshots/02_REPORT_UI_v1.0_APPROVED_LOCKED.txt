@@ -1,0 +1,163 @@
+﻿REPORT UI v1.0 — APPROVED & DESIGN LOCKED — SWING TRADING 1.8
+
+
+ĐÃ ĐƯỢC NGƯỜI DÙNG CHỐT GIAO DIỆN · 05/11/2026 · UI_VERSION = UI-1.0 · Khóa đặc tả trình bày; số liệu minh họa vẫn chỉ là DEMO, chưa có renderer/code thật
+
+
+CURRENT UI POLICY — UI_VERSION=UI-1.0 APPROVED/DESIGN_LOCKED: phần hiển thị A–I, màu sắc, ma trận/chú giải 16 B/S và checklist 8 bước không thay đổi. Phụ lục kỹ thuật §8 và §9 chỉ định binding dữ liệu và golden/accessibility/error tests, KHÔNG là UI redesign hay renderer đã chạy. Quy tắc hiện hành: 01 §24 per-phase data quality/position/report status, 05 §2/18 data/transactions, 06 §16 M15/M5; chỉ hiển thị '8/8 VERIFIED' khi gate nguồn/Step08 hợp lệ, all-unverified không phải NO SIGNAL. Không có renderer/golden tests thực thi.
+1. MỤC TIÊU VÀ NGUYÊN TẮC BỐ CỤC
+
+
+Thiết kế hướng tới một báo cáo nhất quán, đọc nhanh trên điện thoại và đầy đủ bằng chứng trên máy tính. KHÔNG đổi giao diện giữa các lần quét; chỉ thay dynamic data/status theo ReportViewModel có audit evidence, Renderer tách khỏi engine. NO SIGNAL chỉ hiển thị trong vùng/rule đã có outcome=NOT_DETECTED với tất cả required dependencies đủ VERIFIED; DETECTED thì hiển thị vùng/tín hiệu đúng phase, còn UNVERIFIED, BLOCKED, INCOMPLETE hoặc nguồn thiếu PHẢI thể hiện cảnh báo dữ liệu/điều kiện chưa đủ trong các vị trí dynamic status hiện có, tuyệt đối không đổi UNVERIFIED thành NO SIGNAL hay vẽ thêm bố cục UI mới. Visual layout và nhãn cố định UI-1.0 APPROVED_LOCKED không thay đổi.
+BẢNG MÀU THUỘC GIAO DIỆN ĐÃ CHỐT: nền sáng trung tính; BUY xanh lá; SELL đỏ; WATCH vàng/cam; thông tin kỹ thuật xanh lam/xám; dữ liệu thiếu màu vàng cảnh báo; lỗi vận hành đỏ; text đậm dễ đọc. Không dùng màu làm tín hiệu duy nhất, luôn có chữ.
+Thứ tự cố định UI-1.0: [A] Header dữ liệu + gate; [B] Market Context; [C] Opportunity SHORT; [D] Opportunity SWING; [E] Sell Zones/Exit Protection; [F] 16-Zone Coverage + chú giải cố định B1–B8/S1–S8 + checklist 8 bước có evidence; [G] Signal Audit 8 nội dung/tín hiệu; [H] Cache + History; [I] Conclusion. Khi không có position, [E] ghi 'Không có vị thế được cung cấp', không tự xóa section. Mục mở rộng chỉ hiển thị chi tiết kỹ thuật mà không thay bố cục cốt lõi.
+
+
+2. BẢN MẪU TỔNG QUAN — DỮ LIỆU GIẢ ĐỊNH
+
+
+ABC / HOSE — GIÁ GIẢ ĐỊNH 30.000đ — 05/11/2026 10:10 ICT — DEMO ONLY
+Pipeline: 8/8 (MÔ PHỎNG) | Zone Coverage: B 8/8, S 8/8 (MÔ PHỎNG) | Data quality: DEMO VALID | Rule version: v1.8-draft | UI version: UI-1.0 (APPROVED / DESIGN LOCKED, DEMO)
+Market Context: VN-Index trung tính (giả định); ngành tích cực (giả định); W1 tăng, D1 tăng, H1 điều chỉnh, M15 phục hồi, M5 early trigger (giả định).
+SHORT / 3–10 phiên:
+  Primary B2 — Đáy điều chỉnh trong xu hướng tăng | Secondary B5 — Retest Breakout.
+  Trạng thái MUA SỚM (DEMO); Chất lượng 82/100 (điểm giả định, không phải xác suất thắng).
+  Watch Zone 29.000–30.000 | Entry Zone 29.800–30.200 | Trigger DEMO: hồi phục trên swing high M5 khi nến đóng, vẫn dưới Max Entry 30.200.
+  SL 28.800 | TP1 32.200 | TP2 33.500 | R:R nếu mua 30.000 = 1:1,83 đến TP1, 1:2,92 đến TP2 trước phí.
+  Bằng chứng DEMO: giữ đáy D1, reclaim hỗ trợ, cấu trúc M15 có HL, volume phục hồi. Phản chứng: nhịp hồi có thể thất bại khi VN-Index suy yếu; tín hiệu sớm chưa xác nhận toàn D1.
+  Invalidation: đóng dưới hỗ trợ theo rule hoặc giá đã vượt Max Entry; 'MUA SỚM' không đồng nghĩa 'MUA XÁC NHẬN'.
+SWING / 10–60 phiên:
+  Primary B5 — Retest sau Breakout (dự kiến, chưa kích hoạt); trạng thái CHỜ MUA.
+  Watch Zone 28.500–29.500 | Trigger dự kiến: retest giữ vùng hỗ trợ rồi xác nhận hồi D1/H1. Entry/SL/TP: CHƯA CHỐT vì trigger chưa hình thành. Không tự bịa giá.
+SELL WATCH / NO POSITION:
+  Primary S3 — Đỉnh nhịp tăng trong xu hướng tăng (DEMO). Watch Zone 34.500–35.500; trạng thái CHỜ BÁN SỚM; chỉ cảnh báo TP/kháng cự, KHÔNG phải bán ngay, không có vị thế được cung cấp.
+Bảo vệ vị thế: KHÔNG CÓ DỮ LIỆU VỊ THẾ → chỉ kiểm tra no-position, không tính SL kích hoạt thực tế.
+KẾT LUẬN DEMO: SHORT có cơ hội MUA SỚM B2 nhưng chỉ thực thi khi đáp ứng trigger/rủi ro; SWING CHỜ MUA B5; có cảnh báo S3 ở vùng giá cao hơn. Tất cả giá trên chỉ để duyệt giao diện.
+
+
+3. BỐ CỤC CHI TIẾT / HỢP ĐỒNG UI
+
+
+A HEADER: symbol/exchange, latest price & timestamp, changed since last scan, last-closed TFs, source/quality. Badges 'DEMO' hoặc 'LIVE DATA' không nhập nhằng. Thanh kiểm Pipeline 8/8, B8/8 S8/8, status COMPLETE/ERROR, SHORT/SWING.
+B CONTEXT: VN-Index regime, sector relative strength, W1/D1/H1 trend row, market risks and liquidity.
+C SHORT card: [strategy / horizon / main B zone / secondary / state / early vs confirmed / score] ở đầu; [Watch/Entry/Trigger/Max Entry] kế; [SL/TP1/TP2/RR/risk] rồi [evidence/counterevidence/invalidation/audit].
+D SWING card cùng layout 1:1 với SHORT dù chưa có tín hiệu; nếu chưa có giá, dùng 'Chưa xác định', không tự xóa field.
+E SELL/PROTECTION: vùng chính S, phụ, status, sell watch/exit trigger, cảnh báo chốt lời, điều kiện SL/trailing/time stop; hiện NO POSITION khi phù hợp. Một short buy vs sell cảnh báo xa nhau phải giải thích bối cảnh TF.
+F 16-ZONE MATRIX: B1..B8 và S1..S8, mỗi vùng có status DETECTED / NOT_DETECTED / UNVERIFIED, mức độ xác nhận, snapshot/time, reason. Dù 0 DETECTED vẫn hiển thị đủ 16 dòng.
+G AUDIT: 8 mục riêng mỗi signal; trạng thái PASS/WARN/FAIL/N/A, reasons, evidence, last checked; Hard Fail override score; bảng mở rộng hoặc accordion có vị trí cố định. Thêm summary audit coverage.
+H CACHE: 5 layers summary, hit rate/delta fetched/recomputed, source revision, invalidations, last run comparison; không tự báo '96%' nếu chưa đo.
+I FINAL: quyết định hiển thị 'SHORT: ... / SWING: ... / SELL: ...', next trigger, why, where wrong, next scan. Nếu pipeline incomplete => thay toàn bộ FINAL bằng ERROR STATE; không báo mua/bán hợp lệ.
+
+
+4. MA TRẬN 16 VÙNG TRONG UI (MẪU)
+
+
+BUY:
+B1 Đáy lớn: NOT_DETECTED (demo)
+B2 Đáy điều chỉnh: DETECTED, primary SHORT (demo)
+B3 Đáy tích lũy đi ngang: NOT_DETECTED (demo)
+B4 Đáy cao đầu tiên: NOT_DETECTED (demo)
+B5 Retest sau Breakout: DETECTED, secondary SHORT + primary SWING watch (demo)
+B6 Nén giá: NOT_DETECTED (demo)
+B7 Hồi kỹ thuật trong giảm: NOT_DETECTED (demo)
+B8 Momentum Breakout: NOT_DETECTED (demo)
+SELL:
+S1 Đỉnh lớn: NOT_DETECTED (demo)
+S2 Đỉnh hồi trong giảm: NOT_DETECTED (demo)
+S3 Đỉnh nhịp tăng: DETECTED / WATCH only (demo)
+S4 Đỉnh phân phối: NOT_DETECTED (demo)
+S5 Đỉnh thấp đầu tiên: NOT_DETECTED (demo)
+S6 Bull Trap: NOT_DETECTED (demo)
+S7 Retest Breakdown: NOT_DETECTED (demo)
+S8 Blow-off Top: NOT_DETECTED (demo)
+Có thể mở popup/detail khi click một vùng, nhưng cấu trúc danh sách và nhãn cố định. Không suy ra B1 vì giá giảm sâu và không suy ra S1 vì RSI quá mua.
+
+
+GIẢI THÍCH KÝ HIỆU B1–B8 VÀ S1–S8 — HIỂN THỊ NGAY DƯỚI “KIỂM TRA VÙNG B/S”
+Quy tắc giao diện: Mỗi dòng của ma trận ghi “B2 · Đáy điều chỉnh trong xu hướng tăng”, không chỉ ghi “B2”. Ngay dưới bảng có bảng chú giải cố định B1–B8/S1–S8 để người dùng không phải ghi nhớ mã. Danh sách luôn đủ 16 dòng kể cả NOT_DETECTED; mỗi vùng có trạng thái + mức độ xác nhận + lý do/bằng chứng khi mở rộng.
+B1 — Đáy lớn sau xu hướng giảm kéo dài.
+B2 — Đáy nhịp điều chỉnh trong xu hướng tăng.
+B3 — Đáy vùng tích lũy đi ngang.
+B4 — Đáy cao đầu tiên sau đảo chiều tăng.
+B5 — Retest sau Breakout.
+B6 — Vùng nén giá trong xu hướng tăng.
+B7 — Đáy hồi kỹ thuật trong xu hướng giảm.
+B8 — Momentum Breakout, phá nền giá/kháng cự mạnh.
+S1 — Đỉnh lớn sau xu hướng tăng kéo dài.
+S2 — Đỉnh nhịp hồi trong xu hướng giảm.
+S3 — Đỉnh nhịp tăng trong xu hướng tăng.
+S4 — Đỉnh vùng đi ngang hoặc phân phối.
+S5 — Đỉnh thấp đầu tiên sau đảo chiều giảm.
+S6 — Bull Trap, Breakout thất bại.
+S7 — Retest sau Breakdown.
+S8 — Blow-off Top, đỉnh tăng nóng/hưng phấn cực độ.
+B = loại vùng mua tiềm năng; S = loại vùng bán/chốt lời/cảnh báo rủi ro. Ký hiệu KHÔNG đồng nghĩa lệnh được phép thực thi. Nếu không có vị thế, vùng S chỉ là cảnh báo. Ma trận hiển thị DETECTED / NOT_DETECTED / UNVERIFIED (kèm lý do), phân biệt đúng nghĩa.
+
+
+CHECKLIST XÁC MINH THỰC THI 8/8 BƯỚC — LUÔN HIỂN THỊ, KHÔNG CHỈ HIỆN SỐ 8/8
+Đặt ngay sau bảng chú giải vùng B/S và trước phần Audit. Đây là checklist quy trình (pipeline), khác với Audit 8 nội dung cho từng tín hiệu bên dưới.
+01 DATA MANAGER — Kiểm tra mã/sàn, cache, delta và tính hợp lệ cache. Bằng chứng: nguồn, snapshot và danh sách dữ liệu cần tải/tái sử dụng.
+02 DATA VALIDATOR — Lấy/chuẩn hóa/kiểm dữ liệu nến, chỉ số, ngành, corporate actions. Bằng chứng: data quality, last closed bar và nến provisional.
+03 ANALYSIS ENGINE — Chỉ báo, xu hướng, cấu trúc, dòng tiền và tín hiệu sớm được tính hoặc cache xác minh hợp lệ. Bằng chứng: indicator/structure version, dependencies, timeframes.
+04 EXIT PROTECTION — Kiểm bảo vệ vị thế sớm. Step04 phải COMPLETE với evidence và ghi result đúng theo source: NOT_PROVIDED → NO_POSITION_CHECKED (chỉ là chưa cung cấp, KHÔNG xác minh flat); FLAT_VERIFIED → NO_POSITION_VERIFIED; OPEN_VERIFIED → POSITION_PROTECTED/CHECKED; STALE/CONFLICTING → POSITION_UNVERIFIED và BLOCK các hành động theo vị thế. Không dùng N/A để bỏ qua bước; không suy ra số lượng cổ phiếu khi user chưa cung cấp.
+05 ZONE DETECTION — Quét đủ B1–B8 và S1–S8. Bằng chứng: 16/16 kết quả DETECTED/NOT_DETECTED/UNVERIFIED có reason và timestamp.
+06 SIGNAL ENGINE — Đánh giá riêng SHORT và SWING, trạng thái mua/bán, trigger, score, Entry/SL/TP/R:R. Bằng chứng: hai nhánh SHORT/SWING + danh sách tín hiệu/không có tín hiệu.
+07 AUDIT & DECISION — Kiểm toán 8 nội dung cho mỗi tín hiệu, Hard Fail, khả năng thực thi, xung đột. Bằng chứng: audit matrix và decision reason.
+08 REPORT & HISTORY — Kiểm gate cuối, phiên bản mẫu UI, phát hành/lưu snapshot, lịch sử và dữ liệu delta. Bằng chứng: run_id, publication_status, report_version, history write status.
+Mỗi dòng hiển thị: STEP ID + tên bước + trạng thái NOT_STARTED/RUNNING/COMPLETE/FAILED/BLOCKED + phương thức CALCULATED/UPDATED/REUSED_VALIDATED + timestamp + ghi chú kết quả + link/chi tiết evidence. COMPLETE chỉ được đánh dấu sau khi thực sự có đủ bằng chứng; REUSED_VALIDATED là phương thức hoàn thành, KHÔNG thay thế việc thực thi bước.
+Thanh tổng vẫn dùng đúng cấu trúc/nhãn UI-1.0 đã DUYỆT, nhưng chỉ hiển thị “8/8 VERIFIED” khi chứng cứ xác nhận đủ 8/8 steps COMPLETE (Step08 atomic commit), 16 unique B1..B8/S1..S8 được đánh giá và mọi điều kiện nguồn BẮT BUỘC cho kết luận đều VERIFIED, SHORT và SWING cùng 8 chủ đề audit liên quan hoàn thành, dữ liệu candle CLOSED+verified và risk gate hợp lệ. 16/16 rows không đồng nghĩa 16/16 VERIFIED; trường hợp all-UNVERIFIED hoặc feature critical missing hiển thị INCOMPLETE/ERROR với run_id và lý do, không mạo nhận 'NO SIGNAL'. Nếu dữ liệu tùy chọn thiếu mà không ảnh hưởng rule thì vẫn giữ WARN có lý do. Riêng MOCKUP: mọi con số 8/8, 16/16, badge/tín hiệu chỉ là DEMO / MÔ PHỎNG và không phải kết quả chạy engine. Quy tắc này chỉ ràng buộc nguồn dữ liệu và việc hiển thị đúng status, KHÔNG thay bố cục, màu sắc, wording, thứ tự [A]–[I], tên vùng và checklist đã khóa.
+
+
+5. AUDIT UI DEMO / KỲ VỌNG
+
+
+1 Data Quality — PASS (DEMO)
+2 Multi-Timeframe — PASS (DEMO)
+3 Market & RS — PASS (DEMO)
+4 Setup / Zone Evidence — PASS (DEMO)
+5 Trigger / Candle Close — PASS (DEMO nếu các điều kiện M5 đã đóng; nếu chưa đóng = chỉ PROVISIONAL)
+6 Volume / Momentum / Volatility — PASS (DEMO)
+7 Risk & Executability — PASS (DEMO)
+8 Reproducibility / Evidence — PASS (DEMO)
+Phải ghi 'MÔ PHỎNG' mọi nơi khi chưa có engine thật. Nếu một mục WARN, hiển thị lý do. Nếu Hard Fail, Decision bị BLOCKED bất kể score. Cách đánh dấu riêng của audit không được mượn 8/8 pipeline để ngụy tạo '8/8 PASS'.
+
+
+6. HƯỚNG DẪN HIỂN THỊ RESPONSIVE / EMPTY / ERROR
+
+
+Mobile: các section xếp dọc; SHORT trước SWING; header & status bám trên; Entry/SL/TP grid 2 cột hoặc một cột tùy màn; ma trận vùng nhóm BUY/SELL có nhãn và trạng thái luôn thấy; các bằng chứng sâu có thể collapse nhưng phải đọc được.
+Desktop: context/SHORT/SWING có thể theo cột song song, nhưng thứ tự đọc A→I được cố định và đã được user duyệt. Vị trí footer/audit ổn định.
+No setup: hiển thị 'NO SIGNAL' trong mỗi card, giữ tất cả khu vực. Unverified zone: hiển thị WARNING và lý do; không phủi bằng 'NOT DETECTED'. Error pipeline: hiển thị mẫu lỗi cố định, run_id, blocked step, root cause, stale data; không phát hành phân tích mặc định.
+Audit provenance: mỗi field từ AnalysisSnapshot theo schema, renderer không được tự tính/đổi ý tín hiệu. Date/time và decimal format phù hợp Việt Nam, có timezone/source snapshot.
+
+
+7. CƠ CHẾ PHÊ DUYỆT VÀ KHÓA GIAO DIỆN
+
+
+QUYẾT ĐỊNH ĐÃ CÓ HIỆU LỰC NGÀY 05/11/2026: Người dùng đã nói 'Đồng ý với đề xuất trên. Chốt giao diện. Cập nhật handoff.' sau khi duyệt bảng giải thích đủ 16 vùng B1–B8/S1–S8 bên dưới phần Kiểm tra vùng B/S và checklist minh bạch 8 bước. Từ đây đặt UI_VERSION=UI-1.0, APPROVED=true, DESIGN_LOCKED=true. KHÔNG tự ý thay bố cục, thứ tự sections, phong cách/màu, wording tên vùng, checklist 8 bước, bảng audit, các trường Entry/SL/TP/R:R, trạng thái SHORT/SWING, no-signal placeholders, logic responsive đã duyệt. Chỉ dữ liệu thị trường, tín hiệu, số liệu, audit và nội dung evidence được thay theo kết quả phân tích. Mọi yêu cầu đổi giao diện phải xin phép người dùng, làm bản đề xuất UI-1.1+ riêng và giữ UI-1.0 làm mốc đối chiếu. Quyết định khóa ở cấp thiết kế/tài liệu; hiện CHƯA có code renderer và CHƯA có bộ test UI, nên không được khẳng định khóa đã được thi hành tự động trong sản phẩm.
+VIỆC KỸ THUẬT CHƯA LÀM: xây ReportRenderer theo UI-1.0 đã chốt, triển khai mobile/desktop responsivity đúng mẫu, tạo golden sample/snapshot test, kiểm tra UI regression và data binding thật. KHÔNG mở lại việc duyệt bố cục nếu người dùng không yêu cầu. Mọi mock/demo số liệu vẫn chỉ là ví dụ, không thay thế việc quét dữ liệu thực.
+
+
+
+
+
+
+8. ENGINEERING ACCEPTANCE ANNEX — GĐ2 UI-1.0 LOCKED (NON-VISUAL) — 05/11/2026
+Phụ lục chỉ chuẩn hóa chất lượng THỰC THI; KHÔNG thay đổi bố cục [A]–[I], màu sắc, thứ tự, chữ tên vùng, chú giải 16 mã, checklist 8 bước trước audit hoặc giao diện đã chốt. Đây không phải bản UI-1.1, cũng không phải mã UI đã triển khai.
+8.1. Versioned rendering contract
+Bắt buộc renderer nhận AnalysisSnapshot typed/versioned, đúng UI_VERSION=UI-1.0, reference contract hash + golden fixtures; template mismatch => ERROR/INCOMPLETE, không tự dựng layout khác. Mọi status LIVE/DEMO, verified/provisional/stale/unverified, 8 steps, 16 zones, SHORT/SWING, exit protection có provenance và không giả số PASS. No-position không xóa section [E]; no-signal vẫn hiện đủ 16 zone rows; report incomplete nêu tên bước và dependency thực sự thiếu.
+8.2. Golden, regression, accessibility
+Lưu golden fixtures có phiên bản: NO_SIGNAL, B/S_DETECTED, ALL_16_UNVERIFIED, SOURCE_ERROR, 7/8_STAGE_FAIL, 15/16_ZONE_FAIL, no-position, open-M5 provisional, stale quote, market-closed, mobile/desktop responsive; test DOM/data binding và screenshot/diff đúng UI-1.0. Kiểm WCAG cơ bản (đọc qua screen reader, keyboard/focus, contrast, không chỉ dựa vào màu), nhưng thay đổi trực quan nếu cần phải xin phê duyệt UI riêng. Test hash chỉ xác định thiết kế, không tự chứng minh dữ liệu thị trường.
+8.3. Renderer/publisher safety
+GĐ4/GĐ5 cần integration test stage report→validate→commit idempotent→publish, nhất quán run_id và snapshot revision; failed commit không được hiển thị “8/8 VERIFIED” hoặc xác nhận mua. Runtime gate kiểm per-rule mandatory source quality, không chỉ đếm số hàng 16 vùng. Cache-hit là một phương thức thực hiện được kiểm lại, không phải miễn source freshness. Mỗi render phải có footer/timestamp/source trạng thái rõ, không suy đoán LIVE. UI v1.0 giữ LOCKED, mọi thay đổi hình thức phải thành đề xuất và approval riêng.
+8.4. Chứng cứ và trạng thái
+[ĐÃ CÓ] Tài liệu đặc tả UI-1.0 đã được người dùng duyệt ngày 05/11/2026. [CHƯA CÓ] renderer/code, golden snapshots tự động, browser visual regression, accessibility QA và atomic publisher integration. Không đánh dấu GĐ2 triển khai xong. Đây là phụ lục yêu cầu cho GĐ4/GĐ5.
+
+
+9. PRE-CODE DATA-BINDING & ACCESSIBILITY ACCEPTANCE v0.2 — KHÔNG THAY THIẾT KẾ UI-1.0
+9.1. Phạm vi: UI visual A–I, màu, typography, thứ tự, legend B1–B8/S1–S8, 8-step checklist trước 8-audit, tên vùng và mobile layout đã duyệt vẫn APPROVED_LOCKED. Mục này chỉ cố định cách binding dữ liệu + ngữ nghĩa accessibility và kiểm thử, không thêm card/section/badge/nhãn mới tùy ý hay suy ra giao diện đã được triển khai.
+9.2. ReportViewModel v1.2 là data-binding adapter sang UI_VERSION=UI-1.0, KHÔNG phải UI version mới: run_id, symbol/exchange, as_of_utc/source_quality, engine/rule/parameter/calendar/adapter/data_schema hashes, pipeline_steps[exact 8], zone_rows[exact 16 fixed order], strategies{SHORT,SWING}, position_context_status:NOT_PROVIDED|FLAT_VERIFIED|OPEN_VERIFIED|STALE|CONFLICTING, step04_result:NO_POSITION_CHECKED|NO_POSITION_VERIFIED|POSITION_PROTECTED/CHECKED|POSITION_UNVERIFIED, exit_protection_result, audit_topics[exact 8 per relevant candidate], publication_state FULL_ANALYSIS|INCOMPLETE_REPORT|ERROR_REPORT, independent signal_eligibility per zone/strategy, evidence anchors/cache metrics/diagnostics. Core contract = 05 §2/01 §24.6. UI renderer chỉ đọc viewmodel, không fetch SSI, không sửa quyết định hoặc biến UNVERIFIED thành NOT_DETECTED.
+9.3. Position states: NOT_PROVIDED chỉ được ghi 'Không có vị thế được cung cấp' theo mẫu UI có sẵn (không tuyên bố không có holdings). FLAT_VERIFIED là không có vị thế trong phạm vi/timestamp/nguồn được kiểm; OPEN_VERIFIED mới có quantity, P&L, TP/SL, sell sizing; STALE/CONFLICTING hiển thị cảnh báo nguồn và chặn hành động vị thế. Step04 outcome riêng: NO_POSITION_CHECKED, NO_POSITION_VERIFIED, POSITION_PROTECTED/CHECKED, POSITION_UNVERIFIED. Không đổi bố cục/nội dung nhãn cố định đã khóa; chỉ điều chỉnh dữ liệu động và cảnh báo trong vùng sẵn có.
+9.4. Source states & safety: zone NOT_DETECTED != UNVERIFIED; ALL_UNVERIFIED + mandatory source gap không được tô thành '8/8 VERIFIED' hay NO SIGNAL. Scan pipeline có 8 COMPLETE nhưng result quality gate FAIL => ERROR/INCOMPLETE. Provisional M5/M15 phải hiển thị là early/watch, không gắn CONFIRMED. Stage08 failed atomic publication chỉ được show ERROR/INCOMPLETE diagnostics, không hiển thị full report chụp từ cache cũ.
+9.5. Golden tests tối thiểu: UI-01 fixed A–I template/legend order; UI-02 16 unique B/S names/order; UI-03 eight pipeline rows vs eight audit topics distinguish; UI-04 LIVE/DEMO data explicit; UI-05 NO SIGNAL only with NOT_DETECTED+VERIFIED mandatory evidence, while DETECTED shows phase; UI-06 UNVERIFIED/INCOMPLETE due to missing source never rendered NO SIGNAL; UI-07 7/8 and 15/16 failure; UI-08 NOT_PROVIDED vs FLAT_VERIFIED vs OPEN_VERIFIED vs STALE vs CONFLICTING Step04 result and sell sizing; UI-09 M5 provisional vs closed; UI-10 conflict correction/retracted signal evidence; UI-11 responsive/mobile/tablet/desktop+overflow/keyboard/focus/screen reader/contrast without aesthetic change; UI-12 rollback current and previous stable with same approved visual hash. Compare golden screenshots with controlled environment/locale/fonts/device DPR and structured schema snapshots; review/approve visual diffs separately.
+9.6. Trạng thái: SPECIFIED, RENDERER NOT IMPLEMENTED, GOLDEN/ACCESSIBILITY TESTS NOT RUN. Không tự tạo screenshot hash vì chưa có canonical visual asset có thể kiểm chứng. Linked canonical: 01 §24, 05 §18, 06 §16, 00 §27.10–27.17.

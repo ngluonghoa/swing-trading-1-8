@@ -1,0 +1,190 @@
+﻿SWING TRADING 1.8 — INDEPENDENT QA AUDIT & GAP REGISTER
+
+
+Audit số 09 · 05/11/2026 · Re-review of GĐ1–GĐ3 engineering hardening · Findings only; no silent modifications of source documents
+
+
+TRẠNG THÁI KIỂM TOÁN HIỆN HÀNH — ĐỌC §14 SAU CÙNG (06/11/2026): Những P0/P1/P2 ở các mục trước là phát hiện tại thời điểm audit. Các phát hiện qua §13 và 7 lỗi mới của lần audit tiếp theo đã được sửa ở đúng định nghĩa chuẩn; xem §14; tài liệu đã được chỉnh trực tiếp: 01 §§23–24 (16 B/S manifests/phases/signal evaluation), 05 §§2/17/18 (modular architecture/cache/benchmark), 06 §§2/14–16 (M15/M5 replay), 02 §9 (UI nonvisual), 00 §27.10–27.17 (current baseline). Chưa có runnable Python tests/SSI parity validated/CI/release/backtest hoặc bằng chứng hiệu quả giao dịch; mọi P0 vẫn SOFTWARE_OPEN. Kết quả thử nghiệm lịch sử vẫn nguyên vẹn.
+0. EXECUTIVE VERDICT / KẾT LUẬN
+
+
+KHÔNG thể kết luận “tất cả tài liệu, file và mọi thành phần đã đạt chuẩn chuyên nghiệp”. Audit đọc và kiểm tra 9/9 tài liệu hiện có trong thư mục Drive Swing Trading 1.8 tại thời điểm kiểm kê, xác nhận các phụ lục GĐ1–GĐ3 đã thêm đúng vào bốn tài liệu canonical. Những nội dung này là DESIGN HARDENING chứ KHÔNG phải bộ lõi sản phẩm đã được sửa/test.
+Quality verdict: DOCUMENTATION FOUNDATIONAL=PARTIAL PASS / CONDITIONAL; TRACEABILITY & CANONICAL CONSOLIDATION=OPEN; REPRODUCIBLE TEST ARTIFACTS=NOT VERIFIED; PYTHON CORE/CI/CACHE/RELEASE/ROLLBACK=NOT VERIFIED; DATA SOURCE B01–B08=OPEN. Không có bằng chứng cho tuyên bố LIVE READY, PROFITABILITY, hay FULL ANALYSIS 8/8 từ engine đã cài đặt.
+Audit read-only với toàn bộ 9 tài liệu nguồn; báo cáo số 09 này được tạo như chứng cứ kiểm toán mới. Không sửa các tài liệu số 00–08 trong lượt kiểm toán này. Kết quả 40/40+15/15+6/6 chỉ là phép thử logic trong phiên chat trước; không có test suite Python/fixtures tái chạy trong thư mục Drive kiểm tra.
+
+
+1. SCOPE / PHẠM VI ĐÃ KIỂM, CHƯA KIỂM
+
+
+Google Drive folder https://drive.google.com/drive/folders/1s2IHW-hUngcQ49YLIG-iuB0js5y5s2GX có 9 native Google Docs trước khi tạo báo cáo này: 00_MASTER_HANDOFF, 01_MASTER_SPEC, 02_REPORT_UI_LOCKED, 03 SSI source audit, 04 TF parity, 05 Cache/Data Contract, 06 Early M15/M5, 07 Architecture Audit B5, 08 Engineering Hardening Review. Không có các file .py, pyproject.toml, test fixtures, CI workflow, release manifest hay database/cache artifact trong danh sách 9 mục trực tiếp của folder; không suy ra chắc chắn không tồn tại ở nơi khác.
+Đã kiểm tra read-only thư mục cấp đầu tiên /Users/nam.pham/git-clone/namtrai-works/ trên máy M15001-FG-3.local: không thấy thư mục được đặt tên Swing Trading 1.8 tại cấp đầu tiên; chưa search mọi thư mục lồng nhau. Mac-mini-cua-MOCHI.local offline tại lúc kiểm, không thể đọc. Không kiểm các Git repository riêng tư chưa xác định URL, local machine offline, thư mục khác, hay dữ liệu/ứng dụng production chưa có locator. Không kết luận “không có code ở bất cứ đâu”.
+Google Docs version history: đã kiểm cho 01_MASTER_SPEC, 02_UI và 05_CACHE (revision lists và bản cũ): các amendment kỹ thuật không hiện diện trong revision trước nhưng có trong bản hiện hành. Handoff có lịch sử phiên bản. Đây là chứng cứ thay đổi tài liệu, không phải chứng cứ hệ thống triển khai.
+Nên coi audit này là xác minh TOÀN DIỆN cho nội dung Drive folder đã nêu, nhưng PARTIAL cho tất cả máy, thư mục, code repository ngoài phạm vi đã truy cập.
+
+
+2. INVENTORY 9/9 DOCUMENTS — PHÂN BIỆT CANONICAL VÀ EVIDENCE
+
+
+00 MASTER_HANDOFF: lịch sử/điều phối, có các mục 19–26; mục 26 hướng dẫn hiện hành GĐ4/P0.0; các NEXT cũ còn rải rác là lịch sử.
+01 MASTER_SPEC v1.0 DRAFT: rule definitions B1–B8/S1–S8 và amendment mục 22; RULE/TRADING/QUALITY là canonical ở dạng draft, chưa có executable contract.
+02 REPORT_UI v1.0 APPROVED_LOCKED: visual contract đã chốt A–I, append technical test annex mục 8; không được tự đổi thiết kế.
+03 SSI_SOURCE_AUDIT v0.1: frozen source observation, PARTIAL verification; giữ nguyên bản chứng cứ cũ.
+04 TIMEFRAME_AGGREGATION_PARITY v0.1: frozen internal parity experiment; 132/132 W1 và 16/16 combinations trên mẫu không chứng minh native/provider parity.
+05 CACHE_ARCH v0.1: source/cache contract, append correction mục 16 tách lifecycle, coverage, quality; khái niệm v1.1 vẫn nằm trong phụ lục, chưa hợp nhất.
+06 EARLY_DETECTION v0.1: M15 baseline/M5 ARMED, append correction mục 14 chống đếm trùng nến M15 khi user quét lại.
+07 ARCHITECTURE_AUDIT v0.1: frozen report B5 Conditional Pass, 10/10 document coverage, 15/15 synthetic gate POC, runtime unmet; không phải source current.
+08 ENGINEERING_HARDENING_REVIEW: ghi thay đổi GĐ1–3, gaps và GĐ4/P0.0.
+Không có artifact source code đi kèm trong thư mục gốc và chưa thấy registry manifest có máy đọc được. Các báo cáo 03/04/07/08 không bị sửa “hồi tố”; điều này ĐÚNG cho forensic evidence. Tài liệu canonical 01/02/05/06 và HANDOFF 00 có amendment; điều này cũng ĐÚNG nhưng chưa đủ để bảo đảm developers không đọc nhầm phần legacy.
+
+
+3. CRITICAL / P0 FINDINGS — CẦN SỬA TRƯỚC KHI CODE LOGIC GIAO DỊCH
+
+
+P0-01 / CANONICAL CONTRACT SPLIT: 05 Cache v0.1 còn CanonicalCandle.close_status gộp OPEN_PROVISIONAL/CLOSED_CONFIRMED/SESSION_PARTIAL/RANGE_PARTIAL/UNVERIFIED, trong khi amendment mục 16 nói phải tách lifecycle_state, coverage_state, quality_state. Hai mô tả hiện cùng tồn tại trong một file; code generator/coder đọc phần đầu có thể implement sai. NEEDED: canonical v1.1 schema riêng có field types, invariants, enum migration/legacy mapping, true bar-close eligibility and schema compatibility; đánh dấu legacy definition SUPERSEDED tại điểm xuất hiện, giữ archive immutable.
+P0-02 / M15 REPEATED BAR IDempotency: 06 B4 original 40/40 synthetic suite chưa bao gồm nhiều lần gọi trên cùng CLOSED M15 bar. Bản sửa mục 14 yêu cầu đếm mỗi bar ID chỉ một lần; cần định nghĩa consecutive bars + gap/late correction + same ID revised version replay + distinct session boundaries, idempotent alerts. NEEDED executable state-machine Python tests and chronological market/synthetic fixtures; six JS synthetic design tests đã chạy không thay thế.
+P0-03 / RELEASE GATE AND DATA ELIGIBILITY: 16/16 unique zone coverage, 8/8 pipeline, 8 audit topics chỉ là số lượng/tiến độ. Cần dependency graph + mandatory per-rule source quality, as-of closed bar, position+market regime, risk hard fail, Stage08 commit, report status atomic, no-signal vs all-unverified. 07 B5 đã phát hiện mock B4 có thể cho qua all-unverified với global sourceGood; fix mới chỉ nằm ở thiết kế và 15 mock checks. NEEDED deterministic engine tests with missing optional/required and negative paths, no fake FULL_ANALYSIS.
+P0-04 / REPRODUCIBLE TEST EVIDENCE: Các số 132/132,16/16,4/4,11/11,40/40,15/15,6/6 được ghi trong Docs; chưa có pytest, runnable fixtures, pinned dataset with SHA256/source license, explicit python environment/requirements.lock, traceable test run logs/CI link trong 9 Drive Docs. Không thể rerun kiểm thử chỉ từ chữ PASS. NEEDED fixture repository, test commands, golden references, code and raw source snapshots with provenance, lockfile, CI evidence; đối với source không được phép sao chép thì lưu authorized references/hashes.
+P0-05 / DATA-QUALITY SOURCE BLOCKERS: B01 SHS daily open, B02 VGI daily open, B03 VNINDEX volume discrepancy +95, B04 silent missing minutes, B05 native TF/auction mapping unknown, B06 insufficient intraday historical retention/FastConnect entitlement unknown, B07 sector/VWAP/corporate adjustments incomplete, B08 D1 adjusted vs M1 raw basis mismatch. Không được downgrade thành known resolved. NEEDED resolution evidence per dependency; vẫn có thể viết core offline với strict UNVERIFIED.
+P0-06 / NO ACTUAL ENGINE & REPO BASELINE IN VERIFIED SCOPE: Không thể kiểm Git tags, branch protection, review history, package build, tests, deploy, rollback, previous stable trên 9 Docs. M15001 work root checked only first-level directory, MOCHI offline. NEEDED verified authorized code location, repo skeleton, CI, environment isolation and artifact manifest before claiming software engineering acceptance.
+
+
+4. HIGH / P1 FINDINGS — QUẢN TRỊ DỰ ÁN VÀ KHẢ NĂNG BẢO TRÌ
+
+
+P1-01 / STALE NEXT ACTION: 03/04/05/06 và cả sections cũ của 00 nêu B2/B3/B4/B5 là 'next'. HANDOFF mục 26 và báo cáo 08 mới đúng GĐ4/P0.0. Đúng là giữ nguyên lịch sử, nhưng thiếu rõ ràng một banner 'HISTORICAL — SUPERSEDED BY HANDOFF §26' ở đầu các tài liệu cũ và một CURRENT_STATUS index có hiệu lực.
+P1-02 / RELEASE POLICY NOT MACHINE-ENFORCED: Handoff §25 có SemVer/manifest/Last Known Good/12 REL tests, nhưng chưa có artifact release.json, release compatibility matrix, release runbooks có thể thực thi, hay shadow/canary/rollback drill, thresholds approved. Chưa có stable release nào. cần đưa policy về repo governance (không chỉ Handoff) và chạy tests REL-01–REL-12.
+P1-03 / REQUIREMENT TRACEABILITY: Không có machine-readable REQ-ID→SPEC revision→data dependencies→test IDs→fixtures→commit→release/hash→owner/approval/pass evidence. Các mục B/S, P01–P17, eight audit topics đều mô tả nhưng không link test coverage thực thi.
+P1-04 / SOURCE VALIDATION REPEATABILITY: Báo cáo SSI nguồn ngày 05/11 ghi counts và sai lệch, chưa xác nhận bộ input snapshots đã được bảo quản có checksum, entitlement, timezone/precision/parser policy. 250 D1 min (prefer 400) cần kiểm từng mã/feature, 20 same-slot sessions cho RVOL-TOD còn thiếu; không thể coi provider wrapper là đủ lịch sử thực.
+P1-05 / CACHE PERSISTENCE & EQUIVALENCE: L1–L5 mới là thiết kế. Chưa chọn transactional storage, migrations, per-release cache namespace, CAS/safe retries, cache corruption response/recovery, quota/retention, cold-vs-warm metrics. Chưa có full-recompute vs incremental equivalence tests across indicator, structure, zone, audit and report.
+P1-06 / CLOCK & DATA FRESHNESS POLICY: M15/M5 trading active time vs wall clock, lunch/overnight/holiday, auction/PLO and provider event-time semantics chưa được chốt. Source last-fetch timestamp != last-trade timestamp; đếm nến đóng phải căn cứ calendar/quality và event id. Needs code-level policy version+frozen fixtures.
+P1-07 / UI TECHNICAL QA: UI visual design APPROVED, nhưng renderer chưa code, không có reproducible golden screenshots & mobile/responsive/accessibility/error/no-signal/provisional states. UI lock không có nghĩa regression tests đã tồn tại.
+P1-08 / OPERATIONAL PROTECTION: chưa có production observability/SLO, metrics/alerts on source quality & cache, incident playbooks, secrets/access policy, dependency vulnerability/license checks, backup/restore/RPO/RTO evidence. Cấm nói đã được giám sát/khôi phục tự động.
+P1-09 / GOVERNANCE/CHANGE OWNERS: chưa có developer ownership, release approver/rollback authority, PR/ADR templates, branch and commit conventions, issue acceptance, architecture decision log with supersession and sign-off. Handoff nhiều lời chỉ đạo nhưng không phải issue tracker được test.
+P1-10 / FINANCE DOMAIN VALIDATION: P01–P17 thresholds are still experimental; source calendar/exchange constraints, price limits, settlement/T+2, liquidity, corporate actions, fees/taxes, OOS/WF and paper tests not completed. Keep user-facing output with warnings and no unverified confirmed signals.
+
+
+5. MODERATE / P2 FINDINGS
+
+
+P2-01 Naming and status convention: docs 00–06 named with prefix, 07 and 08 generic titles rather than normalized canonical 07_,08_; not fatal but indexing and source references should be standardized, avoid renaming historical files without links/references update.
+P2-02 Design documents append very long sections and historical NEXT blocks; easier maintain a short CURRENT_STATUS, ADR index, versioned canonical schema, archive-only raw reports, and release/test evidence registry, with hyperlinks rather than copying entire changelog.
+P2-03 Explicit licensing/data usage and privacy scope for downloaded market data and source sample fixtures should be recorded; don't store tokens/API secrets/connection details in test docs.
+P2-04 The exact user-approved UI visual template should be kept as a hashable canonical asset/screenshot from approved version, golden comparisons must use controlled environment, not merely 'APPROVED=true' text.
+
+
+6. CORRECTION PRIORITY / LỘ TRÌNH SỬA ÍT RỦI RO
+
+
+STEP 0 — Freezing before correction: treat historical 03/04/07 (and report 08) as evidence, no overwrites of source results; snapshot versions. Establish current status index and CHANGE-ID mappings to each correction. Do not rewrite UI visual.
+STEP 1 — Canonical v1.1 models: consolidate Schema/Candle/Quality enums, dependency IDs, session calendar and strict per-rule data eligibility. Mark legacy definitions deprecated in the same document or move old v0.1 to archive and link current contract. Migration tests required.
+STEP 2 — GĐ4/P0.0 repo/test infrastructure on verified authorized machine: create independent Python package, pyproject/dependency locks, tests/unit-integration-replay, version registry/release manifest, ADR, CODEOWNERS/review, CI. Do not assume MOCHI online or repo path not confirmed.
+STEP 3 — Port previous synthetic scenarios into reproducible pytest: 40 B4 +15 B5 +6 new, plus stricter data-contract and closed M15 duplicate/revision tests; don't claim numerical 61/61 before actual run. Migrate source/TF/EMA/ATR parity numbers into fixtures where licensing permits.
+STEP 4 — SSI adapter/normalizer/parity for 3 exchanges and VNINDEX with source quality B01–B08, min D1 history, minute no-trade semantics, corporate-adjustment basis; run actual tests, capture source errors and evidence.
+STEP 5 — Strict 8-stage, 16-zone, SHORT/SWING/8-audit quality gates, atomic Stage08 report publish; UI golden strict; all-unverified and missing required cannot confirm.
+STEP 6 — Stateful Smart Cache L1–L5 with provider full-day-vs-delta honesty, source corrections, CAS/concurrency, restart/replay/invalidate and release rollback tests; measure cold vs warm.
+STEP 7 — Release and rollback on staged environment with immutable artifact and last stable pointer; benchmark old vs new on fixed data, include market quality/risk metrics; production activation requires user approval and data feature gating.
+Do not label any of these steps finished until runnable evidence from code/repo exists.
+
+
+7. DEFINITION OF DONE / PROFESSIONAL ACCEPTANCE
+
+
+A phase task is COMPLETE only if: (1) requirement and data dependency identified, reviewed and signed off; (2) implementation present in a versioned project; (3) unit + negative + integration tests are runnable from a clean environment and actually PASS; (4) fixtures have source, date, licensing and hash; (5) log captures cache mode and input snapshots; (6) regression against previous stable is tested on pinned data; (7) data-quality and safety hard fails produce INCOMPLETE/ERROR instead of fabricated confirmed signal; (8) rollback compatibility/migration and release manifest verifiable; (9) UI-1.0 golden verified without unauthorized visual changes; (10) owner/approval recorded and evidence linked in release log.
+New status vocabulary: DRAFT_REQUIREMENT / SPECIFIED / IMPLEMENTED / UNIT_TESTED / INTEGRATED / MARKET_VALIDATED / RELEASE_CANDIDATE / RELEASED / ROLLED_BACK. Avoid ambiguous DONE and blanket 8/8 verified. Historical design POC remains PROTOTYPE_TESTED only.
+GĐ1–3 DESIGN AMENDMENTS = documented, not yet software acceptance. GĐ4/P0.0 first engineering action, with B01–B08 source issues tracked independently.
+
+
+8. FULL DOCUMENT LINKS / SOURCE INVENTORY
+
+
+Root project folder: https://drive.google.com/drive/folders/1s2IHW-hUngcQ49YLIG-iuB0js5y5s2GX
+00_MASTER_HANDOFF (latest current section §26): https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit?usp=drivesdk
+01_MASTER_SPEC_v1.0_DRAFT + §22: https://docs.google.com/document/d/1-b74XetjzJVLB3nIpB1tReQTAq828Bpp3GmNOBFU9fY/edit?usp=drivesdk
+02_REPORT_UI_v1.0_APPROVED_LOCKED + §8: https://docs.google.com/document/d/1BG29hocmOOGHkosJ_WU-m4An1-OBzfnlf1t1mtGKbuk/edit?usp=drivesdk
+03_SOURCE_AUDIT (archival): https://docs.google.com/document/d/1qkFBGwxD6gJxt-_OH8slZee7NscZ478uktZVbUI1dRU/edit?usp=drivesdk
+04_TF_PARITY (archival): https://docs.google.com/document/d/1HYysZY3tqOEXz2kiQWQL1-OTx89Vbc5LkcBv-SvVyQw/edit?usp=drivesdk
+05_DATA_CONTRACT_SMART_CACHE + §16: https://docs.google.com/document/d/1ognZgcBfnPd6C1u0FyTYWSq9r-2YC9kZUV4sHWfiA_Y/edit?usp=drivesdk
+06_EARLY_DETECTION + §14: https://docs.google.com/document/d/1aAQnS07zfsal9J-B0ZGDzWiiJpohWEbh9rfWQ_d3gOE/edit?usp=drivesdk
+07_GD3/B5_ARCH_AUDIT (archival): https://docs.google.com/document/d/1ZPaew619YeMTKgCUEeih1kgf1AnNSmvxOf5jR2SwooM/edit?usp=drivesdk
+08_ENG_HARDENING_REVIEW: https://docs.google.com/document/d/11us0pPB-EJOBA5BczDbpLxgQ2VbBlSxZV4q5nSJnHwE/edit?usp=drivesdk
+
+
+9. FINAL AUDIT NOTE / KHÔNG ĐÁNH ĐỒNG TÀI LIỆU VỚI SẢN PHẨM
+
+
+Điều đáng giữ: cấu trúc 8-step/16 zones, strict sources, separation SHORT/SWING, adaptive M15/M5, 5-layer cache broad scope, locked UI, rollback-by-design. Không cần viết lại ý tưởng từ đầu; cần bản chuẩn hợp nhất và executable tests.
+Không thể nói “tất cả đã đạt chuẩn của senior developer” khi không có implementation/CI/versioned datasets/traceability/source verification. Cũng không nên coi tài liệu cũ không được sửa là thiếu sót: kết quả thí nghiệm gốc phải được giữ có timestamp và immutable; chính sách mới cần chỉ rõ supersession và current navigation.
+Trong lượt audit này chỉ tạo tài liệu QA số 09. Không thay đổi 00–08, không tự động deploy/rollback, không động tới SSI source hay các plugin CK 2.0, FX 2.0, Scanner. Khi user yêu cầu sửa toàn bộ các gap, ưu tiên P0 source-of-truth consolidation và GĐ4/P0.0 rồi chạy test thay vì tiếp tục chỉ thêm tài liệu.
+
+
+
+
+10. REMEDIATION STATUS — SAU LẦN CHỈNH SỬA TỔNG THỂ
+10.1. Đối chiếu phát hiện và cách xử lý hiện hành, tách DOCUMENT-RESOLVED khỏi SOFTWARE-OPEN:
+P0-01 / LEGACY CANONICAL CANDLE SPLIT → DOCUMENT-RESOLVED: 05 §2 đã thay nguyên định nghĩa bằng v1.1 lifecycle_state/coverage_state/quality_state, legacy close_status SUPERSEDED. Migration/source parser/tests chưa có → SOFTWARE-OPEN.
+P0-02 / M15 HYSTERESIS DEDUP → DOCUMENT-RESOLVED: 06 §2 PRIORITY 5 đã sửa unique closed M15 bar, nguồn revised/out-of-order yêu cầu replay; §15 matrix. Chưa có runtime tests/calendar replay → SOFTWARE-OPEN.
+P0-03 / COVERAGE VS DATA QUALITY → DOCUMENT-RESOLVED: 01 §§10/14/19/22/23 và UI 02 §5 đã sửa strict per-rule required data/source gate, no-signal vs all-unverified, atomic commit. Chưa có engine tests → SOFTWARE-OPEN.
+P0-04 / REPRODUCIBLE EVIDENCE → TEST SPECIFIED: 01 §23, 05 §17, 06 §15 quy định fixture hashing, source license, deterministic negative paths, traceability. CHƯA có lưu bộ data source fixtures runnable và CI theo phạm vi hiện tại → OPEN.
+P0-05 / SSI B01–B08 → TRACKED: 05 §17 bổ sung register các số liệu gốc và ảnh hưởng; nguồn chưa đối soát → OPEN, không được đánh PASS.
+P0-06 / REPO/CI/RELEASE BASELINE → GOVERNANCE SPECIFIED ONLY: không có repo/code hiện hành được xác minh trong folder Drive; thư mục thử nghiệm Mac từng tạo SAU audit này đã được người dùng yêu cầu xóa và đã xóa, không tính là artifact đang tồn tại. Chưa có GitHub/CI/bản stable hoặc rollback thật → OPEN.
+10.2. P1/P2 governance: Stale NEXT actions đã được gắn banner lịch sử trong 03/04/07 và đầu các đặc tả; HANDOFF mục 27 phải là current status. Thiết kế UI không đổi, report evidence giữ nguyên. Chưa có owner, PR review, security, secrets, observability, RPO/RTO, backup validation và OOS/walk-forward được nghiệm thu; các mục này vẫn OPEN.
+10.3. Không biến số lượng DOCS changed thành tỷ lệ hoàn thành sản phẩm. '8/8 bước' và '16/16 vùng' là nguyên tắc kiểm soát, không phải kết quả quét. Các tổng 132/132, 16/16, 40/40, 15/15 và 6/6 thuộc từng thử nghiệm mô phỏng/lịch sử, KHÔNG cộng hoặc nâng thành kiểm thử Python.
+10.4. Các bước tiếp theo nếu người dùng yêu cầu triển khai: (a) xác minh nơi lưu code và quyền trước khi tạo bất cứ file nào; (b) build Python repo độc lập/CI/fixtures; (c) source SSI B01–B08; (d) test per-rule/step 8 commit/M15/idempotency/cache/replay; (e) UI renderer golden test; (f) release manifest and rollback drills; (g) backtest OOS/WF/paper validation. KHÔNG tự triển khai hay tuyên bố Release Ready.
+
+
+11. FINAL DOCUMENT-CONSISTENCY READBACK — 05/11/2026
+11.1. Tình trạng kiểm toán: DOCUMENT-LEVEL CONSISTENCY CHECK PASS, SOFTWARE ACCEPTANCE NOT TESTED. Đã đọc lại tất cả 10 Google Docs 00–09 trong cùng thư mục, xác nhận cập nhật đúng tài liệu canonical, không tạo lại Doc 10 hay repo trên Mac. Đối chiếu giấy tờ KHÔNG phải xác nhận hoạt động thị trường/chiến lược giao dịch.
+11.2. QA-DOC-01 / Source of truth: 00 §27 là trạng thái hiện hành; 01 rules/gates; 02 UI visual; 05 candle/cache; 06 M15/M5. Các NEXT ACTION cũ được ghi chú LỊCH SỬ và dẫn lại mục 27. PASS.
+11.3. QA-DOC-02 / Full B/S rule coverage: 01 §§15–16 có đủ đúng 16 unique B1..B8 + S1..S8. Mỗi rule có 7 phần: CONTEXT, CANDIDATE, EARLY, CONFIRMED, INVALIDATION, DEPENDENCIES, TESTS (B zones dùng EARLY TRIGGER/CONFIRMED TRIGGER/INVALIDATION-EXIT, S zones dùng EARLY SELL WARNING/CONFIRMED SELL CONDITION/INVALIDATION-RECOVERY). Kiểm tra nội dung cấu trúc đủ 16/16: PASS DOCUMENT STRUCTURE. Điều này không chứng minh logic tín hiệu đúng hoặc test thực thi.
+11.4. QA-DOC-03 / Data Contract: old active CanonicalCandle = {...close_status:...} đã được thay ngay ở mục 2 của 05 bởi v1.1 3 trục; ví dụ legacy close_status được sửa. §16 là lịch sử thay đổi, §17 liệt kê DC-01..15 và source B01–B08. PASS DOCUMENT DEFINITION; migration code/tests NOT IMPLEMENTED.
+11.5. QA-DOC-04 / Early M15: 06 PRIORITY 5 và P16 đã sửa trực tiếp, §14.1 được làm rõ bar_id canonical KHÔNG chứa source_revision, correction replay không tính bar mới; §15 liệt kê M15-01..12. PASS DOCUMENT DEFINITION; state-machine code/calendar tests NOT IMPLEMENTED.
+11.6. QA-DOC-05 / Publication and UI: 01 §§10/14/19 và 02 đã đồng bộ per-rule mandatory source quality vs 16 zone count, 8 stages/8 audit topics, Stage08 atomic publish, NO_POSITION_CHECKED và no-signal. UI_VERSION=UI-1.0 vẫn DESIGN_LOCKED, các demo A–I và tên vùng/chú giải không thay đổi. PASS CONTRACT REVIEW; renderer/golden snapshot tests NOT IMPLEMENTED.
+11.7. QA-DOC-06 / Historical evidence preservation: dùng Google Drive revision history fetch previous version và so sánh toàn bộ nội dung từ mục 0. trở đi sau chuẩn hóa khoảng trắng: 03 SSI_AUDIT oldBody==currentBody (12718 ký tự chuẩn hóa), 04 TIMEFRAME_PARITY (14940 ký tự), 07 ARCHITECTURE_AUDIT (20573 ký tự). Kết quả giữ nguyên 100% nội dung gốc, chỉ thêm status banner trên đầu. PASS CONTENT PRESERVATION; các số liệu B01–B08 vẫn chưa được sửa chữa ở nguồn.
+11.8. QA-DOC-07 / Change register: 08 §11 và 09 §10 phân biệt DOCUMENT_CONSOLIDATED với SOFTWARE_OPEN; HANDOFF 00 §27 là chỉ dẫn duy nhất. QA-DOC-08 / Runtime scope: không có Python tests/CI/market source parity/backtest/release/rollback được thực thi trong lượt đồng bộ tài liệu; tất cả vẫn PENDING. Do đó KHÔNG có tuyên bố 6 P0 đã đóng hoặc 'software professional acceptance PASS'.
+11.9. Quy định nghiệm thu sau cùng: mọi thay đổi mới phải có cùng nghĩa giữa 00/01/02/05/06, case ID/evidence, reviewer, release version và rollback testing theo nhu cầu; nếu phát hiện mâu thuẫn khác phải giữ trạng thái OPEN, sửa ngay tại canonical source và test. Nghiệm thu không được dựa vào lời xác nhận suông.
+
+
+12. PRE-CODE ENGINEERING AUDIT v0.2 — 06/11/2026 — DOCUMENT REMEDIATION & OPEN GATES
+12.1. Phạm vi thực hiện
+Theo yêu cầu người dùng, đã cập nhật trực tiếp năm tài liệu chuẩn: 01 §24 (16 phase-specific R0/R_C/R_E/R_F/O dependencies, predicate grammar, signal quality), 05 §18 (modular monolith, ports/adapters, transactional persistence, cache and benchmark), 06 §16 (M15 replay/late corrections/9 state guards, adaptive M5), 02 §9 (nonvisual UI report schema, position/data states and tests), 00 §27.10–27.15 (ADR/Definition of Ready/roadmap). 03/04/07 là lịch sử nguồn và kỹ thuật, KHÔNG sửa các số liệu hoặc chỉnh sửa lại bằng chứng; 08 là prior review, giữ nguyên. Chưa tạo repo, không chạy SSI, không tạo dữ liệu backtest, không phát hành sản phẩm.
+12.2. Document-structure verification đã đọc lại (not executable tests)
+DOC-FRZ-01 10/10 Docs 00–09 đọc được; 00 current baseline §27.10+, 01 §24, 02 §9, 05 §18, 06 §16 đều tồn tại: PASS (document readback). DOC-FRZ-02 01 §24.4 có 16/16 ID distinct B1..B8/S1..S8, mỗi ID có R0/C/E/F và O vocabulary; 16 paragraph DEPENDENCIES cũ đã được trỏ tới normative §24.4: PASS (text structure), không phải confirm các ngưỡng giao dịch. DOC-FRZ-03 00 có 8 ADR, 05 có performance SLI/SLO baseline plan và atomic commit/storage candidate, 06 có T-01..T-09 state guard tests and events, 02 có UI-01..12 test requirements: PASS (document coverage). DOC-FRZ-04 các Docs 03/04/07 giữ nguyên revisions từ lần đọc trước và chỉ là bằng chứng lịch sử; các báo cáo nguyên gốc đã so revision trong audit §11 trước đây. DOC-FRZ-05 original UI-1.0 visual specification still DESIGN_LOCKED, new §9 only data-binding requirements, no visual redesign. DOC-FRZ-06 no code, live market read, Mac files or broker orders were performed in this documentation remediation.
+12.3. Quyết định mới về tính đúng đắn và tín hiệu
+Khả năng phát hiện sớm != lợi nhuận. Chỉ đánh giá rule bằng event labels đã định nghĩa trước, as-of/no-lookahead, OOS/walk-forward, purge/embargo, realistic fills/cost/settlement, universe point-in-time, baseline A/B/C M30/M15/M5, false-alert rate, lead time, precision/recall, risk-adjusted expectancy/drawdown và performance/quota. Quan trọng: các ngưỡng P01–P17, volume/RS/market/clock đang CANDIDATE, xác nhận yêu cầu dữ liệu/param/feature gate đã được phê duyệt. Bộ tài liệu hiện mô tả 'how to implement safely' nhưng chưa có bằng chứng 'signal effective'.
+12.4. Các phát hiện hiện còn OPEN, không được đánh DONE
+OPEN-A: P0-01..03 đã có định nghĩa doc rõ hơn, nhưng chưa có schema Python, state-machine, rule engine/atomic gate thực thi hoặc runnable tests.
+OPEN-B: P0-04 P0-06 thiếu repo/CI/versioned artifacts, approved storage/host, approved performance SLO, baseline benchmark, test fixture SHA/license, test harness và rollback drill.
+OPEN-C: P0-05 B01–B08 SSI source blockers chưa giải quyết; provider native parity, entitlement, corporate actions, sector/RS, matched value/VWAP, clock, partial minute/trading sessions cần evidence thật.
+OPEN-D: Các câu 'volume cải thiện', 'RS hợp lệ', 'market phù hợp', heuristic Wyckoff/VSA/UTAD và P01–P17 chưa hiệu chuẩn trên OOS; đã có predicate grammar, nhưng vài metric thresholds/min sample vẫn phải đưa vào parameter registry + calibration. Bất kỳ phase CONFIRMED dùng feature chưa hiệu chuẩn phải fail closed; không mặc định dùng tham số ngẫu nhiên.
+OPEN-E: Position data (NOT_PROVIDED vs verified flat/open), source freshness and output error branches need interface integration + tests before publishing runtime. UI visual approved ≠ renderer implemented.
+12.5. Pre-Code ready vs release ready
+PRE-CODE SPEC DOC_READY_FOR_REVIEW: phần hợp đồng nền tảng/mô tả module/traceability đã được cải thiện và xác minh bằng readback. NOT IMPLEMENTED: Python/domain tests, provider/DB adapters, CI/benchmark, M5 scheduler, live signal eligibility, cache persistence, UI renderer. NOT MARKET_VALIDATED: calibrated rule thresholds, SSI B01–B08, backtest expectancy, false-alert rate. NOT RELEASED: immutable artifacts, last-known-good rollback, user/operator permissions. Do not promote any status based on number of edited documents.
+12.6. Action boundary
+Chỉ khi người dùng bắt đầu code: chốt nơi lưu được phép/host/repo, implement contracts and fixtures, source validation, architecture/performance baseline, then vertical slices of 16 detector registry, quality gates, M15/M5, cache and report renderer. Không tự tạo lại files trên M15001/MOCHI hoặc dùng Google Drive như live cache mặc định. Mọi ca test cần lệnh chạy reproducible, log, release/code revision/fixture hashes và reviewer; production approval riêng.
+12.7. Final audit position
+Không còn phát hiện mâu thuẫn cấu trúc lớn trong 16 rule IDs và source-of-truth ownership qua lần đọc lại ở phạm vi tài liệu. Tuy nhiên, điều này không chứng minh đã hết lỗi nội dung, không thay thế formal independent QA/code review hoặc benchmark chạy thực tế. P0-01..06 vẫn mở ở cấp thực thi/phần mềm; các tham số chưa hiệu chuẩn phải được khóa khỏi tín hiệu xác nhận. UI-1.0 remains design-locked.
+
+
+13. FINAL PRE-CODE CONTRACT CORRECTIONS & READBACK — 06/11/2026
+13.1. Audit khác với các vòng trước: tuy 10/10 Docs có thể đọc và 16/16 B/S manifest tồn tại, vẫn tìm được các mâu thuẫn có thể gây lỗi triển khai. Theo yêu cầu người dùng đã sửa trực tiếp canonical source, không tạo repo hoặc làm thay đổi bằng chứng lịch sử. DOCUMENT_CORRECTIONS_COMPLETE nghĩa chỉ xác nhận nội dung đã cập nhật, KHÔNG nghiệm thu Python runtime hoặc tính hiệu quả tín hiệu.
+13.2. ISSUE-FC01 / BAR IDENTITY — FIXED AT SOURCE: 05 §2 thay định nghĩa CandleKey gộp provider/origin bằng MarketBarKey semantic độc lập nguồn + ProviderObservationKey + ObservationRevision riêng; ResolvedBarSnapshot cần policy reconcile và quality. 05 §16.2 đánh dấu proposal Typed API cũ SUPERSEDED; §17.3 thêm DC-16..18 kiểm semantic vs provider observation, correction và source conflict. 06 §15.1 và §16.3 dùng MarketBarKey cho M15 bar ID, không tự đếm nến mới khi nguồn thay đổi. Readback: không còn dòng canonical hoạt động bắt đầu bằng CandleKey=(...) hay legacy §14.3 StateKey ở 06.
+13.3. ISSUE-FC02 / STATE & ALERT DEDUP — FIXED AT SOURCE: 06 §14.3 StateScopeKey không chứa source_revision/position_revision; 06 §16.3 tách SemanticAlertKey khỏi AlertContentRevision. Nến có source revision mới dẫn tới replay/linked supersedes/retraction, không tạo alert trùng khi gọi lại 5 phút. 06 PRIORITY 5 §2 xác định M15MarketBarId=MarketBarKey và clock/minHold chưa duyệt không cho chuyển COOLDOWN bằng phỏng đoán. Acceptance M15-01..20 vẫn NOT_RUN.
+13.4. ISSUE-FC03 / POSITION MODEL — FIXED AT SOURCE: 05 §2 AnalysisSnapshot/PositionContext thống nhất đúng năm trạng thái NOT_PROVIDED, FLAT_VERIFIED, OPEN_VERIFIED, STALE, CONFLICTING; Step04 business result tách NO_POSITION_CHECKED, NO_POSITION_VERIFIED, POSITION_PROTECTED/CHECKED, POSITION_UNVERIFIED khỏi Step04.state. 01 §§2/10/14/22/24 và 02 §§4/9 đồng bộ. Không có input position != đã xác minh không holdings; S zone có thể warning nhưng không sinh số lượng bán. Test DC-19, ARCH-05 và UI-08 NOT_RUN.
+13.5. ISSUE-FC04 / TEST ID REGISTRY — FIXED AT SOURCE: 01 §23.3 sửa REQ-PIPE, REQ-AUDIT, REQ-DATA-CONTRACT-1.2, REQ-M15-DEDUPE, REQ-UI-1.0 và CACHE refs; §24.12 quy định canonical case IDs/legacy aliases; 05 §17.3 định nghĩa DC-01..19 và 05 §18.11 định nghĩa ARCH-01..10 & CACHE-01..12; 06 §§15–16 định nghĩa M15-01..20; 02 §9.5 định nghĩa UI-01..12; REL-01..12 nằm 00 §25.7. M15-001..010 và UI-001..012 chỉ là ALIAS lịch sử, không tạo test chạy hai lần hoặc tăng số PASS.
+13.6. ISSUE-FC05 / BROKEN CROSS-REFERENCE — FIXED: 02 §9.6 trước đây dẫn 00 §28 không tồn tại; đã sửa thành 00 §27.10–27.15. 00 §27.16 hiện là chỉ dẫn hậu kiểm toán. Có thể còn link lịch sử trong changelogs được ghi SUPERSEDED; đường dẫn canonical hiện hành phải qua 00 §27.10–27.16 và 09 §13.
+13.7. DOCUMENT READBACK AFTER CORRECTIONS: 00,01,02,05,06 đã fetch lại và đối chiếu: 00 §27.16/ADR-009..010 tồn tại; 01 có 16 IDs B1–B8/S1–S8 duy nhất và new DC/M15/UI references; 02 không còn active link 00 §28; 05 có MarketBarKey/ProviderObservationKey/ObservationRevision/DC-19/CACHE-12; 06 có StateScopeKey, M15MarketBarId, SemanticAlertKey và replay. Drive folder chứa 10/10 tài liệu 00–09, file Doc 10 xóa trước đây không được khôi phục. 03/04/07/08 không sửa trong lượt này. PASS=READBACK OF TEXT, không phải code tests.
+13.8. VẪN OPEN / KHÔNG THỂ ĐÓNG BẰNG SỬA TÀI LIỆU: SSI B01–B08 (price parity, session minutes/native TF, history entitlement, adjustment basis/sector/turnover); approval of market calendar TTL/minHold and WALL_CLOCK vs TRADING_ACTIVE_MINUTES; calibration and independent OOS for P01–P17/volume/RS/market heuristics; measured p95/CPU/RAM/provider quotas and approved SLO; actual Python repository, executable fixtures/CI/schema migration/provider adapters, runtime M15 replay, L1–L5 persistence, UI renderer/golden tests, release/rollback and independent end-to-end validation. All tests above NOT_RUN unless future evidence with commit/fixture/log. No claims of profitable, fastest, or live ready.
+13.9. FINAL DOCUMENT VERDICT: các lỗi chuẩn hóa cụ thể FC01–FC05 được sửa và có readback; nền tảng thiết kế đủ để BẮT ĐẦU GĐ4/P0.0 (sau khi được user phê duyệt nơi lưu/host), không đủ để tuyên bố READY_FOR_ACTIONABLE_TRADES, MARKET_VALIDATED hoặc RELEASED. Khi viết code, enforce canonical schemas/test IDs as checks in CI; source missing/unapproved thresholds fail closed. Không thay UI-1.0 visual, không sửa các báo cáo lịch sử, không tái lập Mac files tự động.
+
+
+14. INDEPENDENT AUDIT REMEDIATION — SEVEN FOLLOW-UP FINDINGS — 06/11/2026
+14.0 SCOPE: Người dùng đồng ý sửa toàn bộ bảy vấn đề được xác định trong một lượt rà soát độc lập. Sửa canonical documents IN PLACE, không tạo Doc 10/code/repo, không sửa dữ liệu gốc của các báo cáo lịch sử 03/04/07/08, không đổi giao diện UI-1.0 đã khóa. Kết luận đây là READBACK DOCUMENT QA, không phải Python/market test.
+QA-F07-01 M15 expiry policy CONFLICT: 06 §2 PRIORITY 3 đã tách structural invalidation VERIFIED→EXPIRED (không cần TTL) khỏi time expiry chỉ khi clock/version/threshold APPROVED+TESTED. T-08/§15.3/§16.7 đồng bộ; không tự expiry nếu clock/calendar/TTL chưa nghiệm thu. DOC_CONTRACT_CONFLICT_FIXED; runtime tests NOT_RUN.
+QA-F07-02 M15 cooldown/re-arm CONFLICT: 06 §16 T-01 không còn COOLDOWN/EXPIRED→ARMED trực tiếp do NEAR. COOLDOWN yêu cầu approved clock + completed cooldown + live candidate rồi COOLDOWN→IDLE→ARMED; EXPIRED revision cũ là terminal, zone_revision mới được VERIFIED mới có scope IDLE; OPEN_VERIFIED position protection độc lập. Test M15-21..24 bổ sung vào §16.6. DOC_CONTRACT_CONFLICT_FIXED; runtime tests NOT_RUN.
+QA-F07-03 16 detector manifest fields: 01 §24.4 đã sửa 16/16 dòng B1–B8/S1–S8, bổ sung explicit rule_version, evaluation_strategies=[SHORT,SWING], action policy, variant IDs, phase predicate refs R0/R_C/R_E/R_F, per-rule fixture refs và fail-closed behavior. Đây là ID/metadata để build registry, không phải công thức định lượng đã hiệu chuẩn. Mọi action status confirmed_action_eligible=false đến khi exact thresholds/formulas/source/strategy/risk được review + executable tests + OOS acceptance. DOC_STRUCTURE_FIXED / PREDICATE_CALIBRATION_OPEN (không thể đánh PASS bằng giấy).
+QA-F07-04 W1 old enum: 05 §3 Bucket [start,end) đã thay tuần đang diễn ra OPEN_PROVISIONAL bằng lifecycle_state=OPEN và coverage_state/quality_state độc lập; partial left-edge RANGE_PARTIAL. Bổ sung acceptance DC-06. DOC_FIXED; migration tests NOT_RUN.
+QA-F07-05 NEAR formula: 01 §24.5 đã sửa distance_to_zone(p,[L,H]) = max(L-p, 0, p-H), yêu cầu L<=H, verified ATR and unit/tick compatibility. P03 k_near chưa calibrated, only preview/warning; confirmed action blocked. DOC_FIXED; unit/boundary tests NOT_RUN.
+QA-F07-06 verified zero volume: 01 §24.10 và §24.5, 05 §3, DC-14 phân biệt true verified zero trades với thiếu record; RVOL numerator 0 và denominator>0 là hợp lệ, denominator 0/unknown => ratio undefined/UNVERIFIED for dependent rule, không zero-fill missing minute. DOC_FIXED; source verification/tests NOT_RUN.
+QA-F07-07 UI & release coverage: 02 §1 NO SIGNAL chỉ outcome=NOT_DETECTED có required data VERIFIED; §9.5 UI-05/06/08 include incomplete vs all-unverified/position STALE. 00 §25.7 REL-07 bao đủ năm PositionContext statuses/four Step04 outcomes, Stage08 fail/recovery and UI hash across upgrade/rollback. Layout/labels UI-1.0 không đổi. DOC_FIXED; renderer/release regression NOT_RUN.
+14.1 READBACK EVIDENCE: Sau sửa, đã fetch lại 00/01/02/05/06. Presence checks PASS: 00 §27.17 + REL-07; 01 near formula, zero volume rules, 16 unique manifests with MANIFEST CONTRACT v0.3, canonical M15-01..24; 02 dynamic NO SIGNAL policy and UI-05/06/08; 05 W1 OPEN, NoTradeMinutePolicy and DC-06/DC-14; 06 PRIORITY3, T-01/T-08 and M15-21..24. Mục mới phải được trỏ từ đầu docs/HANDOFF và test registry; các số đã chạy trên JS POC lịch sử không tính PASS cho các test mới.
+14.2 OPEN ACCEPTANCE: B01–B08 SSI source mismatches, P01–P17/RS/volume/market predicate calibration, exchange calendar and clock policy approval, runnable Python fixtures/CI/storage/live benchmark, OOS/backtest, UI renderer/release rollback remain OPEN. Bản thiết kế đủ cho GĐ4/P0.0 foundation khi user quyết định host/repository, CHƯA đủ cho live actionable trading. Không giả claim precision/profitability/fastest. Nếu build code, CI phải enforce schema/registry/test evidence, exclude unknown parameters from confirmed action.

@@ -1,0 +1,187 @@
+﻿GĐ3 / BƯỚC 5 — KIỂM TOÁN VÀ NGHIỆM THU KIẾN TRÚC
+
+
+Swing Trading 1.8 | Architecture Acceptance Audit v0.1 | 05/11/2026 | CONDITIONAL DESIGN REVIEW
+
+
+CHỈ DẪN HIỆN HÀNH / BẢN CHỨNG CỨ LỊCH SỬ — GĐ3/B5: Kết quả 10/10 thiết kế và 15/15 synthetic mock là lịch sử kiểm toán theo phạm vi được ghi, KHÔNG chứng minh Python runtime, nguồn SSI native/production release, backtest hay chiến lược có lãi. Các NEXT GĐ4/P0 trước đó không còn là thứ tự đủ chi tiết; nguồn điều phối là MASTER_HANDOFF mục mới nhất và QA 09. Thay đổi thiết kế hiện hành: MASTER_SPEC 01 §14/19/22 per-rule required data gate; 05 §2 Data Contract v1.1; 06 §2/14 M15 dedup+clock blocker; UI 02 vẫn LOCKED. Báo cáo B5 gốc và B01–B08 giữ nguyên để audit provenance.
+0. KẾT LUẬN KIỂM TOÁN — TÁCH BA CẤP ĐỘ
+
+
+ĐÃ HOÀN THÀNH B5 ở cấp đánh giá tài liệu và kiểm thử cổng nghiệm thu mô phỏng. KẾT LUẬN CHÍNH THỨC:
+(A) DESIGN COVERAGE REVIEW = CONDITIONAL PASS: 10/10 hạng mục kiểm tra hiện diện bằng chứng thiết kế/tài liệu. Không đồng nghĩa 10/10 đã vận hành hoặc mọi tham số đã được hiệu chuẩn. Các điểm kiểm toán cần làm rõ đã được ghi thành A01–A06.
+(B) MARKET DATA VERIFICATION = PARTIAL / BLOCKED FOR SOME FEATURES: dữ liệu D1 + intraday mẫu có nhưng B01–B08 vẫn chưa giải quyết. Đặc biệt 249 nến D1 một năm trên SSI thấp hơn DATA MINIMUM >=250 của MASTER_SPEC, trong khi có khả năng truy vấn cửa sổ lớn hơn cần kiểm đủ điều chỉnh/coverage. Không thể gọi đủ lịch sử M5 cho backtest dài hoặc có VWAP exact/sector history.
+(C) PYTHON CORE / STORAGE / PERSISTED CACHE / LIVE OR PAPER ACCEPTANCE = NOT IMPLEMENTED / NO-GO LIVE: chưa có engine, nguồn live latency verified, scheduler, full unit/integration/equivalence suite, renderer code, backtest, walk-forward, paper acceptance.
+DECISION: GO GĐ4 CHỈ CHO PHÁT TRIỂN OFFLINE VÀ KIỂM THỬ ENGINE CÓ FLAG/GATE. NO-GO cho xuất FULL_ANALYSIS thực tế, tín hiệu MUA XÁC NHẬN dựa trên nguồn chưa đủ, hay công bố hiệu quả giao dịch trước khi các điều kiện được nghiệm thu. Không đặt lệnh/broker trading. UI-1.0 APPROVED/DESIGN_LOCKED không đổi, MASTER_SPEC v1.0 vẫn DRAFT kỹ thuật.
+
+
+1. PHẠM VI, TÀI LIỆU VÀ PHƯƠNG PHÁP ĐỐI CHIẾU
+
+
+Đã đọc 7 Google Docs trên Drive: 00_MASTER_HANDOFF (mục 23 mới nhất, mục 19–22 lịch sử); 01_MASTER_SPEC v1.0 DRAFT (8 pipeline steps, 16 B/S rule matrix, P01–P17, mandatory audit/gates); 02_REPORT_UI_v1.0_APPROVED_LOCKED (bố cục A–I, matrix 16, checklist 8, audit riêng); báo cáo 03 SSI source audit; 04 timeframes aggregation/parity; 05 typed data & cache architecture; 06 M15/M5 early-detection & 40 synthetic tests.
+Audit evidence levels: DOCUMENTED (đặc tả xuất hiện), PROTOTYPE_TESTED (test mô phỏng trong phiên, không lưu code sản phẩm), SAMPLED_PROVIDER_DATA (đọc thật với SSI MCP nhưng không chứng minh toàn bộ coverage), RUNTIME_VERIFIED (thực thi sản phẩm có unit/integration tests và persistence), MARKET_VALIDATED (backtest/walk-forward/live/paper). Không nâng cấp cấp bằng chứng chỉ dựa vào việc ghi tài liệu.
+Kiểm chứng liên tài liệu theo 15 câu hỏi (10 check về sự hiện diện thiết kế + 5 trạng thái runtime); và chạy mô phỏng độc lập mới 15 tình huống strict report gate. Không thay đổi MASTER_SPEC, UI, HANDOFF hoặc các plugin CK 2.0/FX 2.0/Scanner trong lượt này.
+
+
+2. MA TRẬN KIỂM TOÁN 10 HẠNG MỤC THIẾT KẾ — DOCUMENT COVERAGE
+
+
+D01 8-step pipeline và 8 chủ đề audit tách riêng: DOCUMENTED/PRESENT. Check đúng thứ tự Data Manager, Validator, Analysis, Exit Protection, Zone Detection, Signal Engine, Audit/Decision, Report/History.
+D02 Rule contracts đầy đủ 8 B1–B8 và 8 S1–S8, các trạng thái DETECTED|NOT_DETECTED|UNVERIFIED: DOCUMENTED/PRESENT; rules và parameters vẫn DRAFT, chưa backtest.
+D03 UI-1.0 approved locked và chế độ ERROR/INCOMPLETE: DOCUMENTED/PRESENT, renderer/golden tests chưa code.
+D04 SSI source sampled HOSE/HNX/UPCOM/VNINDEX, corporate actions, ngành/peers: DOCUMENTED/PRESENT, chất lượng chưa đủ để production.
+D05 W1 + M5/M15/M30/H1 derived parity trên snapshot mẫu: DOCUMENTED/PRESENT, B2 nội bộ 132/132 W1 và 16/16 symbol×TF tests; không có parity native provider.
+D06 Typed Data Contract, SourceMinute, CanonicalCandle, SessionEvent, DatasetManifest, AnalysisSnapshot, QualityFinding: DOCUMENTED/PRESENT, chưa có Python schema validation.
+D07 Five-layer cache, SHA256 source/normalized digest, dependency DAG, invalidation semantics: DOCUMENTED/PRESENT, chưa có persistent cache/restart test.
+D08 Early Detection M15 baseline và M5 ARMED/ARMED_PROTECTION, hysteresis/expiry: DOCUMENTED/PRESENT, TTL qua giờ nghỉ còn hở.
+D09 B4 POC documented 40/40 synthetic tests after fix; 17 state +5 closed/provisional +5 RVOL+4 VWAP+9 gate: DOCUMENTED/PRESENT; không phải proof về chiến lược thực.
+D10 Nhận diện rõ giới hạn SSI MCP vs FastConnect và rủi ro thiếu intraday/sector/VWAP: DOCUMENTED/PRESENT.
+TỔNG: 10/10 present. Đây là số điều kiện có TÀI LIỆU BẰNG CHỨNG, tuyệt đối KHÔNG biểu thị 100% ready hay 100% test coverage.
+
+
+3. NĂM ĐIỀU KIỆN VẬN HÀNH CHƯA ĐẠT
+
+
+R01 Python core, 16 real detectors, stateful 5-layer cache và UI renderer chưa triển khai trong repo => NOT DONE.
+R02 Native M5/M15/M30/H1 parity, thống nhất ATO/ATC/PLO/UPCOM missing-minute/afterhours chưa được xác minh => OPEN.
+R03 Lịch sử dữ liệu đầy đủ theo indicator warm-up/250+ D1, 20-session same-slot RVOL và long M5 backtest chưa chứng nhận => OPEN.
+R04 Persistent cache restart/atomic commit/concurrency/rollback, dry-run error paths không có chứng cứ thực thi => NOT DONE.
+R05 Walk-forward/out-of-sample/realistic costs/latency/paper trade và nghiệm thu hiệu quả chưa có => NOT DONE.
+RUNTIME STATUS: 0/5 được chứng minh hoàn thành. Không gọi là 5 tests fail của phần mềm vì hiện CHƯA có phần mềm đó để chạy, mà là 5 điều kiện chưa đáp ứng.
+
+
+4. ĐẶC TẢ REPORT RELEASE GATE — ĐIỂM KIỂM TOÁN QUAN TRỌNG A01
+
+
+A01 / HIGH: Trong bộ MOCK B4 trước, ca 'GATE_VALID_NO_SIGNAL_FIXTURE' xây 16 zone rows trạng thái UNVERIFIED nhưng nguồn global được giả định sourceGood=true. Bộ gate mô phỏng trước tập trung vào số lượng 16 IDs +8 steps+8 audits+2 strategies nên chưa chứng minh chính xác nguyên tắc phụ thuộc dữ liệu mandatory cho từng vùng. Đây là LỖ HỔNG TRONG FIXTURE/ĐỘ SÂU KIỂM THỬ, không phải bằng chứng mã Python production bị lỗi (vì chưa có mã). MASTER_SPEC đã yêu cầu chất lượng dữ liệu, nhưng phải encode cứng vào runtime gate.
+GIẢI PHÁP KIẾN TRÚC BẮT BUỘC KHI CODE:
+- Coverage Gate: 16 IDs duy nhất B1..B8,S1..S8; mỗi vùng có status, reason/evidence, source/TF/time.
+- Execution Gate: 8 stages COMPLETE, dependency hashes/evidence hợp lệ, Step08 transaction/history commit trước FULL publish.
+- Decision Data Gate: kiểm critical dependency theo TỪNG candidate/rule/strategy; DETECTED/CONFIRMED chỉ nếu required closed candles, price basis, liquidity, risk, mandatory audit VERIFIED. ALL_UNVERIFIED + thiếu source critical không được FULL_REPORT có quyết định thật.
+- Optional feature unverified không nhất thiết block toàn bộ mã nếu tất cả required dependencies của quyết định cụ thể hợp lệ; thể hiện warning và giới hạn ở chỗ đúng. 16 NOT_DETECTED với nguồn đủ là no-signal hợp lệ, không phải lỗi.
+- Position/Exit Gate: nếu không cung cấp vị thế, Step04 vẫn COMPLETE với NO_POSITION_CHECKED và có evidence; có vị thế mà source critical invalid thì cảnh báo, không tự tuyên bố exit executable.
+- UI Gate: template UI-1.0 đúng revision; Error/Incomplete report không được có lời gọi MUA XÁC NHẬN.
+Cần bổ sung test thật cho ALL 16 UNVERIFIED, one critical dependency missing, one optional unverified, all 16 negative no-signal, 7/8/15/16, report CAS failure, stale source, missing position handling.
+
+
+5. KẾT QUẢ 15 TÌNH HUỐNG REVISED RELEASE-GATE POC
+
+
+Đã chạy lại mô hình Release Gate độc lập (mock JS tại phiên kiểm toán, KHÔNG ghi vào repo):
+G01 NO_SIGNAL_ALL_16_EVALUATED_ALLOWED: PASS; 16 NOT_DETECTED có bằng chứng và gates đầy đủ có thể đưa ra no-signal.
+G02 ALL_16_UNVERIFIED_CRITICAL_MUST_BLOCK: PASS.
+G03 ALL_16_UNVERIFIED_WITH_SOURCE_FLAG_BLOCK: PASS.
+G04 ONE_OPTIONAL_UNVERIFIED_WITH_REASON_ALLOW_OTHERS: PASS trong mock đã có các điều kiện bắt buộc khác.
+G05 ONE_MANDATORY_UNVERIFIED_BLOCK: PASS.
+G06 FIFTEEN_ONLY_BLOCK: PASS.
+G07 DUPLICATE_ZONE_ID_BLOCK: PASS.
+G08 SEVEN_STEPS_BLOCK: PASS.
+G09 SEVEN_AUDITS_BLOCK: PASS.
+G10 SINGLE_STRATEGY_BLOCK: PASS.
+G11 SPLIT_PRICE_BASIS_FLAG_BLOCK: PASS.
+G12 UNVERIFIED_MARKET_CONTEXT_BLOCK: PASS (nếu context là bắt buộc theo rule).
+G13 REPORT_NOT_COMMITTED_BLOCK: PASS.
+G14 UI_VERSION_WRONG_BLOCK: PASS.
+G15 NO_POSITION_STEP_SKIPPED_BLOCK: PASS.
+KẾT QUẢ: 15/15 PASS với expected bool trên mô hình gate đã sửa. Trạng thái này chỉ là design validation, không phải Python integration/acceptance. Cần port logic và test fixtures vào project core với đúng source/rule dependencies và idempotent publish gate.
+
+
+6. CÁC PHÁT HIỆN MỚI TỪ ĐỐI CHIẾU LIÊN TÀI LIỆU (A02–A06)
+
+
+A02 / HIGH — D1 MINIMUM / HISTORY WARMUP: MASTER_SPEC mục 14 ghi D1 >=250 và ưu tiên 400 để seed MA200. B1 test SSI một năm chỉ có 249 D1; vì vậy không được nói '1yr history mặc nhiên đủ'. Có thể query 730 ngày đã chứng minh một phần (tổng mẫu phân trang gần 500 bars) nhưng phải thực hiện lấy đủ/corporate-action adjustment checks cho từng mã, không tự suy mọi mã đều đạt. GĐ4 L1 phải có require_minimum_history(timeframe, feature, warmup, price_basis) gate.
+A03 / HIGH — SESSION & BAR SEMANTICS: nguồn historical 1m có mốc 09:00/09:15/11:30/14:30/14:45 với ngữ nghĩa khác từng sàn; minute_timestamp_semantic START|END vẫn UNKNOWN. H1 session-anchored chứa bar 15/30 phút không bằng provider-native H1. Cần adapter/canonical session policy version, explicit event mapping/quality, parity native nếu được cấp API. Không nhận derived OHLCV parity nội bộ là native verified.
+A04 / HIGH — M5 STATE MACHINE & TIMEBASE: P16 TTL=45m, cooldown=10m, hold=15m mới thử bằng phút tuyến tính; chưa có định nghĩa nghỉ trưa, qua đêm, holiday, ATC/afterhours hay provider lag. Cần clock=TRADING_ACTIVE_MINS hoặc WALL_CLOCK được version và test; không để zone tự expire trong lunch theo giả định không được duyệt. Step03 pre-screen + Step04 Exit Protection + bounded Step05 escalation phải có attempt_id và exactly-once stage evidence để không nhân đôi alert/indicator updates.
+A05 / HIGH — CACHE PERSISTENCE/ATOMIC RELEASE: fingerprint/DAG mới là thiết kế; không có source of truth cho persisted store, object schema/limits/quota/CAS transaction, replay after restart, source-retry or historical rollback. Cache hit không được thay chứng cứ thị trường mới; source full-day fetch có thể vẫn tốn network. Cần chọn durable backend, model concurrent scan/staging/commit, metrics nguồn/latency/bytes và test rollback. Không tự động dùng Google Drive documents làm transactional DB hoặc reuse CK/FX caches.
+A06 / MEDIUM-HIGH — BENCHMARK & MICRO FEATURES: 20 prior comparable intraday sessions cho RVOL_TOD chưa được chứng minh đủ với SSI MCP intraday rỗng ở ngày cũ; sector index OHLCV historical và VWAP matched value semantics chưa được kiểm. D1 raw/adjusted mismatch có thể làm ATR distance đến vùng B/S sai. GĐ4 feature provider interface phải biết AVAILABLE/UNVERIFIED/MISSING và fail closed cho dependency mandatory; không dùng avg_price như VWAP exact.
+Thêm nguyên tắc audit: giá quote/latest sau phiên không chứng minh độ trễ streaming thật; metrics source_as_of != last_bar_closed_time; request activity không đồng nghĩa luôn theo dõi mã trong background.
+
+
+7. TÁM BLOCKER NGUỒN B01–B08: CHƯA ĐƯỢC ĐÓNG
+
+
+B01 D1_OPEN_MISMATCH SHS 04/11: 12.400 D1 vs 12.300 M1 first open.
+B02 D1_OPEN_MISMATCH VGI 04/11: 75.000 D1 vs 74.500 M1 first open.
+B03 VNINDEX_VOLUME_MISMATCH: volume D1 785.061.515 vs sum M1 785.061.420, chênh 95.
+B04 HNX SHS 6/240 phút không có record và VGI UPCoM 127/270; phải phân biệt no-trade vs source gap, không tạo fake closed candle.
+B05 Native M5/M15/M30/H1 comparison chưa thực hiện; ATO/ATC, HNX PLO, UPCoM afterhours và H1 session-partial chưa xác minh.
+B06 SSI MCP historical intraday nhiều ngày trước đầu 10/2026 trả rỗng, không đủ M5/M15 long backtest; SSI FastConnect V3 permission, streaming, latency/rate limit chưa thử trực tiếp.
+B07 Sector historical OHLCV benchmark, corporate-action adjustment semantics và exact matched_value cho VWAP/AVWAP thiếu.
+B08 Price-basis reconciliation D1 adjusted vs M1 raw/unknown chưa có, cấm liên kết không đúng để phát mức hỗ trợ/entry/breakout.
+Không tự gỡ hoặc waive blocker. Một blocker chỉ được chuyển RESOLVED khi có bằng chứng thực nghiệm, ngày kiểm, source/revision và test PASS; WAIVER cần user approval và ghi ảnh hưởng rõ, không xem waiver là source verified.
+
+
+8. GO/NO-GO MATRIX THEO NĂNG LỰC
+
+
+GO — Viết Python project skeleton, schema/validators per source, market calendar/session adapters, test fixtures, 5-layer cache interfaces, source/quality gate, 8-stage manifest, 16-detector registry stubs, error/snapshot/report DTO. Bắt đầu offline, không phát live signals.
+GO WITH WARN — Đọc mẫu D1 và 1m gần đây để phát triển unit/integration tests với flags và dữ liệu synthetic; test cache full-vs-incremental/revision/split; cold/warm costs chỉ khi đo được.
+CONDITIONAL — M15/M5 adaptive event logic chỉ dùng trong chế độ thử nghiệm, bắt buộc provisional/closed rules, source-quality check, no lookahead, no auto background monitoring. RVOL/VWAP features phải có UNVERIFIED path nếu nguồn thiếu.
+NO-GO — Gọi hệ thống đã hoàn thiện hoặc có hiệu quả giao dịch; trade signals CONFIRMED dựa dữ liệu còn B01–B08 critical; chạy full long intraday backtest như đã có dữ liệu; giấy chứng nhận live streaming/API quota native; publish FULL_ANALYSIS khi gate chưa đủ; tự đổi UI/đặt lệnh.
+Khi đánh giá một mã, chỉ release eligible outputs nếu chính xác dependencies của rule/strategy đã qua kiểm chứng; hệ thống vẫn có thể đưa báo cáo lỗi/incomplete khi chưa đủ dữ liệu.
+
+
+9. BACKLOG GĐ4 — TRIỂN KHAI LÕI PYTHON THEO ĐỘ ƯU TIÊN
+
+
+P0.1 Khởi tạo package độc lập SwingTrading1.8; rule/parameter registry versioned, config rõ, không sửa CK2/FX2/Scanner; đóng test fixtures từ B1–B4 và audit gate v0.1. Chưa tự quyết định triển khai trên MOCHI hoặc Drive cache production nếu chưa xác minh nơi lưu.
+P0.2 Provider adapter SSI MCP read-only, typed DataProvenance, endpoint-specific timezone/date parsers, Decimal/tick, empty/errors, pagination & 250/400 D1 history warmup gates, raw vs adjusted basis.
+P0.3 Exchange calendar/event normalizer HOSE/HNX/UPCOM/INDEX: lunch, holidays, auction/afterhours, source-minute semantics, special rows và source quality; M1→M5/M15/M30/H1, D1→W1 có flags.
+P0.4 QA parity suite: 132 W1/16 combinations fixtures, O/H/L/C/V discrepancies (SHS/VGI/index), sparse minutes, partial session, revisions/late data, native parity when available.
+P0.5 Data quality and release gate: L1 source statuses, per-rule critical dependency map, 16 IDs unique, 8 steps, 8 audit subjects/strategy, NO_POSITION_CHECKED, no-signal, Error/Incomplete, UI_VERSION UI-1.0 hash. Port 15 new synthetic release gate cases to Python.
+P1.1 Persisted snapshot/cache architecture L1–L5 with immutable raw source, content hash, DAG granular, affected-window recomputation; choose backing store with transaction/CAS and restore/retry tests, no false claim source delta API.
+P1.2 Incremental indicators EMA/ATR/RSI/MACD/ADX/OBV + source provenance, rolling/warmup; full==incremental append/revise/delete/split; source offline fallback.
+P1.3 L3 causal pivots/market structures and L4 zone B1–B8/S1–S8 evaluation, conflicts, 2 independent strategies and Exit Protection; paired positive/negative/boundary fixtures and no-lookahead.
+P1.4 M15 baseline/M5 ARMED state machine with clock/calendar-aware expiry, cooldown, protection override, bounded reentry; feature eligibility RVOL/VWAP/sector; staged report publication and exact once semantics.
+P2.1 UI-1.0 ReportRenderer IMPLEMENT ONLY from approved A–I template, snapshot/golden tests, fixed Vietnamese legend B1..B8/S1..S8, 8-step checklist before audit and error/no-signal states.
+P2.2 Bench source/performance (cold vs warm scan, API calls/bytes, latency, 5-min repeat), validate historical depth and return to data blockers before comprehensive GĐ6 backtest.
+P2.3 GĐ5 end-to-end audit strict failure/recovery; GĐ6 backtest A/B/C with walk-forward/OOS, realistic risk, costs/taxes/T+2; GĐ7 paper acceptance only after evidence.
+Every task above must have an executable test/evidence artifact; declarations in documents alone are not PASS.
+
+
+10. KIỂM THỬ TỐI THIỂU CẦN CÓ TRƯỚC GĐ4 ACCEPTANCE
+
+
+T-A Source and Calendar: dd/MM vs MM/dd ambiguities, source 'ok' empty, missing/out of order/duplicate, weekend/holiday/half-day, auction rows, 1m no trade, price basis.
+T-B TF parity: full batch vs append vs corrections for all 6 signal TF, special event treatment and native candle comparisons where possible; check W1 partial current week and early-range partial.
+T-C Cache correctness: 5-minute recall, full-day fetch with client-side delta honesty, 5-layer dependency checks including index/sector/stock updates, state restart, source revisions, split, dirty tail, cache corruption and rollback.
+T-D Market features: 250/400 D1 warmup by indicator, RVOL_TOD 20 prior comparable session slots, VWAP exact matched value eligibility and no silent proxies.
+T-E B/S and Strategy: B1–B8/S1–S8 tests positive/negative/edge, early vs confirmed, conflict ordering, SHORT/SWING separation, T+2/price limits/fee risk, no lookahead.
+T-F Strict release: 8/8 pipeline + 16 IDs with dependency quality, audit 8 per relevant candidate, Step04 no position checked, 15 gate POC scenarios, stage08 atomic commit, error layout, UI-1.0 golden hash and no-signal.
+T-G Performance: cold vs warm for a single symbol and bulk, measurable fetched bytes/requests/recomputed nodes, cache hit rate recorded rather than guessed, source failure paths.
+Do not claim these are executed: only document coverage checks 10/10 and 15 synthetic gate checks were run in this B5 audit.
+
+
+11. TRẠNG THÁI GĐ3 / ĐỀ XUẤT ĐIỀU KIỆN CHUYỂN GĐ4
+
+
+GĐ3/B1: SSI MCP sampled source verification — PARTIAL, source blockers remain.
+GĐ3/B2: 6 TF W1/D1/H1/M30/M15/M5 construction — INTERNAL PARITY POC PASS, DATA PARITY PARTIAL.
+GĐ3/B3: Typed Data Contract and 5-layer cache architecture — DESIGN DOCUMENTED; indicators POC 4/4 and logical DAG 11/11 PASS; persistence/runtime NOT DONE.
+GĐ3/B4: M15 baseline/M5 ARMED policy — DESIGN DOCUMENTED + synthetic 40/40 PASS; real market replay/production NOT DONE.
+GĐ3/B5: ARCHITECTURE AUDIT PERFORMED; DESIGN REVIEW CONDITIONAL PASS. 10/10 documented checkpoints, release-gate model 15/15 synthetic tests. Data source overall PARTIAL, runtime 0/5 documented conditions met.
+GĐ3 overall: DESIGN PHASE REVIEW COMPLETE WITH CONDITIONS; DATA AND ENGINE PRODUCTION ACCEPTANCE NOT COMPLETE, B01–B08 remain open. No claim live/backtest readiness.
+NEXT ACTION when user says 'Làm tiếp': enter GĐ4/P0 implementation backlog in controlled mode. First deliverable: Python core skeleton + typed data contracts/SSI read-only adapters + data-quality validators/fixtures + strict release gate; write executable tests and report real PASS/FAIL. Before selecting persistent store and writing to a remote Mac, confirm destination/access when needed; do not improvise another system's cache, and do not change locked UI. Continue parallel source blocker verification without claiming automatic live updates.
+When user says 'Cập nhật Handoff': append this report as new section to the EXACT existing 00_MASTER_HANDOFF in Drive, keep detail and old changelogs, update NEXT to GĐ4/P0, preserve MASTER_SPEC/UI unless user explicitly requests their edit.
+
+
+12. CÔNG VIỆC ĐÃ/CẤM THỰC HIỆN
+
+
+ĐÃ LÀM: đọc/đối chiếu 7 documents, 10 documented-scope checks, 5 runtime condition reviews, 15 new release-gate synthetic scenarios and classify release readiness; phát hiện lỗ hổng B4 gate fixture và requirement mismatch D1 249 vs >=250; ghi A01–A06 and B01–B08.
+CHƯA LÀM: không có mã Python core sản phẩm, không chạy 16 B/S detectors thực sự, không đặt lệnh, không backtest lịch sử dài, không lưu stateful cache hoặc thực hiện schedule tự động. Giao diện UI-1.0, MASTER_SPEC, MASTER_HANDOFF, CK2/FX2/Scanner và nguồn SSI không được sửa.
+Cách đọc kết quả: PASS của logic mô phỏng là kiểm tra thiết kế, KHÔNG phải tuyên bố hệ thống đã hoạt động, đã đủ dữ liệu hoặc đã được đo hiệu suất.
+
+
+13. DANH SÁCH TÀI LIỆU CĂN CỨ
+
+
+Thư mục: https://drive.google.com/drive/folders/1s2IHW-hUngcQ49YLIG-iuB0js5y5s2GX
+00_MASTER_HANDOFF: https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit?usp=drivesdk
+01_MASTER_SPEC_v1.0_DRAFT: https://docs.google.com/document/d/1-b74XetjzJVLB3nIpB1tReQTAq828Bpp3GmNOBFU9fY/edit?usp=drivesdk
+02_REPORT_UI_v1.0_APPROVED_LOCKED: https://docs.google.com/document/d/1BG29hocmOOGHkosJ_WU-m4An1-OBzfnlf1t1mtGKbuk/edit?usp=drivesdk
+03_GD3_SSI_DATA_SOURCE_AUDIT_v0.1: https://docs.google.com/document/d/1qkFBGwxD6gJxt-_OH8slZee7NscZ478uktZVbUI1dRU/edit?usp=drivesdk
+04_GD3_TIMEFRAME_AGGREGATION_PARITY_v0.1: https://docs.google.com/document/d/1HYysZY3tqOEXz2kiQWQL1-OTx89Vbc5LkcBv-SvVyQw/edit?usp=drivesdk
+05_GD3_DATA_CONTRACT_SMART_CACHE_ARCH_v0.1: https://docs.google.com/document/d/1ognZgcBfnPd6C1u0FyTYWSq9r-2YC9kZUV4sHWfiA_Y/edit?usp=drivesdk
+06_GD3_EARLY_DETECTION_M15_M5_ARMED_v0.1: https://docs.google.com/document/d/1aAQnS07zfsal9J-B0ZGDzWiiJpohWEbh9rfWQ_d3gOE/edit?usp=drivesdk
+Báo cáo 07 này là minh chứng audit B5 độc lập và không thay thế canonical MASTER_SPEC/MASTER_HANDOFF.

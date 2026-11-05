@@ -28,3 +28,8 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 3. Resolve SSI B01–B08 and rights to historical data.
 4. Review and implement the first executable rule, then a cost/fill/settlement-aware simulator and qualified real historical backtest.
 5. Backup code and versioned documents to MOCHI only when online; do not treat this as prerequisite for tasks 1–4.
+
+## GĐ4/P0.1 increment — 2026-11-06
+
+- [Versioned session-boundary contracts](P0_1_SESSION_BOUNDARIES.md) implemented with synthetic negative tests for lunch-gap isolation, auctions, version mismatches and explicit timestamp semantics.
+- Official market calendars, SSI source timestamp semantics, B01–B08 and three-axis quality remain UNVERIFIED. This is **structural validation only**, not an actionable trading gate or a real historical backtest.

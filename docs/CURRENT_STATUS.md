@@ -1,31 +1,33 @@
 # CURRENT_STATUS — 2026-11-06
 
-## Canonical source and implementation boundary
+## Canonical decisions and boundaries
 
-- Original Google Drive documents remain **canonical** for project design. See 00 §27.18, 01 §24/§24.14, 05 §2/§18, 06 §14–16, UI 02, and QA 09 §14.
-- GitHub is authoritative for executable Python source / CI; `docs/source-snapshots` is a fixed text snapshot, **not** auto-synchronized.
-- MOCHI is **OFFLINE / DEFERRED**; design requires **MOCHI-INDEPENDENT** core and future plugin operations.
-- Google Colab only on-demand engineering execution; not operational cache or live trading runtime.
+- Google Drive's original Master Handoff §27.20 is the **latest decision**; §27.19 is implementation history. Original Drive specs remain canonical for design; `docs/source-snapshots` is a point-in-time text export, not automatic synchronization.
+- GitHub `ngluonghoa/swing-trading-1-8` is authoritative for executable Python source and GitHub Actions CI.
+- **Python-first:** Use ChatGPT's Python environment for on-demand computation, exploratory backtest/test fixtures when input data is accessible, and GitHub Actions for reproducible automated code testing. ChatGPT Python has no direct network access and is ephemeral, so neither Python sessions nor CI constitute continuous plugin hosting.
+- **Colab is OPTIONAL / ON HOLD:** A notebook and guide are kept as spare utilities only. No Colab plugin connection, runtime, account authorization, token, step in mandatory workflow, CI gate or actual Colab test has been completed or is required.
+- **MOCHI OFFLINE / DEFERRED:** optional local clone and backup later. Core/plugin architecture must be MOCHI-independent.
+- Future always-on or scheduled plugin runtime with persistent storage is not yet selected/deployed; it must be approved independently.
 
-## What this code implements
+## Implemented in code (not trading validated)
 
-- P0.0: typed **partial** v1.2 market bar / provider observation / revision contracts; basic quality validation.
-- Revision `first_known_time_utc` checks and fail-closed, typed, deterministic replay fixture.
-- Unimplemented 16 B/S zones return UNVERIFIED, never a confirmed trading decision.
-- Synthetic tests in GitHub Actions on Python 3.11/3.12; a private Colab smoke notebook is present but has **NOT** been executed in Colab.
-- No broker API, no real historical backtest, no detector numerical thresholds, no source feed nor trade simulator.
+- GĐ4/P0.0 partial v1.2 typed market-bar/provider-observation/revision contracts with basic input validation and quality guards.
+- First-known-time deterministic synthetic replay; fail-closed handling for not-yet-implemented 16 B/S zones.
+- Python 3.11/3.12 GitHub Actions engineering unit tests. Optional Colab notebook syntax checking is **outside** the default CI test discovery.
+- No executable detector, no SSI integration, no licensed historical backtest, no broker order interface or fill simulator.
 
-## NOT_IMPLEMENTED / OPEN
+## Still OPEN / BLOCKED
 
-SSI B01–B08 source parity and entitlement, executable predicates and P01–P17 calibration, real exchange calendar, time semantics and session policy, quality gates / source corrections, full L1–L5 Smart Cache, eight-step engine + UI binding/renderer, valid cost/slippage/tax/settlement simulation, BT-01..BT-16 acceptance and OOS/walk-forward, persistent runtime, monitoring/SLO and recovery.
+SSI B01–B08 source parity and entitlement, P01–P17 calibration and executable rule predicates, exchange calendar/session and time semantics, full source correction/quality gates, L1–L5 Smart Cache, eight-step engine and locked UI renderer/golden tests, fill/fees/slippage/settlement model, BT-01..BT-16 acceptance, OOS/walk-forward, persistent cloud runtime, monitoring and release/rollback.
 
-**CI PASS means engineering foundation tests only. Historical and release readiness are NOT_RUN / BLOCKED.** Do not use synthetic fixtures as claims of signal profitability.
+**CI PASS = engineering fixture tests only, NOT historical validation or production readiness.**
 
-## Next steps
+## Required next engineering actions
 
-1. Review this branch and CI result, then merge when green.
-2. Reconcile full 05 §2 contracts and build versioned calendar/session fixtures; implement exact minimum eligibility gates.
-3. Expand negative and deterministic replay tests including corrections/dedup and M15/M5.
-4. Validate source B01–B08 / rights before any SSI-backed backtest.
-5. Approve one executable detector and simulator before first historical backtest.
-6. When MOCHI later comes online, clone repository and configure safe sync + Drive document backup, no impact to runtime.
+1. Reconcile full 05 §2 source contracts and versioned calendar/session/quality gates.
+2. Expand deterministic correction/dedup/M15/M5 negative tests, ensure replay has no lookahead.
+3. Verify SSI B01–B08, history rights/coverage and correct timestamps.
+4. Implement first approved executable detector with unit evidence and simulation including costs/fills/settlement before real backtest.
+5. When the user later turns MOCHI on, clone and set up controlled Git sync and versioned Drive backup. This is deferred, not a requirement for items 1–4.
+
+Colab has **no required next action**. Existing optional guide: [COLAB_QUICKSTART](COLAB_QUICKSTART.md).

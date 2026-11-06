@@ -121,6 +121,7 @@ def migrate_batch(
 
     identities = [_legacy_id(r) for r in envelopes]
     duplicate_counts = Counter(k for k in identities if k is not None)
+    reference_counts = Counter(r.row_reference for r in envelopes)
     migrated: list[CanonicalCandleV12] = []
     quarantined: list[QuarantinedRow] = []
     registry = QualityFindingRegistry()
@@ -130,7 +131,9 @@ def migrate_batch(
         code: str | None = None
         if not _filled(row.row_reference):
             raise ValueError("Every input must have a nonempty row_reference")
-        if not isinstance(c, LegacyCandle):
+        if reference_counts[row.row_reference] > 1:
+            code = "DUPLICATE_ROW_REFERENCE"
+        elif not isinstance(c, LegacyCandle):
             code = "INVALID_LEGACY_RECORD"
         elif identity is not None and duplicate_counts[identity] > 1:
             code = "DUPLICATE_OBSERVATION_REVISION"

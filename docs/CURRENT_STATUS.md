@@ -2,6 +2,8 @@
 
 ## Latest decisions
 
+- **P0.23 implementation branch (CI pending):** executed real read-only SSI/DNSE probes for SHS (SSI detailed daily 2 rows, SSI alternative intraday 215 ticks, SSI full paginated endpoint DOWNSTREAM_UNAVAILABLE, DNSE price history 248 DAY rows); direct response was **NOT** persisted as market data. New in-memory `source_capability_evidence.py` emits provider/endpoint/status/row count only with all rights/first-known/price basis/M1-M5-M15/backtest flags hard closed. [P0.23 source evidence](P0_23_LIVE_SOURCE_CAPABILITY_EVIDENCE.md). Canonical Handoff still §27.46 until source merge and §27.47 sync.
+
 - **P0.22 merged on main (PR #55; final source branch CI 448/448 PASS each Python 3.11/3.12):** P0.21 signed offline archive verifier rejects WAL-mode header independently of sidecar presence; fixture-only one-shot host conformance harness reuses P0.16 SSI-first/DNSE-fallback D1 reference router with exact allowlisted arguments, canonical bounded static responses and credential-key denial. No hosted runtime/data licence. [P0.22 spec](P0_22_WAL_HOST_FIXTURE_CONTRACT.md). Canonical Google Drive Handoff now §27.46; GitHub full-text snapshot synchronized in docs PR, exact main check required.
 
 - **P0.21 merged main (PR #53; final branch CI 434/434 PASS each Python 3.11/3.12):** opt-in Ed25519 signed offline P0.18 metadata archive verifier reads bytes using pinned POSIX FDs, checks SHA256 and SQLite integrity in isolated `:memory:` database, and rejects sidecars, quote-bearing cache, unsafe file modes and unsigned/tampered manifests. Does **not** make live path-based SQLite code safe for production. [P0.21 design](P0_21_OFFLINE_SIGNED_METADATA_ARCHIVE.md). Canonical Google Drive Handoff now §27.45; GitHub full-text point-in-time snapshot synchronized in documentation PR, final comparison on main required.
@@ -272,3 +274,8 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 - Explicit SQLite header rollback-mode (0x01 0x01) gate for P0.21 **offline** signed metadata backup: reject WAL-mode (0x02 0x02) even if sidecars absent and separately signed.
 - New fixture-only SSI/DNSE MCP conformance harness with one-shot, exact SSI/DNSE D1 endpoint arguments, no live callables/credentials, max 128 KiB canonical JSON, D1-only/no current-day substitution and reference-only receipts. Not an authenticated real MCP runtime.
 - Live SQLite writer/reader still path-based, actual SSI B01–B08 and native historical M1/M5/M15 rights/coverage, B5/BT/OOS and trusted host/custodian remain OPEN.
+
+## GĐ4/P0.23 real-source diagnostic and source gate — 2026-11-06 (branch CI pending)
+
+- Evidence: `marketdata_list_daily_stock_infor` SHS 13/10/2026 returned 2 daily rows including prior session; `marketdata_list_intraday_stock_infor` same date returned 215 timestamp-labeled rows (not proven M1/M5/M15 complete); `marketdata_list_stock_infor` DOWNSTREAM_UNAVAILABLE on one attempt; DNSE `price_get_history` returned 248 **DAY** rows. Retrieved via connected MCP tools in chat, raw OHLCV NOT persisted to GitHub, Drive or Mac.
+- Safety: source timestamps & adjustment semantics unresolved, explicit licence/retention not verified, SSI full pagination and native M1/M5/M15 coverage unproven. Synthetic code tests must pass; live data access does not elevate any signal, BT/OOS or production host.

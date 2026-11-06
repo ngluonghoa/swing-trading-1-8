@@ -79,3 +79,5 @@ GĐ4/P0.12 introduces [read-only SSI intraday/daily matched-volume reconciliatio
 
 
 P0.12 [PR #35](https://github.com/ngluonghoa/swing-trading-1-8/pull/35) merged with [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42192360436) **263/263 PASS** synthetic tests on Python 3.11 and 3.12. Canonical Handoff is now §27.36. The three-date SHS volume parity is read-only source observation, *not* source entitlement or complete native M1/20-session coverage; SSI date-layout ambiguity and full/paged endpoint failure remain OPEN.
+
+GĐ4/P0.13 adds [cross-venue SSI parity review and a 24-cell B5 calibration grid draft](docs/P0_13_SSI_MULTIVENUE_B5_GRID.md). Seven new read-only historical symbol-date samples (SSI/DIG on HOSE, VGI on UPCOM, SHS on HNX) bring the observed summary to **10/10 matched intraday-vs-daily volume samples** across three venues. These are same-provider diagnostics, not independent session coverage. SHORT and SWING × both B5 E variants × six axes have **no numeric candidate values or approval**, and cannot emit signals or run a historical backtest.

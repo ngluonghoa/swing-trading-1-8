@@ -174,4 +174,8 @@ class DatasetManifestV12:
                 and not self.gaps_by_session
                 and self.raw_adjusted_consistency is AdjustmentConsistency.VERIFIED
                 and self.price_basis is not PriceBasis.UNKNOWN
-                and not any(f.is_open_block for f in self.quality_findings))
+                and bool(self.provenance_chain)
+                # An approval label alone is not externally verified here.
+                # Require a separate release/waiver gate for historical BLOCKs.
+                and not any(f.severity is FindingSeverity.BLOCK
+                            for f in self.quality_findings))

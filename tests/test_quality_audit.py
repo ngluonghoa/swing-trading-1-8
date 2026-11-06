@@ -111,6 +111,17 @@ class QualityAuditTests(unittest.TestCase):
         self.assertTrue(replace(m, quality_findings=(warning,))
                         .structural_prerequisites(at(120)))
 
+    def test_waiver_label_cannot_alone_override_blocking_finding(self):
+        # The registry keeps resolution history, but an external approval
+        # verification gate is not implemented in P0.3.
+        waived = finding(
+            resolution_status=ResolutionStatus.WAIVED_WITH_APPROVAL,
+            resolution_reference="fixture-only-approval",
+        )
+        m = manifest(quality_findings=(waived,))
+        self.assertFalse(m.structural_prerequisites(at(120)))
+        self.assertFalse(manifest(provenance_chain=()).structural_prerequisites(at(120)))
+
     def test_dataset_bad_digest_dates_or_type_rejected(self):
         with self.assertRaises(ValueError):
             manifest(snapshot_digest_sha256="bad")

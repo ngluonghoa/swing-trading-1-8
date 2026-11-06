@@ -238,7 +238,40 @@ def verify_pinned_rights_event_chain(
     if (pin.pinned_at_utc > checked_at_utc
             or checked_at_utc - pin.pinned_at_utc > _MAX_PIN_AGE):
         raise RightsChainRejected("Claimed head is stale or from the future")
-    if len(events) != pin.expected_sequence:
+
+    def pinned_key(event):
+        if event.key_id != pin.key_id:
+            raise RightsChainRejected("Mixed product or unpinned signing key")
+        return pin.public_key_raw
+
+    return _verify_rights_prefix(
+        events, product=pin.product, reporting_key_id=pin.key_id,
+        expected_sequence=pin.expected_sequence,
+        expected_tail_sha256=pin.expected_tail_sha256,
+        pinned_at_utc=pin.pinned_at_utc, checked_at_utc=checked_at_utc,
+        public_key_for_event=pinned_key,
+    )
+
+
+def _verify_rights_prefix(
+    events, *, product, reporting_key_id, expected_sequence,
+    expected_tail_sha256, pinned_at_utc, checked_at_utc, public_key_for_event,
+):
+    """Shared P0.28/P0.29 integrity rules; resolver never grants permission.
+
+    P0.28 supplies a single claimed key. P0.29 checks a root-countersigned
+    rotation schedule before selecting each event key. Keeping one loop
+    preserves identical link/time/replay/expiry/sticky-hold semantics.
+    """
+    if not isinstance(events, tuple) or any(
+        type(e) is not SignedRightsEvent for e in events
+    ):
+        raise TypeError("Exact immutable signed event tuple required")
+    _iso(checked_at_utc)
+    _iso(pinned_at_utc)
+    if not 1 <= len(events) <= _MAX_EVENTS:
+        raise RightsChainRejected("Nonempty bounded event history required")
+    if len(events) != expected_sequence:
         raise RightsChainRejected("Pinned sequence differs from supplied history")
 
     try:
@@ -246,7 +279,7 @@ def verify_pinned_rights_event_chain(
         from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
     except ImportError as exc:
         raise RuntimeError("Install the [custody] extra for Ed25519 verification") from exc
-    public_key = Ed25519PublicKey.from_public_bytes(pin.public_key_raw)
+    public_keys = {}
     previous = _GENESIS
     last_published = None
     ids = set()
@@ -255,11 +288,11 @@ def verify_pinned_rights_event_chain(
     is_held = False
 
     for index, event in enumerate(events, start=1):
-        if event.product is not pin.product or event.key_id != pin.key_id:
+        if event.product is not product:
             raise RightsChainRejected("Mixed product or unpinned signing key")
         if event.sequence != index or event.previous_sha256 != previous:
             raise RightsChainRejected("Gap, reordering or previous-link mismatch")
-        if event.published_at_utc > pin.pinned_at_utc:
+        if event.published_at_utc > pinned_at_utc:
             raise RightsChainRejected("Signed event published after the pinned head")
         if event.published_at_utc > checked_at_utc or (
             last_published is not None
@@ -270,8 +303,13 @@ def verify_pinned_rights_event_chain(
             raise RightsChainRejected("Duplicate signed event ID or nonce")
         ids.add(event.event_id)
         nonces.add(event.nonce_hex)
+        raw_key = public_key_for_event(event)
+        if type(raw_key) is not bytes or len(raw_key) != 32:
+            raise RightsChainRejected("Resolved Ed25519 key must be 32 bytes")
+        if raw_key not in public_keys:
+            public_keys[raw_key] = Ed25519PublicKey.from_public_bytes(raw_key)
         try:
-            public_key.verify(_sig(event.signature_base64), event.signing_bytes())
+            public_keys[raw_key].verify(_sig(event.signature_base64), event.signing_bytes())
         except (InvalidSignature, ValueError) as exc:
             raise RightsChainRejected("Ed25519 signature verification failed") from exc
         if event.kind is EventKind.GRANT_CANDIDATE:
@@ -283,7 +321,7 @@ def verify_pinned_rights_event_chain(
         previous = event.chain_hash()
         last_published = event.published_at_utc
 
-    if previous != pin.expected_tail_sha256:
+    if previous != expected_tail_sha256:
         raise RightsChainRejected("Event-chain tip differs from separately supplied pin")
     if is_held:
         state = RightsChainState.SIGNED_HOLD_UNAUTHORIZED
@@ -292,7 +330,7 @@ def verify_pinned_rights_event_chain(
     else:
         state = RightsChainState.SIGNED_CANDIDATE_UNAUTHORIZED
     return RightsChainVerification(
-        pin.product, pin.key_id, len(events), previous,
+        product, reporting_key_id, len(events), previous,
         tuple(event.event_id for event in events), state,
     )
 

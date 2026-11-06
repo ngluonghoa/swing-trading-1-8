@@ -1,6 +1,10 @@
-# CURRENT_STATUS — 2026-11-06
+# CURRENT_STATUS — 2026-11-07
 
 ## Latest decisions
+
+- **P0.29 implemented on the source branch; remote CI/merge pending:** [custodied-head contract](P0_29_CUSTODIED_HEAD_FRESHNESS_ROLLBACK.md) adds a claimed root/provenance anchor, role-separated root/old/new signatures for ledger-key rotation, challenge/floor-bound signed head, preserved event/registry prefixes and immutable next-floor CAS proposal. Fixed <=60s challenge/head lifetime; no I/O or custody-store implementation. 78 new synthetic unit/security tests, full local suite 667 PASS on Python 3.12 with the declared custody extra. All real provider ownership/independent custody/current revocation/durable rollback/read-cache/backtest/production/action permissions remain False. [ADR-0003](ADR_0003_EXTERNAL_RIGHTS_CUSTODIAN.md): actual host/custodian NOT_SELECTED; external evidence review is next, no automatic enrolment. Canonical Handoff remains §27.52 until source merge and exact full-text refresh.
+
+- **Intake reconciliation:** full Drive §27.52 matched GitHub main `0e9d1e97ea0bf3e652af6c9eb8d4fcbe6df48892` exactly (315,861 characters). PR #68 merged and no open PR at intake. [Main post-merge CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42258673786) independently checked SUCCESS on both Python 3.11 and 3.12; older pending-main-CI notes below are historical. Baseline 589 tests passed locally.
 
 - **P0.28 merged on main (PR #67; final branch CI 589/589 PASS each Python 3.11/3.12):** pinned Ed25519 source-rights event prefix verifier (`provider_signed_event_chain.py`) checks canonical signed claim/hold events, exact externally supplied key/fingerprint/head sequence/tip, chain links, replay IDs/nonces, expiry and sticky revocation. Cryptographic proof is CONDITIONAL on unverified key/head input; no independent vendor signer or live stream, no actual source access/retention/backtest/trading. [P0.28 design](P0_28_PINNED_RIGHTS_EVENT_CHAIN.md). Canonical Google Drive Handoff now §27.52; GitHub source snapshot refreshed on docs branch, exact main comparison pending.
 

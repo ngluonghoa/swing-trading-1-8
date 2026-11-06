@@ -26,7 +26,7 @@ A set of generic `verified=True` flags is insufficient. P0.7 therefore provides 
 
 - `b5_phase_contract.py` defines typed `B5Ingredient`, `B5PhaseReceipt`, `B5PhaseManifestAssessment` and `inspect_b5_phase_receipts()`.
 - Input must first satisfy the existing B5 `EXTRACTED_UNCALIBRATED` base; missing or conflicting bars remain blocked.
-- Every receipt binds the **same pivot event ID**, instrument, price basis and calendar version; bar receipts additionally require unique source-qualified v1.2 snapshots, approved-fixture quality flags, explicit timeframe, source revision and as-of-causal availability.
+- Every receipt binds the **same pivot event ID**, instrument, exchange, price basis and calendar version; bar receipts additionally require unique source-qualified v1.2 snapshots, declared fixture quality flags, exact source event ID membership, explicit timeframe, source revision and as-of-causal availability.
 - Future-known receipts and revisions are rejected; prior ATR must already be known and verified before the retest begins; a claimed RF micro-high after retest cannot use an earlier/same retest bar.
 - Duplicate ingredient receipts are rejected, even if one appears plausible; no silent latest-revision/provider selection.
 - Missing items are `RECEIPTS_MISSING`, bad lineage is `RECEIPTS_UNVERIFIED`, and a full structurally present set is `PRESENT_UNCALIBRATED`.
@@ -35,7 +35,7 @@ A set of generic `verified=True` flags is insufficient. P0.7 therefore provides 
 
 ## Tests and acceptance boundary
 
-`tests/test_b5_phase_contract.py` provides synthetic positive/negative cases covering both strategies and both explicit E variants, missing/doubled receipts, future evidence, first-known vs verified-time, mismatched pivot/instrument/basis/calendar, source-revision conflicts, bad timeframe, premature micro-high, missing/nonpositive ATR, invalid policy/UTC/type and source conflicts.
+`tests/test_b5_phase_contract.py` provides synthetic positive/negative cases covering both strategies and both explicit E variants, missing/doubled receipts, future evidence, first-known vs verified-time, mismatched pivot/instrument/exchange/basis/calendar, event IDs absent from native source-bar event references, source-revision conflicts, bad timeframe, premature micro-high, missing/nonpositive ATR, invalid policy/UTC/type and source conflicts.
 
 **STOP:** This is a receipt inventory, not executable B5 market logic. P01–P17 calibration, rule predicates for R_C/R_E/R_F, historical source provenance/entitlements, true retest event chronology, native/derived TF parity and market trading calendar remain unverified. SSI B01–B08 all remain OPEN; BT-01..16 and OOS/walk-forward remain NOT_RUN.
 

@@ -115,3 +115,10 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 - [P0.8 PR #27](https://github.com/ngluonghoa/swing-trading-1-8/pull/27) merged `4e5f50844f96a0dc2bf05eb19c63c06fe1cab2f7` into main. [CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42178103421) **163/163 PASS** synthetic engineering tests each on Python 3.11 and 3.12.
 - Native Google Drive Master Handoff advanced to §27.32; GitHub full-text snapshot synchronized exactly as a point-in-time export.
 - No executable B5 predicate or approved risk/threshold; SSI B01–B08 remain OPEN and B06 read-only calls failed DOWNSTREAM_UNAVAILABLE; real historical BT/OOS remain NOT_RUN.
+
+## GĐ4/P0.9 causal ATR14 / RVOL_TF20 engineering — 2026-11-06
+
+- Added [P0.9 source-guarded indicator primitives](P0_9_CAUSAL_ATR_RVOL.md): `calculate_wilder_atr14()` with 15 D1 bar / 14 true-range warmup, Wilder smoothing and separate prior-knowledge cutoff; `calculate_rvol_tf20()` using 20 comparable closed, verified same-timeframe history bars excluding the target.
+- Each input snapshot must be a single causally visible v1.2 revision with complete coverage, verified quality, consistent instrument/provider/price-basis/calendar/aggregation/adjustment and explicit time knowledge. RVOL comparators require explicit matching session class and versioned comparison policy; no automatic provider selection or backfill.
+- All return values are **COMPUTED_UNCALIBRATED** or **BLOCKED**; no source-certified signal, approved threshold or actionable trading state. **RVOL_TOD is not implemented** without verified cumulative same-slot historic intraday and official schedule.
+- SSI B01–B08, independently licensed/complete source records, ATR14 provider parity, live sessions, real historical backtest/OOS and B5 executable predicates all remain OPEN/NOT_RUN. No other system/UI/MOCHI modifications.

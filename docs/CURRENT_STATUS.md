@@ -24,7 +24,7 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 ## Next actions
 
 1. Continue SSI B01–B08 source triage: independently verify endpoint date/clock semantics, provider data rights, source parity, historical coverage and official market schedules. See [P0.5 evidence](P0_5_SSI_SOURCE_TRIAGE.md).
-2. Add deterministic replay/dedup/correction and M15/M5 tests to verified fixtures.
+2. P0.6 deterministic replay/dedup/correction and synthetic M15/M5 tests are implemented (pending branch CI/merge); next validate approved real calendar/source semantics for M5/M15 and independently reconcile native/derived bars.
 3. Resolve SSI B01–B08 and rights to historical data.
 4. Review and implement the first executable rule, then a cost/fill/settlement-aware simulator and qualified real historical backtest.
 5. Backup code and versioned documents to MOCHI only when online; do not treat this as prerequisite for tasks 1–4.
@@ -76,3 +76,9 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 - Added [B5 retest-after-breakout causal feature extraction](B5_CAUSAL_FEATURE_PACK.md) using source-qualified v1.2 bar snapshots and replay as-of, with SHORT/SWING isolation, pivot event and source revision references, no-lookahead, price-basis and calendar guards.
 - Tested synthetic positive/negative/missing/conflict paths. Output is **EXTRACTED_UNCALIBRATED / UNVERIFIED**, with no executable R_C/R_E/R_F, no detector decision, trading action or actual backtest.
 - P01–P17 calibration, SSI B01–B08, approved source timestamps, native data lineage, first realistic fill/fees/settlement simulator and licensed multi-period history remain OPEN. UI v1.0, MOCHI, CK2/FX2/Scanner unchanged.
+
+## GĐ4/P0.6 increment — 2026-11-06
+
+- Added [deterministic M5/M15 as-known replay and exact retransmission guards](P0_6_M5_M15_REPLAY.md), including monotone UTC checkpoints, stable market-key ordering, explicit identical-duplicate counts and collision blocking. Source corrections remain invisible before their first-known time; divergent providers/revisions remain unresolved.
+- Added synthetic unit/negative tests for cross-timeframe M5/M15 snapshots, late verification, future corrections, same-identity divergent payloads, missing/unverified coverage, malformed inputs and no lookahead.
+- **Engineering-only:** does not aggregate M1 into M5/M15, validate SSI B01–B08 or market calendars, enable B5 executable predicates/thresholds, grant trades, execute historical backtests or certify performance. UI v1.0, MOCHI and other trading systems unchanged.

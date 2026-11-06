@@ -27,7 +27,7 @@ A set of generic `verified=True` flags is insufficient. P0.7 therefore provides 
 - `b5_phase_contract.py` defines typed `B5Ingredient`, `B5PhaseReceipt`, `B5PhaseManifestAssessment` and `inspect_b5_phase_receipts()`.
 - Input must first satisfy the existing B5 `EXTRACTED_UNCALIBRATED` base; missing or conflicting bars remain blocked.
 - Every receipt binds the **same pivot event ID**, instrument, exchange, price basis and calendar version; bar receipts additionally require unique source-qualified v1.2 snapshots, declared fixture quality flags, exact source event ID membership, explicit timeframe, source revision and as-of-causal availability.
-- Future-known receipts and revisions are rejected; prior ATR must already be known and verified before the retest begins; a claimed RF micro-high after retest cannot use an earlier/same retest bar.
+- Future-known receipts and revisions are rejected; prior ATR and the chosen retest-window policy must already be known before the retest begins (the ATR source bar must also have been verified); a claimed RF micro-high after retest cannot use an earlier/same retest bar.
 - Duplicate ingredient receipts are rejected, even if one appears plausible; no silent latest-revision/provider selection.
 - Missing items are `RECEIPTS_MISSING`, bad lineage is `RECEIPTS_UNVERIFIED`, and a full structurally present set is `PRESENT_UNCALIBRATED`.
 - **Every output has `parameter_status=PARAM_CANDIDATE_NOT_APPROVED`, `detector_approved=False`, `actionable=False`.** No `DETECTED`, `NOT_DETECTED`, signal confidence, Entry/SL/TP, P&L, order or historical backtest.

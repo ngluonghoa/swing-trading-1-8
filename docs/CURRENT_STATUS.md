@@ -24,7 +24,7 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 ## Next actions
 
 1. Continue SSI B01–B08 source triage: independently verify endpoint date/clock semantics, provider data rights, source parity, historical coverage and official market schedules. See [P0.5 evidence](P0_5_SSI_SOURCE_TRIAGE.md).
-2. P0.6 deterministic replay/dedup/correction and synthetic M15/M5 tests are implemented ; next validate approved real calendar/source semantics for M5/M15 and independently reconcile native/derived bars.
+2. P0.6 deterministic replay/dedup/correction and synthetic M15/M5 tests are implemented; next validate approved real calendar/source semantics for M5/M15 and independently reconcile native/derived bars.
 3. Resolve SSI B01–B08 and rights to historical data.
 4. Review and implement the first executable rule, then a cost/fill/settlement-aware simulator and qualified real historical backtest.
 5. Backup code and versioned documents to MOCHI only when online; do not treat this as prerequisite for tasks 1–4.
@@ -83,3 +83,9 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 - [P0.6 PR #22](https://github.com/ngluonghoa/swing-trading-1-8/pull/22) merged to main `9a1f367df67ebb1090dfb9d64ad5bdf954c8682d`; [main GitHub Actions run](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42172733020) PASS **128/128** synthetic engineering tests on each Python 3.11 and 3.12.
 - Added synthetic unit/negative tests for cross-timeframe M5/M15 snapshots, late verification, future corrections, same-identity divergent payloads, missing/unverified coverage, malformed inputs and no lookahead.
 - **Engineering-only:** does not aggregate M1 into M5/M15, validate SSI B01–B08 or market calendars, enable B5 executable predicates/thresholds, grant trades, execute historical backtests or certify performance. UI v1.0, MOCHI and other trading systems unchanged.
+
+## Handoff editorial reconciliation — 2026-11-06
+
+- Corrected the canonical Google Drive §27.30 read-first instructions, replaced the outdated PRE-CODE status with current GĐ4/P0.6 engineering scope, and removed an unintended foreign-language token from §27.29.
+- Marked earlier §27.28–§27.30 source-snapshot sync instructions as historically completed by PR #19/#21/#23, rather than active pending tasks. Historical engineering and data-quality claims are unchanged.
+- The full GitHub Handoff snapshot was re-exported from the native Google Doc and checked character-for-character on the editorial branch. No trading-core, SSI source, market-data, UI, runtime, MOCHI or backtest code changes.

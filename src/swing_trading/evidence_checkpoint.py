@@ -5,6 +5,7 @@ OUTSIDE the SQLite database and controlled by a separately approved custodian.
 These helpers do not sign checkpoints, grant SSI permissions, or authorize
 historical backtests/trading.
 """
+from contextlib import closing
 from dataclasses import dataclass
 from datetime import datetime
 from hashlib import sha256
@@ -101,7 +102,8 @@ def create_candidate_checkpoint(
     if not isinstance(store, EvidenceStore):
         raise TypeError("Expected evidence store")
     require_utc(created_at_utc)
-    if not _ID.fullmatch(checkpoint_id) or not _ID.fullmatch(store_id):
+    if (not isinstance(checkpoint_id, str) or not isinstance(store_id, str)
+            or not _ID.fullmatch(checkpoint_id) or not _ID.fullmatch(store_id)):
         raise ValueError("Explicit checkpoint and store identifiers required")
     path = Path(backup_destination)
     total, tip = backup_verified(store, path)
@@ -139,6 +141,8 @@ def restore_from_pinned(
         approved_checkpoint.record_count, approved_checkpoint.chain_tip_sha256
     ):
         raise EvidenceCorrupt("Restored chain differs from the pinned checkpoint")
+    if file_sha256(restored.path) != approved_checkpoint.backup_sha256:
+        raise EvidenceCorrupt("Restored file checksum differs from independently pinned copy")
     return restored
 
 
@@ -155,20 +159,26 @@ def verify_history_prefix(
         raise TypeError("Expected independently pinned checkpoint")
     if approved_checkpoint.store_id != expected_store_id:
         raise EvidenceCorrupt("Store identity mismatch")
-    size, tip = store.verify()
-    if size < approved_checkpoint.record_count:
-        raise EvidenceCorrupt("Current chain truncated below pinned record count")
-    if approved_checkpoint.record_count == 0:
-        old_tip = ZERO
-    else:
-        with store.connection() as conn:
-            row = conn.execute(
-                "SELECT chained FROM rows ORDER BY seq LIMIT 1 OFFSET ?",
-                (approved_checkpoint.record_count - 1,)
-            ).fetchone()
-            if row is None:
-                raise EvidenceCorrupt("Pinned row not found")
-            old_tip = row["chained"]
-    if old_tip != approved_checkpoint.chain_tip_sha256:
-        raise EvidenceCorrupt("Pinned historical chain prefix was rewritten")
-    return size, tip
+    # Check the full chain and pinned prefix IN ONE read snapshot. Separate
+    # connections would create a read/write TOCTOU gap.
+    with closing(store.connection()) as conn:
+        conn.execute("BEGIN")
+        try:
+            size, tip = store._verify_conn(conn)
+            if size < approved_checkpoint.record_count:
+                raise EvidenceCorrupt("Current chain truncated below pinned record count")
+            if approved_checkpoint.record_count == 0:
+                old_tip = ZERO
+            else:
+                row = conn.execute(
+                    "SELECT chained FROM rows ORDER BY seq LIMIT 1 OFFSET ?",
+                    (approved_checkpoint.record_count - 1,)
+                ).fetchone()
+                if row is None:
+                    raise EvidenceCorrupt("Pinned row not found")
+                old_tip = row["chained"]
+            if old_tip != approved_checkpoint.chain_tip_sha256:
+                raise EvidenceCorrupt("Pinned historical chain prefix was rewritten")
+            return size, tip
+        finally:
+            conn.execute("ROLLBACK")

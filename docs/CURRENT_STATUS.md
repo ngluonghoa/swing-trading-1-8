@@ -2,6 +2,8 @@
 
 ## Latest decisions
 
+- **P0.22 code branch / CI pending:** P0.21 signed offline archive verifier rejects WAL-mode header independently of sidecar presence; fixture-only one-shot host conformance harness reuses P0.16 SSI-first/DNSE-fallback D1 reference router with exact allowlisted arguments, canonical bounded static responses and credential-key denial. No hosted runtime/data licence. [P0.22 spec](P0_22_WAL_HOST_FIXTURE_CONTRACT.md). Canonical Handoff stays §27.45 pending merge and document sync.
+
 - **P0.21 merged main (PR #53; final branch CI 434/434 PASS each Python 3.11/3.12):** opt-in Ed25519 signed offline P0.18 metadata archive verifier reads bytes using pinned POSIX FDs, checks SHA256 and SQLite integrity in isolated `:memory:` database, and rejects sidecars, quote-bearing cache, unsafe file modes and unsigned/tampered manifests. Does **not** make live path-based SQLite code safe for production. [P0.21 design](P0_21_OFFLINE_SIGNED_METADATA_ARCHIVE.md). Canonical Google Drive Handoff now §27.45; GitHub full-text point-in-time snapshot synchronized in documentation PR, final comparison on main required.
 
 - **P0.20 merged main (PR #51, final branch CI 423/423 PASS per Python 3.11/3.12):** nofollow/read-only pinned SQLite FD inspection and detached Ed25519 verifier with externally supplied pinned public-key fingerprint, optional `cryptography` extra. This does NOT solve TOCTOU for separate SQLite path-based connections or deploy a signer/host. [P0.20 document](P0_20_PINNED_FD_ED25519_VERIFY.md). Google Drive Handoff now §27.44; GitHub point-in-time source snapshot synchronized on the documentation branch, pending main verification.
@@ -264,3 +266,9 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 
 - `reference_offline_verified_archive.py` and negative tests: Ed25519 detached trusted-signature gate, O_NOFOLLOW pinned FD + SHA256 fixed-size streaming, `sqlite3.deserialize` into read-only in-memory copy, verify P0.17 journal chain and zero cached quote rows. Explicitly OFFLINE METADATA ONLY; no source OHLCV copied or exposed.
 - Open gates: approved hosted SQLite/VFS + ACL/encryption, actual independent trust anchor and source entitlement, native historical SSI/DNSE M1/M5/M15 and B5/BT/OOS. UI and other modules unchanged.
+
+## GĐ4/P0.22 increment — 2026-11-06 (code branch CI pending)
+
+- Explicit SQLite header rollback-mode (0x01 0x01) gate for P0.21 **offline** signed metadata backup: reject WAL-mode (0x02 0x02) even if sidecars absent and separately signed.
+- New fixture-only SSI/DNSE MCP conformance harness with one-shot, exact SSI/DNSE D1 endpoint arguments, no live callables/credentials, max 128 KiB canonical JSON, D1-only/no current-day substitution and reference-only receipts. Not an authenticated real MCP runtime.
+- Live SQLite writer/reader still path-based, actual SSI B01–B08 and native historical M1/M5/M15 rights/coverage, B5/BT/OOS and trusted host/custodian remain OPEN.

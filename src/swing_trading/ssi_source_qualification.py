@@ -271,3 +271,75 @@ def cross_timeframe_price_basis(
     if daily_basis != minute_basis and not independently_verified_adjustment_mapping:
         return SourceGate.BLOCKED
     return SourceGate.OBSERVED_UNVERIFIED
+
+class MinuteSlotState(str, Enum):
+    COMPLETE_OBSERVED_UNVERIFIED = "COMPLETE_OBSERVED_UNVERIFIED"
+    MISSING_UNCLASSIFIED = "MISSING_UNCLASSIFIED"
+
+
+@dataclass(frozen=True)
+class SessionMinuteSlots:
+    """Missing records are never classified as no-trade without separate proof."""
+    instrument_id: str
+    trading_day: date
+    scheduled_slots: int
+    observed_slots: int
+    calendar_verified: bool
+
+    def __post_init__(self):
+        _text(self.instrument_id, "instrument_id")
+        _day(self.trading_day)
+        for name in ("scheduled_slots", "observed_slots"):
+            n = getattr(self, name)
+            if type(n) is not int or n < 0:
+                raise ValueError(name + " must be a nonnegative integer")
+        if self.scheduled_slots == 0 or self.observed_slots > self.scheduled_slots:
+            raise ValueError("Invalid number of scheduled/observed slots")
+        if type(self.calendar_verified) is not bool:
+            raise TypeError("Calendar verification must be explicit")
+
+    @property
+    def missing_slots(self) -> int:
+        return self.scheduled_slots - self.observed_slots
+
+    @property
+    def state(self) -> MinuteSlotState:
+        return (MinuteSlotState.COMPLETE_OBSERVED_UNVERIFIED
+                if self.missing_slots == 0 else MinuteSlotState.MISSING_UNCLASSIFIED)
+
+
+@dataclass(frozen=True)
+class DailyVsMinuteVolumeParity:
+    """An unexplained +95 mismatch blocks parity even when otherwise tiny."""
+    instrument_id: str
+    trading_day: date
+    daily_volume: int | None
+    minute_sum_volume: int | None
+    minute_pagination_complete: bool
+    aggregation_policy_verified: bool
+
+    def __post_init__(self):
+        _text(self.instrument_id, "instrument_id")
+        _day(self.trading_day)
+        for name in ("daily_volume", "minute_sum_volume"):
+            n = getattr(self, name)
+            if n is not None and (type(n) is not int or n < 0):
+                raise ValueError(name + " must be integer/nonnegative or unknown")
+        for name in ("minute_pagination_complete", "aggregation_policy_verified"):
+            if type(getattr(self, name)) is not bool:
+                raise TypeError(name + " must be explicit bool")
+
+    @property
+    def parity_state(self) -> ParityState:
+        if (self.daily_volume is None or self.minute_sum_volume is None
+                or not self.minute_pagination_complete):
+            return ParityState.MISSING_UNKNOWN
+        return (ParityState.MATCH_UNVERIFIED
+                if self.daily_volume == self.minute_sum_volume
+                else ParityState.MISMATCH_BLOCKED)
+
+    @property
+    def delta(self) -> int | None:
+        if self.parity_state is ParityState.MISSING_UNKNOWN:
+            return None
+        return self.daily_volume - self.minute_sum_volume

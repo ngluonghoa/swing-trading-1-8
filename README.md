@@ -58,3 +58,6 @@ P0.8 adds [B5 symbolic SHORT/SWING formulas and causal raw ATR-normalized geomet
 
 
 [P0.8 PR #27](https://github.com/ngluonghoa/swing-trading-1-8/pull/27) merged, [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42178103421) **163/163 PASS** per Python 3.11/3.12; canonical Handoff now §27.32. The formulas remain draft, thresholds unset and B5 nonactionable; SSI read-only B06 rechecks failed downstream availability and B01–B08 remain OPEN.
+
+
+GĐ4/P0.9 adds [causal Wilder ATR14 and RVOL_TF20 engineering primitives](docs/P0_9_CAUSAL_ATR_RVOL.md) on qualified v1.2 input snapshots. These are uncalibrated numerical outputs only, not live SSI validation, RVOL_TOD, trade predicates, broker calls or historical backtest results.

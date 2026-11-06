@@ -45,3 +45,5 @@ P0.4C adds [independently pinned backup checkpoints, history-prefix verification
 P0.5 adds [SSI MCP read-only source triage and fail-closed date/clock/parity contracts](docs/P0_5_SSI_SOURCE_TRIAGE.md); B01–B08 remain OPEN. No licensed replay-ready history, executable detector, historical backtest or deployment has been accepted.
 
 The [B5 causal feature pack](docs/B5_CAUSAL_FEATURE_PACK.md) prepares evidence for the first detector, but has **no executable B5 phase predicates, approved thresholds or actionable signals**. Shared domain features are not a historical backtest or a validated detector.
+
+P0.6 adds [deterministic M5/M15 as-known replay, exact retransmission deduplication and revision-collision guards](docs/P0_6_M5_M15_REPLAY.md). This is synthetic source-domain verification only, not native candle reconciliation or a first historical backtest.

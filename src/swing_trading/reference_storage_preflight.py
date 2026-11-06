@@ -27,9 +27,20 @@ class StoragePreflight:
     database: Path
     expected_uid: int
     issues: tuple[str, ...]
-    host_volume_approved: bool = False
-    provider_retention_approved: bool = False
-    production_authorized: bool = False
+
+    # Hard-coded closed gates: a caller cannot accidentally replace a report
+    # with approval=True, because no such constructor fields exist.
+    @property
+    def host_volume_approved(self) -> bool:
+        return False
+
+    @property
+    def provider_retention_approved(self) -> bool:
+        return False
+
+    @property
+    def production_authorized(self) -> bool:
+        return False
 
     @property
     def local_permissions_pass(self) -> bool:

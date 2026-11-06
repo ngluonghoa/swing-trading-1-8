@@ -63,8 +63,11 @@ def tf20(*, timeframe=Timeframe.D1, volume=100,
         rows = [make_bar(i, timeframe=timeframe, volume=volume)
                 for i in range(21)]
     else:
+        # A closed prior M15 bar can be verified a little AFTER its bar end.
+        # Leave an explicit causal gap before the target; otherwise its most
+        # recent comparator is not yet known at target start.
         rows = [make_bar(i, timeframe=timeframe, volume=volume,
-                         start=START + timedelta(minutes=i*15))
+                         start=START + timedelta(minutes=(i if i < 20 else 21)*15))
                 for i in range(21)]
     def tagged(row):
         return VolumeComparisonBar(snap(row), session_class, "fixture-compare-v1")

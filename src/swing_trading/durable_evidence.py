@@ -112,6 +112,12 @@ class EvidenceStore:
             raise EvidenceCorrupt("Unsupported schema")
         if c.execute("PRAGMA foreign_key_check").fetchone():
             raise EvidenceCorrupt("Broken relationship")
+        for table in ("batches", "rows"):
+            for action in ("update", "delete"):
+                trigger = table + "_no_" + action
+                if c.execute("SELECT 1 FROM sqlite_master WHERE type='trigger' AND name=?",
+                             (trigger,)).fetchone() is None:
+                    raise EvidenceCorrupt("Missing append-only trigger")
         count_by_batch = {r["id"]: r["count"] for r in c.execute("SELECT * FROM batches")}
         seen, tip = {}, ZERO
         for r in c.execute("SELECT * FROM rows ORDER BY seq"):
@@ -127,7 +133,7 @@ class EvidenceStore:
             raise EvidenceCorrupt("Batch count mismatch")
         return (sum(seen.values()), tip)
 
-    def append_batch(self, batch_id, items, at_utc: datetime):
+    def append_batch(self, batch_id, items, at_utc: datetime, *, expected_tip_sha256=None):
         require_utc(at_utc)
         if not isinstance(batch_id, str) or not batch_id:
             raise ValueError("Missing batch ID")
@@ -142,6 +148,8 @@ class EvidenceStore:
             c.execute("BEGIN IMMEDIATE")
             try:
                 _, tip = self._verify_conn(c)
+                if expected_tip_sha256 is not None and expected_tip_sha256 != tip:
+                    raise EvidenceCorrupt("Stale chain head or concurrent writer")
                 c.execute("INSERT INTO batches VALUES (?,?)", (batch_id, len(items)))
                 for item in items:
                     values = (batch_id, item.ref, item.source_id, item.state.value,
@@ -160,3 +168,17 @@ class EvidenceStore:
             except Exception:
                 c.execute("ROLLBACK")
                 raise
+
+    def read_verified_bytes(self, batch_id, row_reference):
+        """Read original bytes only after checksums and chain validate."""
+        with closing(self.connection()) as c:
+            c.execute("BEGIN")
+            try:
+                self._verify_conn(c)
+                r = c.execute("SELECT payload FROM rows WHERE batch=? AND ref=?",
+                              (batch_id, row_reference)).fetchone()
+                if r is None:
+                    raise KeyError((batch_id, row_reference))
+                return bytes(r["payload"])
+            finally:
+                c.execute("ROLLBACK")

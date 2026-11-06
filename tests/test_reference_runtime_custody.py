@@ -46,6 +46,8 @@ class StorageBoundaryTests(unittest.TestCase):
         self.assertFalse(report.host_volume_approved)
         self.assertFalse(report.provider_retention_approved)
         self.assertFalse(report.production_authorized)
+        with self.assertRaises(TypeError):
+            replace(report, production_authorized=True)
         self.assertEqual(report.issues, ())
 
     def test_world_readable_db_fails(self):

@@ -2,6 +2,8 @@
 
 ## Latest decisions
 
+- **P0.19 code branch / CI pending:** preflight of local POSIX SQLite directory/file/symlink/hardlink/sidecar permissions and detached HMAC-SHA256 manifest integrity check, with opt-in verify/restore/prefix wrappers. **NOT** independent public-key signature, live storage approval or deployed custodian. [P0.19 scope](P0_19_STORAGE_PREFLIGHT_CHECKPOINT_CUSTODY.md). Google Drive canonical §27.42 until post-merge §27.43 sync.
+
 - **P0.18 merged on main (PR #47, branch CI 387/387 PASS each Python 3.11/3.12):** metadata-only logical journal backup and independently pinnable whole-file+chain checkpoint, restore with SHA256 recheck and new-file-only publication, historical prefix validation; SSI/DNSE quote cache is never copied into backup. There is no running host, approved retention/licence, external trust custodian, production recovery or historical backtest. [P0.18 specification](P0_18_METADATA_ONLY_CHECKPOINT_RECOVERY.md). Canonical Google Drive Handoff now §27.42; GitHub snapshot synchronized on the documentation branch, final main equality to be checked.
 
 - **P0.17 merged on main (PR #45; branch CI 376/376 PASS on Python 3.11/3.12):** local SQLite reference journal, append-only metadata SHA256 chain and consent-gated expiring provider-specific diagnostic quote cache. All storage/retention permissions are caller assertions only; no host deployment, approved data licence, independent custody, source certification or trading authority. See [P0.17 document](P0_17_REFERENCE_JOURNAL.md). Canonical Google Drive Handoff updated to §27.41; GitHub snapshot requires exact text verification after this documentation merge.
@@ -242,3 +244,8 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 
 - Added `reference_journal_recovery.py` plus quote-free logical snapshot, `JournalCheckpoint`, separately pinned restore and prefix-guard tests. Shared SSI/DNSE cache is still **one SQLite database**; checkpoint export includes only metadata journal rows, and never quote data even in deleted pages/WAL of the exported file.
 - Not production-ready: source quote retention and live SQLite/WAL sanitization, independent signed checkpoint custody, runtime/volume approval, disaster recovery exercises, native historical M1/M5/M15 source rights and actionable signal gates remain OPEN.
+
+## GĐ4/P0.19 incremental implementation — 2026-11-06 (branch CI pending)
+
+- Added `reference_storage_preflight.py`, `reference_checkpoint_mac.py` and synthetic tests. Local root+SQLite DB+sidecars permission scans, no symlinks/hardlinks/git trees and strict 0700/0600 modes; detached domain-separated HMAC over the entire checkpoint + key ID/seal time; opt-in authenticated metadata-only recovery.
+- **NOT_DEPLOYED:** no independently attested separate custodian, asymmetric digital signature, production storage/ACL/encryption, source retention approval, live read-only MCP runtime, B5 calibration or real historical BT/OOS.

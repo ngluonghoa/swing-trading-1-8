@@ -77,6 +77,7 @@ class B5PhaseReceipt:
     anchor_pivot_event_id: str
     evidence_id: str
     instrument_id: str
+    exchange: str
     price_basis: PriceBasis
     calendar_version: str
     event_time_utc: datetime
@@ -90,7 +91,7 @@ class B5PhaseReceipt:
         if not isinstance(self.ingredient, B5Ingredient):
             raise TypeError("Explicit B5Ingredient required")
         for name in ("anchor_pivot_event_id", "evidence_id", "instrument_id",
-                     "calendar_version", "source_revision", "method_version"):
+                     "exchange", "calendar_version", "source_revision", "method_version"):
             _text(getattr(self, name), name)
         if not isinstance(self.price_basis, PriceBasis) or self.price_basis is PriceBasis.UNKNOWN:
             raise ValueError("Explicit known price basis required")
@@ -190,6 +191,7 @@ def inspect_b5_phase_receipts(
 
         if (receipt.anchor_pivot_event_id != pivot.event_id
                 or receipt.instrument_id != ref_key.instrument_id
+                or receipt.exchange != ref_key.exchange
                 or receipt.price_basis != ref_key.price_basis
                 or receipt.calendar_version != ref_key.calendar_version):
             return finish(B5PhaseReadiness.RECEIPTS_UNVERIFIED,
@@ -215,6 +217,9 @@ def inspect_b5_phase_receipts(
                 or key.timeframe not in _ALLOWED_TIMEFRAMES[receipt.ingredient]):
             return finish(B5PhaseReadiness.RECEIPTS_UNVERIFIED,
                           "BAR_IDENTITY_OR_TIMEFRAME_MISMATCH")
+        if receipt.evidence_id not in selected.source_event_ids:
+            return finish(B5PhaseReadiness.RECEIPTS_UNVERIFIED,
+                          "EVIDENCE_EVENT_NOT_IN_SOURCE_BAR")
         if (receipt.source_revision != selected.observation_revision.source_revision_or_payload_digest
                 or receipt.event_time_utc != selected.bar_end_utc
                 or receipt.first_known_time_utc < selected.verified_at_utc):

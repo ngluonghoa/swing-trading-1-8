@@ -32,7 +32,7 @@ def claim(*, product=SSI, evid=EVID,
 
 def mark(role, *, product=SSI, evid=EVID, index=0, actor=None,
          time=NOW-timedelta(days=1)):
-    actor = actor or f"ACTR-{role.name[:8]}{index:04d}"
+    actor = actor or f"ACTR-{role.name.replace('_', '')[:8]}{index:04d}"
     return ClaimedReviewAttestation(
         product, evid, f"ATST-2026{role.name[:4]}{index:04d}",
         role, actor, time,

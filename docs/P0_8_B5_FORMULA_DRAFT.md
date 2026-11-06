@@ -127,7 +127,7 @@ instrument/adjustment, prior closed failed-break and no automatic thresholds.
 
 ## SSI source and backtest prerequisites
 
-All SSI blockers B01–B08 (see P0.5) remain OPEN: daily-vs-intraday
+SSI MCP B06 re-check 2026-11-06: two READ-ONLY calls for SHS intraday 01/09/2026 and 13/10/2026 both returned `DOWNSTREAM_UNAVAILABLE` (no data); an unavailable downstream cannot be interpreted as empty historical coverage or a recovery. All SSI blockers B01–B08 (see P0.5) remain OPEN: daily-vs-intraday
 first-open mismatch, minute-volume parity and gap classification,
 native-vs-aggregated bars/auctions, response date order/clock labels,
 older M1 coverage, licensed bulk/retention rights, corporate-action

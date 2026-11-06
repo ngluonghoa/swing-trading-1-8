@@ -2,7 +2,7 @@
 
 ## Latest decisions
 
-- Google Drive Master Handoff §27.23 is the latest execution update (P0.2 versioned source identity, quality axes, safe conflict handling, 42 engineering tests per Python version on main). Prior §27.22 describes P0.1. The full GitHub 00 snapshot is only current through §27.21; see [Handoff latest pointer](source-snapshots/HANDOFF_LATEST_POINTER.md) and read the canonical Drive original.
+- Google Drive Master Handoff §27.24 is the latest execution update (P0.3 controlled migration/quarantine and typed quality audit; 64 engineering tests on Python 3.11/3.12, main CI PASS). Prior §27.23 covers P0.2 and §27.22 P0.1. The full GitHub 00 text snapshot stops at §27.21; see [Handoff latest pointer](source-snapshots/HANDOFF_LATEST_POINTER.md) and read the native Drive original.
 - GitHub is the only authoritative **code** repository. GitHub Actions CI is the repeatable test environment; ChatGPT Python handles on-demand local calculations when inputs can be provided.
 - The ChatGPT Python environment is ephemeral and has no direct network access. GitHub Actions is not a 24/7 server. A persistent production/plugin runtime and cache must be independently approved and verified.
 - Unused auxiliary execution utilities and their token instructions have been removed from the current repository tree; they are not required, connected or part of the test/release workflow. Historical Git commits are not rewritten.
@@ -23,7 +23,7 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 
 ## Next actions
 
-1. Implement the remaining canonical source-quality/calendar/clock contracts against 05 §2/§18.
+1. Build and test durable append-only raw/quarantine evidence storage with checksum, atomic transaction and restore tests; maintain no-verification-promotion migration gates.
 2. Add deterministic replay/dedup/correction and M15/M5 tests to verified fixtures.
 3. Resolve SSI B01–B08 and rights to historical data.
 4. Review and implement the first executable rule, then a cost/fill/settlement-aware simulator and qualified real historical backtest.

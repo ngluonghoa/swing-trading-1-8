@@ -1,6 +1,6 @@
 # Swing Trading 1.8
 
-**GĐ4/P0.23 REAL SSI/DNSE SOURCE CAPABILITY PROBE + METADATA-ONLY EVIDENCE GATES (ENGINEERING PARTIAL) — NOT a deployed or validated trading system.**
+**GĐ4/P0.24 SSI INTRADAY CLOCK-LABEL GAP DIAGNOSTICS (ENGINEERING PARTIAL) — NOT a deployed or validated trading system.**
 
 The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.
 
@@ -109,3 +109,5 @@ GĐ4/P0.21 adds [signed, pinned FD byte verification in disposable in-memory SQL
 GĐ4/P0.22 adds [explicit rejection of WAL-mode SQLite even without visible sidecars and a bounded fixture-only SSI/DNSE read-only host-envelope conformance harness](docs/P0_22_WAL_HOST_FIXTURE_CONTRACT.md). No live MCP connected, external source entitlement, safe native live WAL runtime, B5 execution, historical BT/OOS or trading authority. Canonical Google Drive Handoff is now §27.46; GitHub full-text snapshot explicitly refreshed in this docs PR, requiring final exact-match on main.
 
 GĐ4/P0.23 [observed real connected SSI/DNSE read-only probe outcomes and documented them without raw OHLCV storage](docs/P0_23_LIVE_SOURCE_CAPABILITY_EVIDENCE.md): SHS 13/10/2026 SSI daily 2 rows, SSI alternative intraday 215 rows, SSI full paginated intraday DOWNSTREAM_UNAVAILABLE on one call, DNSE 248 DAY rows. Availability does **not** prove licensed retention, first-known, complete M1/M5/M15 or readiness for B5 real BT/OOS. New ephemeral audit code holds hard-false rights/readiness gates. Canonical Google Drive Handoff now §27.47, reflecting merged source PR #57 and verified final branch CI. The GitHub full-text snapshot is explicitly refreshed on this docs branch and must be rechecked against Drive on main.
+
+GĐ4/P0.24 adds [transient SSI timestamp-label gap diagnostics and actual SHS 14/10/2026 read-only probe evidence](docs/P0_24_SSI_INTRADAY_LABEL_SURFACE.md): 223 timestamp-labelled rows, 16 inter-label gaps >1 minute (maximum 92 minutes, including potential lunch), and a second failed SSI full paginated endpoint call. These are NOT 223 source-native M1 candles or proof of missing bars. SSI FastConnect `IntradayOhlc` documented elsewhere is not the connected MCP, and no separate licence is verified. Source timestamp semantics, full M1/M5/M15, first-known, backtest/BT/OOS, safe live SQLite/VFS and retention rights remain OPEN. Canonical Drive Handoff §27.47 until post-merge §27.48 sync.

@@ -64,3 +64,6 @@ GĐ4/P0.9 adds [causal Wilder ATR14 and RVOL_TF20 engineering primitives](docs/P
 
 
 P0.9 merged via [PR #29](https://github.com/ngluonghoa/swing-trading-1-8/pull/29); [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42182737356) **190/190** synthetic tests PASS on Python 3.11 and 3.12. Latest canonical Handoff is §27.33. **RVOL_TOD is not implemented; ATR/RVOL outputs do not qualify data or trading signals.**
+
+
+GĐ4/P0.10 implements a [D1 expected-session manifest audit and ATR14 append/correction replay parity contract](docs/P0_10_D1_SESSION_ATR_REPLAY.md). It verifies exact match against **supplied** expected sessions and batch/incremental `Decimal` parity only; it does not independently certify official market dates, SSI licensing, source coverage or actionable B5 signals.

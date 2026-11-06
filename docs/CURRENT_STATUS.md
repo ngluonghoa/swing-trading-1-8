@@ -102,3 +102,10 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 - [P0.7 PR #25](https://github.com/ngluonghoa/swing-trading-1-8/pull/25) merged into main commit `e3b49a35a8ddc07f0f450a2343b32451a543a721`. [Main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42176318156) PASS **147/147** synthetic unit/negative tests on Python 3.11 and Python 3.12.
 - Native Google Drive Master Handoff advanced to §27.31; the complete GitHub text export is a point-in-time exact-match snapshot, not continuous two-way syncing.
 - All SSI source rights/coverage B01–B08 remain OPEN; B5 has no calibrated R_C/R_E/R_F detector or actionable signal, and historical backtest/OOS remain NOT_RUN.
+
+## GĐ4/P0.8 — B5 symbolic formulas and causal raw geometry (2026-11-06)
+
+- [P0.8 formula draft](P0_8_B5_FORMULA_DRAFT.md): separate unapproved SHORT/SWING numeric slots; signed ATR-normalized R_C/R_E/R_F geometry; E_RECLAIM and E_FAILED_BREAK variants; explicitly demands prior independent M15 closed failed-break evidence for the latter and a known-before-followup micro-high anchor for R_F.
+- Strict source/clock prerequisites still come from P0.7; strengthened P0.7 to require **all RF support/micro/volume bars** close after retest. Raw geometry never outputs B5 DETECTED, Entry/SL/TP or P&L, and never declares risk-approval.
+- SSI MCP read-only B06 spot checks for SHS 01/09/2026 and 13/10/2026 attempted 2026-11-06; both failed with connector `DOWNSTREAM_UNAVAILABLE`. This proves neither historic absence nor coverage recovery; leave B01–B08 OPEN and avoid using SSI source data for B5.
+- Synthetic no-lookahead/unit tests extended; `B5/SHORT/FORMULA_DRAFT_0_1` and `B5/SWING/FORMULA_DRAFT_0_1` are separate, all thresholds None / unapproved. No source entitlements, simulator, backtest/OOS, UI, MOCHI or other project changes.

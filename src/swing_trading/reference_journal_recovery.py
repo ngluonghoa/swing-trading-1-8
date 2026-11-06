@@ -240,6 +240,9 @@ def restore_journal_from_pinned(
     dest, temporary_directory, staging = _paths(destination)
     try:
         with Path(backup_path).open("rb") as source, staging.open("xb") as target:
+            # The staging DIRECTORY is private, but the final hard-linked
+            # destination must itself have owner-only permissions.
+            os.chmod(staging, 0o600)
             shutil.copyfileobj(source, target, length=1024 * 1024)
             target.flush()
             os.fsync(target.fileno())

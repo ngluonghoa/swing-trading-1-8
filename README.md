@@ -74,3 +74,5 @@ GĐ4/P0.11 adds [source-linked RVOL_TOD20 same-exchange-local-slot cumulative-vo
 
 
 P0.11 merged via [PR #33](https://github.com/ngluonghoa/swing-trading-1-8/pull/33); [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42187628379) **244/244 PASS** synthetic unit/negative tests on Python 3.11 and 3.12. Canonical Master Handoff now §27.35. Same-slot cumulative RVOL_TOD20 remains source/market unverified and nonactionable; only listed HOSE/HNX 2026 closure anchors have primary-source notices, not a full trading calendar.
+
+GĐ4/P0.12 introduces [read-only SSI intraday/daily matched-volume reconciliation](docs/P0_12_SSI_INTRADAY_DAILY_PARITY.md) with declared date layout and non-approval guards. Three historical SHS sessions (12–14 Oct 2026) returned 233/215/223 intraday rows and exact daily matched-volume totals, but only on the *non-paged* SSI endpoint; `marketdata_list_stock_infor` still returned `DOWNSTREAM_UNAVAILABLE`. This is observational diagnostic parity **not** source rights, full minute coverage, 20-session RVOL-TOD certification, calibrated B5 or historical backtest.

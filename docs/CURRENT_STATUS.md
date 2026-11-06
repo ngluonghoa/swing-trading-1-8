@@ -2,7 +2,7 @@
 
 ## Latest decisions
 
-- Google Drive Master Handoff §27.31 is the latest execution update (P0.7 B5 phase evidence receipts: 147 engineering tests per Python 3.11/3.12 main CI PASS). §27.30 covers P0.6 M5/M15 replay; §27.29 covers B5 feature extraction without executable detector; §27.28 SSI P0.5 and §27.27 P0.4C. The [full GitHub Master Handoff text snapshot](source-snapshots/00_MASTER_HANDOFF.txt) has now been synchronized through §27.31 and verified by exact text comparison against the Google Drive export; see [snapshot status](source-snapshots/HANDOFF_LATEST_POINTER.md). The native Drive document remains the authority for future edits and formatting.
+- Google Drive Master Handoff §27.32 is the latest execution update (P0.8 B5 SHORT/SWING formula geometry: 163 engineering tests per Python 3.11/3.12 main CI PASS). §27.31 is P0.7 phase receipts, §27.30 P0.6 M5/M15 replay, §27.29 B5 features, §27.28 SSI P0.5 and §27.27 P0.4C. The [full GitHub Master Handoff text snapshot](source-snapshots/00_MASTER_HANDOFF.txt) has now been synchronized through §27.32 and verified by exact text comparison against the Google Drive export; see [snapshot status](source-snapshots/HANDOFF_LATEST_POINTER.md). The native Drive document remains the authority for future edits and formatting.
 - GitHub is the only authoritative **code** repository. GitHub Actions CI is the repeatable test environment; ChatGPT Python handles on-demand local calculations when inputs can be provided.
 - The ChatGPT Python environment is ephemeral and has no direct network access. GitHub Actions is not a 24/7 server. A persistent production/plugin runtime and cache must be independently approved and verified.
 - Unused auxiliary execution utilities and their token instructions have been removed from the current repository tree; they are not required, connected or part of the test/release workflow. Historical Git commits are not rewritten.
@@ -109,3 +109,9 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 - Strict source/clock prerequisites still come from P0.7; strengthened P0.7 to require **all RF support/micro/volume bars** close after retest. Raw geometry never outputs B5 DETECTED, Entry/SL/TP or P&L, and never declares risk-approval.
 - SSI MCP read-only B06 spot checks for SHS 01/09/2026 and 13/10/2026 attempted 2026-11-06; both failed with connector `DOWNSTREAM_UNAVAILABLE`. This proves neither historic absence nor coverage recovery; leave B01–B08 OPEN and avoid using SSI source data for B5.
 - Synthetic no-lookahead/unit tests extended; `B5/SHORT/FORMULA_DRAFT_0_1` and `B5/SWING/FORMULA_DRAFT_0_1` are separate, all thresholds None / unapproved. No source entitlements, simulator, backtest/OOS, UI, MOCHI or other project changes.
+
+## P0.8 merged main and canonical Handoff §27.32 — 2026-11-06
+
+- [P0.8 PR #27](https://github.com/ngluonghoa/swing-trading-1-8/pull/27) merged `4e5f50844f96a0dc2bf05eb19c63c06fe1cab2f7` into main. [CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42178103421) **163/163 PASS** synthetic engineering tests each on Python 3.11 and 3.12.
+- Native Google Drive Master Handoff advanced to §27.32; GitHub full-text snapshot synchronized exactly as a point-in-time export.
+- No executable B5 predicate or approved risk/threshold; SSI B01–B08 remain OPEN and B06 read-only calls failed DOWNSTREAM_UNAVAILABLE; real historical BT/OOS remain NOT_RUN.

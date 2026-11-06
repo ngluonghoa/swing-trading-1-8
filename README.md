@@ -53,3 +53,5 @@ P0.6 was merged in [PR #22](https://github.com/ngluonghoa/swing-trading-1-8/pull
 P0.7 adds a [B5 R_C/R_E/R_F phase-evidence receipt inventory](docs/P0_7_B5_PHASE_EVIDENCE_CONTRACT.md), but it is **not a calibrated or executable B5 detector**. A synthetically complete receipt manifest does not authorize a signal or backtest.
 
 The [P0.7 phase contract](docs/P0_7_B5_PHASE_EVIDENCE_CONTRACT.md) was merged via [PR #25](https://github.com/ngluonghoa/swing-trading-1-8/pull/25); [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42176318156) PASS 147/147 synthetic tests on each Python version. Canonical Google Drive Handoff is §27.31. The phase receipts are not an executable, calibrated or backtested B5 signal.
+
+P0.8 adds [B5 symbolic SHORT/SWING formulas and causal raw ATR-normalized geometry](docs/P0_8_B5_FORMULA_DRAFT.md). This is a draft feature calculation, not a validated detector, calibrated threshold, market-source entitlement or real historical backtest.

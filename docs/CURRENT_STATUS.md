@@ -129,3 +129,10 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 - Native Google Drive Master Handoff now §27.33. GitHub snapshot is a point-in-time exact text export; not live bidirectional sync.
 - ATR14 is raw Wilder math on input D1 closed bars with separate first-known/verified pre-retest cutoff; RVOL_TF20 is raw same-TF comparable volume (NOT same-slot RVOL_TOD). Neither certifies real source completeness, authorization, P01–P17 or actionable B5 decisions.
 - Source blockers SSI B01–B08 OPEN, RVOL_TOD NOT_IMPLEMENTED, historical BT/OOS NOT_RUN.
+
+
+## GĐ4/P0.10 — D1 expected sessions and ATR14 replay parity (2026-11-06)
+
+- Added [P0.10 session-inventory and ATR14 correction reconciliation](P0_10_D1_SESSION_ATR_REPLAY.md): compare D1 closed v1.2 bars to exact externally supplied `session_period_id`/start/end slots; separate `MATCH_UNCERTIFIED` from missing/extra/bad sessions. Inventories are not independently certified official market calendars.
+- Reconcile batch ATR14 against checkpoint+incremental replay (append, late source revision, pre-seed revision requiring full reseed, post-seed corrections). Requires old/new independent causal as-of clock, first-dirty bar, no truncation, unresolved source conflict, changed adjustment/basis or missed sessions. Decimal equality is exact, not tolerance-based.
+- New synthetic unit/negative tests verify causal correction first-known checks, missing/extra expected sessions, duplication, old checkpoint quality and replay idempotency. **No live SSI completeness/parity, executable B5, calibrated thresholds, RVOL_TOD, simulator, historical BT/OOS or UI changes.** SSI B01–B08 still OPEN.

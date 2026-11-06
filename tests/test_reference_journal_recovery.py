@@ -4,6 +4,7 @@ from datetime import timedelta
 from pathlib import Path
 import json
 import sqlite3
+import stat
 import tempfile
 import unittest
 
@@ -105,6 +106,9 @@ class JournalRecoveryFixtureTests(unittest.TestCase):
         )
         self.assertEqual(restored.verify(),
                          (cp.record_count, cp.chain_tip_sha256))
+        # The published snapshot AND restored file must be private (POSIX).
+        self.assertEqual(stat.S_IMODE((self.root / "backup.sqlite").stat().st_mode), 0o600)
+        self.assertEqual(stat.S_IMODE(restored.path.stat().st_mode), 0o600)
         for run_id, provider in [("ssi", D1Provider.SSI), ("dnse", D1Provider.DNSE)]:
             self.assertIsNotNone(
                 self.store.read_diagnostic(

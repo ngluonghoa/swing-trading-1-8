@@ -1,13 +1,13 @@
 # Swing Trading 1.8
 
-**GĐ4/P0.15 SSI→DNSE D1 REFERENCE FALLBACK ENGINEERING — NOT a validated trading system.**
+**GĐ4/P0.16 SSI/DNSE READ-ONLY MCP ADAPTER BRIDGE — NOT a validated trading system.**
 
 The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.
 
 ## Source of truth
 
 - **Python code, repeatable unit tests and CI:** this private GitHub repository.
-- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.39; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
+- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.40; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
 - **Source snapshots:** [docs/source-snapshots](docs/source-snapshots/00_MASTER_HANDOFF.txt) are point-in-time text exports. They are not automatically synchronized and do not replace the original documents.
 - **Approved market data and experiment evidence:** Google Drive where access, licensing, retention and source quality are explicitly verified.
 - **MOCHI:** secondary code clone and document backup, deferred while the device is offline. The plugin must remain independent of MOCHI.
@@ -93,3 +93,5 @@ GĐ4/P0.15 adds a [read-only SSI-first DNSE D1 reference fallback router](docs/P
 P0.15 [source PR #41](https://github.com/ngluonghoa/swing-trading-1-8/pull/41) merged; [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42204138440) **341/341 synthetic tests PASS** each Python 3.11 and 3.12. Canonical Handoff now §27.39. SSI-first DNSE D1 reference-only router needs live MCP adapter wiring in an approved runtime; same-day D1 close and provider-adjusted price basis are not independently certified. Not an intraday feed, indicator input, historical backtest or trade execution.
 
 GĐ4/P0.16 introduces [read-only SSI/DNSE MCP envelope adapters and explicitly segregated reference receipts](docs/P0_16_MCP_ADAPTER_READONLY_BRIDGE.md). Injectable authenticated host callbacks now parse observed SSI daily and DNSE DAY response shapes, preserve UTC receipt time and SHA256 ingestion digests, and hold selected reference quotes in a provider-separated **volatile diagnostic** cache. An explicit SSI DOWNSTREAM_UNAVAILABLE or missing exact D1 date can invoke DNSE; unknown/malformed/permission errors fail closed, and intraday is never substituted. This is NOT live plugin connector deployment, licensed historical source, persistent Smart Cache, approved indicator input, real backtest or signal authority.
+
+GĐ4/P0.16 [source PR #43](https://github.com/ngluonghoa/swing-trading-1-8/pull/43) merged, [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42207319126) **360/360 synthetic tests PASS** each Python 3.11 and 3.12. Canonical native Handoff §27.40. SSI/DNSE adapters are read-only injectable Python callables, **not live auto-wired user-facing Plugin MCP**. Metadata digest and volatile cache are segregated by provider; no licensed persistent history, certified source/first-known, B5 backtest or orders.

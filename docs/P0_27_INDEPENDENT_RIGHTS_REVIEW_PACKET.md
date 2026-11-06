@@ -1,0 +1,31 @@
+# GĐ4/P0.27 — Independent source-rights review packet and fail-closed revocation hold
+
+**Date:** 2026-11-06 (Asia/Ho_Chi_Minh) · **ENGINEERING-ONLY synthetic CI, no deployed entitlement authority, real market-data licensing or trading approval.**
+
+## Why this milestone exists
+
+P0.26 established provider-specific claims for six rights scopes: historical reads, raw quote retention, derived minute bars, derived-bar retention, research backtest and OOS. A complete-looking vendor letter still could not elevate into a right. P0.27 prepares a **bounded, nonsecret packet for human/externally approved review**, plus a **conservative as-of hold/expiry diagnostic**, without fabricating signatures or assuming that a role marker verifies its signer.
+
+New code: `src/swing_trading/provider_review_packet.py` and tests `tests/test_provider_review_packet.py`. All output is metadata only; there are no user credentials, account numbers, original agreements, vendor contact names, quote data, attached files, network calls, background monitoring or broker orders.
+
+## External review and independent trust requirements
+
+Before any real permission could be granted **outside this prototype**, the approved process must verify: (1) vendor authority and a signed or authenticated grant; (2) account-to-product and API-version binding (SSI FastConnect Data V2 vs newer SSI FastConnect V3 vs DNSE OpenAPI are **not interchangeable**); (3) six independent authorized rights scopes and retention, historical range, adjustment and OOS restrictions; (4) provider-side expiry, revocation and appeal/renewal; (5) independent compliance review and host storage/ACL/encryption/secure deletion plan; (6) independent custody/revocation event integrity and fail-closed connectors.
+
+P0.27 **does not connect to an identity provider, validate signatures, implement a licensed source, or check the provider account**. Every reviewer marker and hold event is **UNVERIFIED**, and even a fully populated packet can only be `READY_FOR_EXTERNAL_REVIEW_ONLY` — **never** `LICENSED` or `PRODUCTION_APPROVED`.
+
+## Typed packet and review logic
+
+- `ClaimedReviewAttestation`: opaque `ATST-` marker, role (`PROVIDER_ENTITLEMENT`, `INDEPENDENT_COMPLIANCE`, `STORAGE_SECURITY`), opaque `ACTR-` actor reference, existing `EVID-` docket ID, product and UTC observation time. Rejects fake/unknown evidence, free-text identities, attestation of public-only documentation, time travel, cross-provider markers and duplicate attestation IDs. A claimed actor reference cannot claim more than one role. **This is only structural separation of duties** — no verified actor identity or cryptographic signing.
+- `UnverifiedHoldNotice`: typed `PROVIDER_REVOCATION_CLAIM`, `EXPIRED_TERMS_NOTICE`, `SECURITY_SUSPENSION` with opaque `HOLD-` ID, target evidence/product and effective/observed UTC times. Rejects future-observed, pre-evidence or cross-product notices, duplicate event IDs, malformed IDs, unrealistic effective-after-observation timestamps. **A notice held in this complete caller-supplied history blocks the entire product packet; no release/reinstatement event exists.**
+- `assemble_independent_review_packet`: uses P0.26 `review_unverified_source_claims`, computes missing six rights *claims*, missing review role markers, missing expiry claims, expired evidence IDs and global holds. States: `EVIDENCE_INCOMPLETE`, `READY_FOR_EXTERNAL_REVIEW_ONLY`, `BLOCKED_EXPIRED`, `BLOCKED_HOLD`. Expired/held takes precedence even when all roles/scopes are claimed. Emits reviewer workflow blockers and, for a hold, the need to block access and audit cleanup of any previous cache/backup retention.
+- `IndependentReviewPacket` exposes only opaque IDs, dates, roles, claimed rights and unresolved checklist. Flags `external_identity_or_signature_verified`, `provider_entitlement_verified`, `permission_to_read`, `permission_to_store_raw_or_derived`, `real_backtest_allowed`, `production_authorized` and `actionable` remain **hardcoded False**.
+- `require_independently_authorized_packet` always raises. This implementation does **not** have an approved external source-of-truth/verification service or any mechanism to grant permissions.
+
+**Critical security limitation:** The caller provides the entire review/hold history. It is **not cryptographically sealed or independently fetched from a provider**; a malicious caller could omit a revoked notice or fabricate three distinct actor tokens. The positive `READY_FOR_EXTERNAL_REVIEW_ONLY` state only means that an opaque *packet is prepared for an authorized person to examine*, not that it is safe to invoke a provider or retain data. Revocation/expiration does not automatically delete a cache, revoke a real API key, or modify a backup; those remain external operational tasks.
+
+## Verification and next gates
+
+Synthetic tests cover the positive *packet-prepared only* case, all-complete-but-unauthorized, missing roles/scopes/expiry, duplicates and actor role crossover, public-doc impersonation, per-product isolation, invalid/future event timestamps, expiry at review cutoff, global revocation/security hold precedence, no permission promotion, bounded event counts, no names/secrets/quotes in report, and all authorizations remaining closed. GitHub Actions CI Python 3.11/3.12 must PASS before merge.
+
+**GĐ4/P0.28 next:** Specify independent provider-issued, signature-verifiable authorization and revocation service (trust-anchor registration, authenticated event sequence, nonce/expiry/version, renewal and immediate revocation enforcement), hardened protected runtime/SQLite WAL/VFS and secure purge validation. Do not activate source-native M1/M5/M15 API or persistent OHLCV/Smart Cache until provider/account license, source first-known/adjustments/calendar and host authorization are real. B5 24 numeric thresholds/executable detection, realistic fill/fees/slippage/tax/T+2 and first genuine historical BT/OOS still **NOT_RUN**. Preserve UI-1.0 DESIGN_LOCKED, CK2/FX2/Scanner/MOCHI unchanged, no orders.

@@ -95,6 +95,13 @@ def verify_offline_signed_metadata_archive(
             raise UnsafeReferenceStorage(
                 "Offline metadata backup must be standalone: no SQLite sidecars"
             )
+        # P0.18 publishes a standalone rollback-journal-mode SQLite file.
+        # A WAL-mode main DB (header bytes 18/19 = 2) may lack committed
+        # transactions without sidecars: rejecting absent-sidecar WAL is vital.
+        if os.pread(pin.database_fd, 2, 18) != b"\x01\x01":
+            raise UnsafeReferenceStorage(
+                "Offline archive must use standalone rollback SQLite journal mode"
+            )
         file_info = os.fstat(pin.database_fd)
         size = file_info.st_size
         if not 4096 <= size <= max_archive_bytes:

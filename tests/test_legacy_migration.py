@@ -125,6 +125,16 @@ class MigrationTests(unittest.TestCase):
         self.assertIs(x.quarantined[0].original, c)
         self.assertIs(x.quarantined[1].original, c)
 
+    def test_same_audit_row_reference_with_distinct_revisions_quarantines_both(self):
+        x = migrate_batch((
+            row(legacy(revision="r1"), row_reference="same-row"),
+            row(legacy(revision="r2"), row_reference="same-row"),
+        ), at(30))
+        self.assertFalse(x.migrated)
+        self.assertEqual(len(x.quarantined), 2)
+        self.assertEqual({q.reason_code for q in x.quarantined},
+                         {"DUPLICATE_ROW_REFERENCE"})
+
     def test_distinct_corrections_remain_separate_and_conflict(self):
         a = legacy(revision="r1")
         b = legacy(revision="r2")

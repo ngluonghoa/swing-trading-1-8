@@ -203,7 +203,7 @@ class ATR14ReplayTests(unittest.TestCase):
         later = AS_OF + timedelta(minutes=10)
         current[17] = adjusted(current[17], known=later)
         # resolve_as_known returns no visible revision at the requested time.
-        r = evaluate(old, tuple(current))
+        r = evaluate(old, tuple(current), inventory=sessions(old))
         self.assertEqual(r.state, ATRReplayState.BLOCKED)
         self.assertTrue(r.reason.startswith("CURRENT_HISTORY_"))
 
@@ -215,7 +215,7 @@ class ATR14ReplayTests(unittest.TestCase):
         newer = updated.selected
         current[16] = resolve_as_known(
             original.market_bar_key, (original, newer), AS_OF)
-        r = evaluate(old, tuple(current))
+        r = evaluate(old, tuple(current), inventory=sessions(old))
         self.assertEqual(r.state, ATRReplayState.BLOCKED)
         self.assertTrue(r.reason.startswith("CURRENT_HISTORY_"))
 

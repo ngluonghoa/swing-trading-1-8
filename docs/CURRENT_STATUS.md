@@ -26,7 +26,7 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 1. Continue SSI B01–B08 source triage: independently verify endpoint date/clock semantics, provider data rights, source parity, historical coverage and official market schedules. See [P0.5 evidence](P0_5_SSI_SOURCE_TRIAGE.md).
 2. P0.6 deterministic replay/dedup/correction and synthetic M15/M5 tests are implemented; next validate approved real calendar/source semantics for M5/M15 and independently reconcile native/derived bars.
 3. Resolve SSI B01–B08 and rights to historical data.
-4. Review and implement the first executable rule, then a cost/fill/settlement-aware simulator and qualified real historical backtest.
+4. P0.7 B5 phase receipts are now structurally audited (not executable); approve R_C/R_E/R_F formulas, explicit B5 variant predicates, P01–P17 parameters and no-lookahead fixtures before implementing the first executable rule, followed by a fill/cost/settlement-aware simulator and qualified real historical backtest.
 5. Backup code and versioned documents to MOCHI only when online; do not treat this as prerequisite for tasks 1–4.
 
 ## GĐ4/P0.1 increment — 2026-11-06
@@ -89,3 +89,10 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 - Corrected the canonical Google Drive §27.30 read-first instructions, replaced the outdated PRE-CODE status with current GĐ4/P0.6 engineering scope, and removed an unintended foreign-language token from §27.29.
 - Marked earlier §27.28–§27.30 source-snapshot sync instructions as historically completed by PR #19/#21/#23, rather than active pending tasks. Historical engineering and data-quality claims are unchanged.
 - The full GitHub Handoff snapshot was re-exported from the native Google Doc and checked character-for-character on the editorial branch. No trading-core, SSI source, market-data, UI, runtime, MOCHI or backtest code changes.
+
+## GĐ4/P0.7 B5 phase receipt increment — 2026-11-06
+
+- Added [B5 R_C/R_E/R_F phase evidence contracts](P0_7_B5_PHASE_EVIDENCE_CONTRACT.md): source-event ID and exchange-qualified receipts, explicit R_E variants, immutable phase ingredient inventory, versioned policy references and causal as-of rejection. No parameter thresholds are invented or approved.
+- All outcomes remain BASE_UNVERIFIED / RECEIPTS_MISSING / RECEIPTS_UNVERIFIED / PRESENT_UNCALIBRATED, with `detector_approved=False` and `actionable=False` (even for complete synthetic receipts).
+- Synthetic tests cover SHORT/SWING, both E variants, missing/duplicate receipts, mixed instrument/exchange/basis/calendar, future-known evidence, conflicting revisions, timestamp order and ATR/micro-high chronology.
+- **Still OPEN:** SSI B01–B08, licensed historical M15/M5 and native bars, real causal predicate formulas, P01–P17 calibration, B5 detector execution, risk/settlement simulation, historical backtest BT-01..16 and OOS. UI-1.0, MOCHI and CK2/FX2/Scanner unchanged.

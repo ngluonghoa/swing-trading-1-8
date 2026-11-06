@@ -183,6 +183,21 @@ class OfflineSignedArchiveTests(unittest.TestCase):
         with self.assertRaises(ReferenceJournalCorrupt):
             self.check(archive=full, checkpoint=cp, signature=self.make_seal(cp))
 
+    def test_signed_wal_mode_database_rejected_even_without_sidecars(self):
+        # Even if the archive has zero quote cache and a *new valid*
+        # signature, its WAL-mode header is never a standalone P0.18 backup.
+        with sqlite3.connect(self.archive) as c:
+            self.assertEqual(c.execute("PRAGMA journal_mode=WAL").fetchone()[0],
+                             "wal")
+        for suffix in ("-wal", "-shm", "-journal"):
+            self.assertFalse(Path(str(self.archive) + suffix).exists())
+        self.assertEqual(self.archive.read_bytes()[18:20], b"\x02\x02")
+        revised = replace(
+            self.cp, backup_sha256=sha256(self.archive.read_bytes()).hexdigest()
+        )
+        with self.assertRaises(UnsafeReferenceStorage):
+            self.check(checkpoint=revised, signature=self.make_seal(revised))
+
     def test_wrong_inode_type_symlink_refused(self):
         alias = self.root / "alias.sqlite"
         alias.symlink_to(self.archive)

@@ -1,13 +1,13 @@
 # Swing Trading 1.8
 
-**GĐ4/P0.11 CAUSAL RVOL_TOD20 / OFFICIAL CLOSURE ANCHORS FOUNDATION — NOT a validated trading system.**
+**GĐ4/P0.12 SSI INTRADAY/DAILY PARITY DIAGNOSTIC FOUNDATION — NOT a validated trading system.**
 
 The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.
 
 ## Source of truth
 
 - **Python code, repeatable unit tests and CI:** this private GitHub repository.
-- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.35; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
+- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.36; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
 - **Source snapshots:** [docs/source-snapshots](docs/source-snapshots/00_MASTER_HANDOFF.txt) are point-in-time text exports. They are not automatically synchronized and do not replace the original documents.
 - **Approved market data and experiment evidence:** Google Drive where access, licensing, retention and source quality are explicitly verified.
 - **MOCHI:** secondary code clone and document backup, deferred while the device is offline. The plugin must remain independent of MOCHI.
@@ -76,3 +76,6 @@ GĐ4/P0.11 adds [source-linked RVOL_TOD20 same-exchange-local-slot cumulative-vo
 P0.11 merged via [PR #33](https://github.com/ngluonghoa/swing-trading-1-8/pull/33); [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42187628379) **244/244 PASS** synthetic unit/negative tests on Python 3.11 and 3.12. Canonical Master Handoff now §27.35. Same-slot cumulative RVOL_TOD20 remains source/market unverified and nonactionable; only listed HOSE/HNX 2026 closure anchors have primary-source notices, not a full trading calendar.
 
 GĐ4/P0.12 introduces [read-only SSI intraday/daily matched-volume reconciliation](docs/P0_12_SSI_INTRADAY_DAILY_PARITY.md) with declared date layout and non-approval guards. Three historical SHS sessions (12–14 Oct 2026) returned 233/215/223 intraday rows and exact daily matched-volume totals, but only on the *non-paged* SSI endpoint; `marketdata_list_stock_infor` still returned `DOWNSTREAM_UNAVAILABLE`. This is observational diagnostic parity **not** source rights, full minute coverage, 20-session RVOL-TOD certification, calibrated B5 or historical backtest.
+
+
+P0.12 [PR #35](https://github.com/ngluonghoa/swing-trading-1-8/pull/35) merged with [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42192360436) **263/263 PASS** synthetic tests on Python 3.11 and 3.12. Canonical Handoff is now §27.36. The three-date SHS volume parity is read-only source observation, *not* source entitlement or complete native M1/20-session coverage; SSI date-layout ambiguity and full/paged endpoint failure remain OPEN.

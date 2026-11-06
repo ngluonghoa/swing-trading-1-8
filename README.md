@@ -1,6 +1,6 @@
 # Swing Trading 1.8
 
-**GĐ4/P0.20 PINNED SQLITE FD INSPECTION + ED25519 VERIFIER (ENGINEERING PARTIAL) — NOT a deployed or validated trading system.**
+**GĐ4/P0.21 SIGNED PINNED-FD OFFLINE METADATA ARCHIVE READER (ENGINEERING PARTIAL) — NOT a deployed or validated trading system.**
 
 The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.
 
@@ -103,3 +103,5 @@ GĐ4/P0.18 adds [metadata-only SSI/DNSE journal checkpoint and verified restore]
 GĐ4/P0.19 adds [fail-closed POSIX SQLite owner/perms preflight and opt-in detached HMAC checkpoint verification](docs/P0_19_STORAGE_PREFLIGHT_CHECKPOINT_CUSTODY.md). This is NOT a signed independent-custody deployment; HMAC requires a shared secret and the holder of the verification key can also forge a seal. No actual host/volume, key custodian, licensing or production cache activation. Canonical Google Drive Handoff §27.43 now includes merged PR #49 and final branch CI 405/405 on both Python 3.11/3.12; the GitHub text snapshot was explicitly refreshed in the documentation PR and must be rechecked on main.
 
 GĐ4/P0.20 adds [pinned nofollow POSIX read-only SQLite file-descriptor inspection and optional Ed25519 checkpoint verification](docs/P0_20_PINNED_FD_ED25519_VERIFY.md). It detects some pathname/inode swaps but does NOT make separate `sqlite3.connect(path)` calls race-free; requires independently trusted public key/fingerprint and signing service, neither provisioned. No production runtime, live cache approval, historic B5/BT/OOS or brokerage operation. Canonical Drive Handoff is now §27.44; GitHub full-text snapshot has been updated on the docs branch and requires exact-match revalidation on main after merge.
+
+GĐ4/P0.21 adds [signed, pinned FD byte verification in disposable in-memory SQLite](docs/P0_21_OFFLINE_SIGNED_METADATA_ARCHIVE.md) for **offline P0.18 metadata-only backups**. Rejects WAL/SHM/journal sidecars, cache quote rows, checksum/signature/inode mismatch and oversized archives; avoids any second path-based SQLite open for this narrow read. Does NOT make live P0.17 SQLite `_connection` / writes or P0.18 restores production-safe. No live host, approved SSI/DNSE licence, B5 detector, real BT/OOS or brokerage actions. Canonical Handoff §27.44 until explicit post-merge §27.45 sync.

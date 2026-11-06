@@ -3,7 +3,7 @@
 Engineering-only. No serialization of legacy Python objects, provider
 authentication, SSI entitlement checks, or promotion to VERIFIED.
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from hashlib import sha256
 
@@ -19,7 +19,7 @@ class RawSourceBinding:
     row_reference: str
     source_record_id: str
     source_snapshot_id: str
-    raw_bytes: bytes
+    raw_bytes: bytes = field(repr=False)
     declared_sha256: str
 
     def __post_init__(self):
@@ -49,7 +49,7 @@ class ArchivedRowReceipt:
 @dataclass(frozen=True)
 class ArchivedMigrationBatch:
     batch_id: str
-    migration: MigrationBatchResult
+    migration: MigrationBatchResult = field(repr=False)
     receipts: tuple[ArchivedRowReceipt, ...]
     record_count: int
     chain_tip_sha256: str
@@ -72,9 +72,9 @@ def archive_migration_batch(
     if not isinstance(store, EvidenceStore):
         raise TypeError("Expected EvidenceStore")
     require_utc(as_of_utc)
-    if (not isinstance(envelopes, tuple) or not isinstance(raw_sources, tuple)
-            or not envelopes or len(envelopes) != len(raw_sources)
-            or len(envelopes) > 1000):
+    if not isinstance(envelopes, tuple) or not isinstance(raw_sources, tuple):
+        raise TypeError("Both input collections must be immutable tuples")
+    if not envelopes or len(envelopes) != len(raw_sources) or len(envelopes) > 1000:
         raise ValueError("Require nonempty, equal-length bounded tuple inputs")
     if any(not isinstance(e, LegacyMigrationEnvelope) for e in envelopes):
         raise TypeError("Expected LegacyMigrationEnvelope")

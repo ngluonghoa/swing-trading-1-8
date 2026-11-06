@@ -237,9 +237,26 @@ class ResolvedBarSnapshotV12:
     reason: str
 
     def __post_init__(self) -> None:
-        _nonblank(self.reason, "reason")
-        if self.visible_candidate_count < 0:
-            raise ValueError("Negative candidate count")
+        if not isinstance(self.market_bar_key, MarketBarKey):
+            raise TypeError("Resolved snapshot requires MarketBarKey")
+        if type(self.visible_candidate_count) is not int or self.visible_candidate_count < 0:
+            raise ValueError("Candidate count must be nonnegative integer")
+        allowed = {"NO_VISIBLE_REVISION", "SINGLE_VISIBLE_REVISION", "SOURCE_OR_REVISION_CONFLICT"}
+        if self.reason not in allowed:
+            raise ValueError("Unknown resolution status")
+        if self.selected is not None:
+            if not isinstance(self.selected, CanonicalCandleV12):
+                raise TypeError("Selected snapshot must be CanonicalCandleV12")
+            if self.selected.market_bar_key != self.market_bar_key:
+                raise ValueError("Selected snapshot market identity mismatch")
+            if self.visible_candidate_count != 1 or self.reason != "SINGLE_VISIBLE_REVISION":
+                raise ValueError("Selected revision requires a single visible candidate")
+        elif self.reason == "SINGLE_VISIBLE_REVISION":
+            raise ValueError("Selected revision required for single-candidate status")
+        elif self.reason == "NO_VISIBLE_REVISION" and self.visible_candidate_count != 0:
+            raise ValueError("Empty status contradicts candidate count")
+        elif self.reason == "SOURCE_OR_REVISION_CONFLICT" and self.visible_candidate_count < 2:
+            raise ValueError("Conflict requires multiple visible revisions")
 
     def confirmation_prerequisites(self, as_of_utc: datetime) -> bool:
         return (

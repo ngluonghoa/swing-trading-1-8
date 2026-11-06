@@ -60,8 +60,10 @@ class ProviderRightsReviewTests(unittest.TestCase):
                    {"expiry":NOW+timedelta(days=1)},
                    {"retention":30}):
             with self.subTest(kw=kw),self.assertRaises(ValueError):
-                claim(kind=EvidenceKind.PUBLIC_PRODUCT_DOCUMENTATION,
-                      scopes=(),retention=None,**kw)
+                args = dict(kind=EvidenceKind.PUBLIC_PRODUCT_DOCUMENTATION,
+                            scopes=(),retention=None)
+                args.update(kw)
+                claim(**args)
 
     def test_account_entitlement_claim_only_read_is_not_retention_or_bt(self):
         r=self.audit(claim())

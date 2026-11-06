@@ -243,10 +243,13 @@ def inspect_b5_phase_receipts(
             if receipt.observed_value is None or receipt.observed_value <= 0:
                 return finish(B5PhaseReadiness.RECEIPTS_UNVERIFIED,
                               "ATR_VALUE_MISSING_OR_NONPOSITIVE")
-        if (receipt.ingredient is B5Ingredient.RF_MICRO_HIGH_BREAK
-                and selected.bar_end_utc <= retest_bar.bar_end_utc):
+        if receipt.ingredient in (
+            B5Ingredient.RF_MICRO_HIGH_BREAK,
+            B5Ingredient.RF_SUPPORT_H1_D1,
+            B5Ingredient.RF_VOLUME,
+        ) and selected.bar_end_utc <= retest_bar.bar_end_utc:
             return finish(B5PhaseReadiness.RECEIPTS_UNVERIFIED,
-                          "MICRO_HIGH_NOT_AFTER_RETEST")
+                          "RF_CLOSED_BAR_NOT_AFTER_RETEST")
 
     missing = tuple(item for item in B5_REQUIRED_INGREDIENTS if item not in seen)
     observed = tuple(item for item in B5_REQUIRED_INGREDIENTS if item in seen)

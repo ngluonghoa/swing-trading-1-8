@@ -11,6 +11,12 @@ T = datetime(2026, 11, 6, tzinfo=timezone.utc)
 
 
 class EvidenceSmoke(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.store = EvidenceStore(Path(self.tmp.name) / 'shared.sqlite')
+        self.store.initialize()
+
     def test_store_and_restore_bytes(self):
         with tempfile.TemporaryDirectory() as folder:
             s = EvidenceStore(Path(folder) / "records.sqlite")

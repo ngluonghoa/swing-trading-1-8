@@ -2,7 +2,7 @@
 
 ## Latest decisions
 
-- Google Drive Master Handoff §27.32 is the latest execution update (P0.8 B5 SHORT/SWING formula geometry: 163 engineering tests per Python 3.11/3.12 main CI PASS). §27.31 is P0.7 phase receipts, §27.30 P0.6 M5/M15 replay, §27.29 B5 features, §27.28 SSI P0.5 and §27.27 P0.4C. The [full GitHub Master Handoff text snapshot](source-snapshots/00_MASTER_HANDOFF.txt) has now been synchronized through §27.32 and verified by exact text comparison against the Google Drive export; see [snapshot status](source-snapshots/HANDOFF_LATEST_POINTER.md). The native Drive document remains the authority for future edits and formatting.
+- Google Drive Master Handoff §27.33 is the latest execution update (P0.9 source-guarded Wilder ATR14 D1/RVOL_TF20: 190 engineering tests per Python 3.11/3.12 main CI PASS). §27.32 is P0.8 B5 formula geometry, §27.31 P0.7 phase receipts, §27.30 P0.6 M5/M15 replay, §27.29 B5 features and §27.28 SSI P0.5. The [full GitHub Master Handoff text snapshot](source-snapshots/00_MASTER_HANDOFF.txt) has now been synchronized through §27.33 and verified by exact text comparison against the Google Drive export; see [snapshot status](source-snapshots/HANDOFF_LATEST_POINTER.md). The native Drive document remains the authority for future edits and formatting.
 - GitHub is the only authoritative **code** repository. GitHub Actions CI is the repeatable test environment; ChatGPT Python handles on-demand local calculations when inputs can be provided.
 - The ChatGPT Python environment is ephemeral and has no direct network access. GitHub Actions is not a 24/7 server. A persistent production/plugin runtime and cache must be independently approved and verified.
 - Unused auxiliary execution utilities and their token instructions have been removed from the current repository tree; they are not required, connected or part of the test/release workflow. Historical Git commits are not rewritten.
@@ -122,3 +122,10 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 - Each input snapshot must be a single causally visible v1.2 revision with complete coverage, verified quality, consistent instrument/provider/price-basis/calendar/aggregation/adjustment and explicit time knowledge. RVOL comparators require explicit matching session class and versioned comparison policy; no automatic provider selection or backfill.
 - All return values are **COMPUTED_UNCALIBRATED** or **BLOCKED**; no source-certified signal, approved threshold or actionable trading state. **RVOL_TOD is not implemented** without verified cumulative same-slot historic intraday and official schedule.
 - SSI B01–B08, independently licensed/complete source records, ATR14 provider parity, live sessions, real historical backtest/OOS and B5 executable predicates all remain OPEN/NOT_RUN. No other system/UI/MOCHI modifications.
+
+## P0.9 merged main and canonical Handoff §27.33 — 2026-11-06
+
+- [P0.9 PR #29](https://github.com/ngluonghoa/swing-trading-1-8/pull/29) merged into main commit `0500727721ce9ec3d9ee9113cf88343ce2764f9e`. [Main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42182737356) **190/190** synthetic engineering tests PASS on Python 3.11 and 3.12.
+- Native Google Drive Master Handoff now §27.33. GitHub snapshot is a point-in-time exact text export; not live bidirectional sync.
+- ATR14 is raw Wilder math on input D1 closed bars with separate first-known/verified pre-retest cutoff; RVOL_TF20 is raw same-TF comparable volume (NOT same-slot RVOL_TOD). Neither certifies real source completeness, authorization, P01–P17 or actionable B5 decisions.
+- Source blockers SSI B01–B08 OPEN, RVOL_TOD NOT_IMPLEMENTED, historical BT/OOS NOT_RUN.

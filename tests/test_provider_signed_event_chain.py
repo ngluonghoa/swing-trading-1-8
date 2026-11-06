@@ -239,6 +239,12 @@ class SignedRightsEventChainTests(unittest.TestCase):
             with self.subTest(date=date),self.assertRaises(RightsChainRejected):
                 self.verify(chain,pin=self.pin(chain,pinned_at=date))
 
+    def test_pinned_head_cannot_predate_a_signed_event(self):
+        chain=self.chain(EventKind.GRANT_CANDIDATE)
+        too_early=chain[0].published_at_utc-timedelta(microseconds=1)
+        with self.assertRaises(RightsChainRejected):
+            self.verify(chain,pin=self.pin(chain,pinned_at=too_early))
+
     def test_typed_pin_and_event_collection_required(self):
         chain=self.chain(EventKind.GRANT_CANDIDATE)
         with self.assertRaises(TypeError):

@@ -2,7 +2,7 @@
 
 ## Latest decisions
 
-- Google Drive Master Handoff §27.29 is the latest execution update (B5 causal feature pack with no approved detector, 117 engineering tests per Python 3.11/3.12 main CI PASS). §27.28 covers SSI P0.5, §27.27 covers P0.4C. The [full GitHub Master Handoff text snapshot](source-snapshots/00_MASTER_HANDOFF.txt) has now been synchronized through §27.29 and verified by exact text comparison against the Google Drive export; see [snapshot status](source-snapshots/HANDOFF_LATEST_POINTER.md). The native Drive document remains the authority for future edits and formatting.
+- Google Drive Master Handoff §27.30 is the latest execution update (P0.6 causal M5/M15 replay: 128 engineering tests per Python 3.11 and 3.12 main CI PASS). §27.29 covers B5 causal feature extraction without an executable detector; §27.28 covers SSI P0.5 and §27.27 covers P0.4C. The [full GitHub Master Handoff text snapshot](source-snapshots/00_MASTER_HANDOFF.txt) has now been synchronized through §27.30 and verified by exact text comparison against the Google Drive export; see [snapshot status](source-snapshots/HANDOFF_LATEST_POINTER.md). The native Drive document remains the authority for future edits and formatting.
 - GitHub is the only authoritative **code** repository. GitHub Actions CI is the repeatable test environment; ChatGPT Python handles on-demand local calculations when inputs can be provided.
 - The ChatGPT Python environment is ephemeral and has no direct network access. GitHub Actions is not a 24/7 server. A persistent production/plugin runtime and cache must be independently approved and verified.
 - Unused auxiliary execution utilities and their token instructions have been removed from the current repository tree; they are not required, connected or part of the test/release workflow. Historical Git commits are not rewritten.
@@ -80,5 +80,6 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 ## GĐ4/P0.6 increment — 2026-11-06
 
 - Added [deterministic M5/M15 as-known replay and exact retransmission guards](P0_6_M5_M15_REPLAY.md), including monotone UTC checkpoints, stable market-key ordering, explicit identical-duplicate counts and collision blocking. Source corrections remain invisible before their first-known time; divergent providers/revisions remain unresolved.
+- [P0.6 PR #22](https://github.com/ngluonghoa/swing-trading-1-8/pull/22) merged to main `9a1f367df67ebb1090dfb9d64ad5bdf954c8682d`; [main GitHub Actions run](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42172733020) PASS **128/128** synthetic engineering tests on each Python 3.11 and 3.12.
 - Added synthetic unit/negative tests for cross-timeframe M5/M15 snapshots, late verification, future corrections, same-identity divergent payloads, missing/unverified coverage, malformed inputs and no lookahead.
 - **Engineering-only:** does not aggregate M1 into M5/M15, validate SSI B01–B08 or market calendars, enable B5 executable predicates/thresholds, grant trades, execute historical backtests or certify performance. UI v1.0, MOCHI and other trading systems unchanged.

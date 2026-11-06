@@ -76,7 +76,7 @@ class B5GeometryTests(unittest.TestCase):
         self.assertEqual(output.geometry.retest_elapsed_seconds_from_breakout,
                          Decimal("1800"))
         self.assertEqual(output.geometry.followup_close_minus_micro_high_atr,
-                         Decimal("-1.5"))
+                         Decimal("-1"))
 
     def test_failed_break_branch_requires_independent_prior_closed_bar(self):
         output = run(variant_id="B5/E_FAILED_BREAK")

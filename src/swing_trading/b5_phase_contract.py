@@ -199,6 +199,10 @@ def inspect_b5_phase_receipts(
         if (receipt.event_time_utc > as_of_utc
                 or receipt.first_known_time_utc > as_of_utc):
             return finish(B5PhaseReadiness.RECEIPTS_UNVERIFIED, "FUTURE_EVIDENCE")
+        if receipt.ingredient is B5Ingredient.RC_WINDOW_POLICY:
+            if receipt.first_known_time_utc > ref_key.bar_start_utc:
+                return finish(B5PhaseReadiness.RECEIPTS_UNVERIFIED,
+                              "RETEST_WINDOW_POLICY_KNOWN_TOO_LATE")
         if receipt.bar is None:
             # The referenced policy is merely declared, never interpreted
             # as a numeric approval or as a substitute for actual risk checks.
@@ -232,7 +236,8 @@ def inspect_b5_phase_receipts(
                           "RETEST_BAR_NOT_SAME_CAUSAL_EVENT")
         if receipt.ingredient is B5Ingredient.RC_PRIOR_ATR:
             if (selected.bar_end_utc > ref_key.bar_start_utc
-                    or selected.verified_at_utc > ref_key.bar_start_utc):
+                    or selected.verified_at_utc > ref_key.bar_start_utc
+                    or receipt.first_known_time_utc > ref_key.bar_start_utc):
                 return finish(B5PhaseReadiness.RECEIPTS_UNVERIFIED,
                               "ATR_NOT_KNOWN_BEFORE_RETEST")
             if receipt.observed_value is None or receipt.observed_value <= 0:

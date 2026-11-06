@@ -122,7 +122,7 @@ class SourceCapabilityTests(unittest.TestCase):
             self.audit("price_get_history",dnse_payload())
         with self.assertRaises(TypeError):
             self.audit(ProbeEndpoint.SSI_DAILY,[])
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             summarize_source_capability(
                 ProbeEndpoint.SSI_DAILY,ssi_payload(),
                 symbol="SHS",checked_at_utc=NOW.replace(tzinfo=None)

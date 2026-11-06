@@ -117,6 +117,7 @@ def verify_offline_signed_metadata_archive(
         # Never connect by pathname. Only deserialize the fully signed bytes
         # into a disposable in-memory SQLite database.
         with closing(sqlite3.connect(":memory:", isolation_level=None)) as db:
+            db.row_factory = sqlite3.Row
             if not hasattr(db, "deserialize"):
                 raise RuntimeError("SQLite deserialize unavailable; fail closed")
             try:

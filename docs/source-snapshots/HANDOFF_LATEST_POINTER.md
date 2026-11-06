@@ -2,11 +2,11 @@
 
 Canonical Google Doc: https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit
 
-**Latest decision: §27.33 / GĐ4 — causal Wilder ATR14 D1 and RVOL_TF20 engineering primitives**, 2026-11-06.
+**Latest decision: §27.34 / GĐ4 — D1 expected-session inventory and ATR14 append/correction replay parity**, 2026-11-06.
 
-The [full-text GitHub snapshot](00_MASTER_HANDOFF.txt) was refreshed from the canonical Google Doc through §27.33. It is a **point-in-time plain-text copy**, not an automatic two-way synchronization. Exact equality must be checked on `main` after merge, and the native Google Doc remains authoritative for later changes.
+The [full-text GitHub snapshot](00_MASTER_HANDOFF.txt) was refreshed from the canonical Google Doc through §27.34. It is a **point-in-time plain-text copy**, not an automatic two-way synchronization. Exact equality must be checked on `main` after merge, and the native Google Doc remains authoritative for later changes.
 
-Editorial reconciliation on 2026-11-06 corrected stale read-first / PRE-CODE wording, a stray foreign-language token in §27.29 and obsolete sync-as-TODO wording in §27.28–§27.30. That editorial correction did not itself advance the technical milestone (which has since progressed to §27.33).
+Editorial reconciliation on 2026-11-06 corrected stale read-first / PRE-CODE wording, a stray foreign-language token in §27.29 and obsolete sync-as-TODO wording in §27.28–§27.30. That editorial correction did not itself advance the technical milestone (which has since progressed to §27.34).
 
 - P0.1–P0.4C: source/calendar contracts, quality axes, legacy quarantine, local SQLite evidence and independent-checkpoint candidate mechanism (no production storage or external custody deployed).
 - P0.5 [SSI B01–B08 read-only audit](../P0_5_SSI_SOURCE_TRIAGE.md), [PR #18](https://github.com/ngluonghoa/swing-trading-1-8/pull/18) merge `700bf781afbf432bfe8c6a5b3ff56c1f4aa9de0d`: **all source blockers remain OPEN**, FastConnect access/long intraday replay not verified.
@@ -22,3 +22,6 @@ Editorial reconciliation on 2026-11-06 corrected stale read-first / PRE-CODE wor
 - **P0.8:** [PR #27](https://github.com/ngluonghoa/swing-trading-1-8/pull/27) merge `4e5f50844f96a0dc2bf05eb19c63c06fe1cab2f7`, [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42178103421) **163/163** synthetic engineering tests PASS each on Python 3.11 and 3.12. [Formula draft](../P0_8_B5_FORMULA_DRAFT.md) separates SHORT/SWING unapproved slots, causal geometry and explicit E variants. No executable detector, source-qualified SSI historical backtest, OOS or trade authority; B01–B08 OPEN and SHS B06 read-only calls returned DOWNSTREAM_UNAVAILABLE.
 
 - **P0.9:** [PR #29](https://github.com/ngluonghoa/swing-trading-1-8/pull/29), main squash merge `0500727721ce9ec3d9ee9113cf88343ce2764f9e`, [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42182737356) **190/190** synthetic tests PASS on Python 3.11 and 3.12. [ATR14/RVOL_TF20 contracts](../P0_9_CAUSAL_ATR_RVOL.md) use causal source guards but do not certify SSI entitlement/history/session completeness or actionable B5. RVOL_TOD and historical backtest/OOS remain NOT_RUN; B01–B08 OPEN.
+
+
+- **P0.10:** [PR #31](https://github.com/ngluonghoa/swing-trading-1-8/pull/31), main merge `e6ab560fdba1a26ad2774c20823446a5eef5a28b`; [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42184622891) **214/214 PASS** on Python 3.11 and 3.12. [D1 expected sessions and ATR replay contract](../P0_10_D1_SESSION_ATR_REPLAY.md) detects input-vs-manifest gaps and verifies batch/replay exact Decimal parity, but external calendars remain unverified and outputs nonactionable. SSI B01–B08, calibrated detector, RVOL_TOD and real historical backtest/OOS remain OPEN/NOT_RUN.

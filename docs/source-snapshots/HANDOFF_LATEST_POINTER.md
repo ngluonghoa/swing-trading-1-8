@@ -2,17 +2,15 @@
 
 Canonical Google Doc: https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit
 
-**Latest decision: §27.27 / GĐ4-P0.4C**, 2026-11-06.
+**Latest decision: §27.28 / GĐ4-P0.5 (source triage partial)**, 2026-11-06.
 
-The [full-text GitHub snapshot](00_MASTER_HANDOFF.txt) has been refreshed from the canonical Google Doc through §27.27; GitHub readback must match its Drive text export before the sync is accepted. This is a point-in-time plain-text copy without native Google Docs formatting, **not automatic two-way synchronization**.
+The [full-text GitHub snapshot](00_MASTER_HANDOFF.txt) is copied from the canonical Google Doc through §27.28 and must be checked for exact equality after merge into `main`. It is a point-in-time text export, not automatic two-way sync or native Google Docs formatting.
 
-- P0.1: session/clock boundaries, merge `b88324437e54d96e346f622ff22a446da227bc7f`.
-- P0.2: provenance and three-axis quality, merge `b4efcfe18209eea22839098d25e900838518e7dc`.
-- P0.3: downgrade-only migration/quarantine, merge `8c2efed1fd85aabfc93df561a698c480dad7efdc`.
-- P0.4: local SQLite evidence-store backup/restore, merge `22e1a40da987ed882b9a985f65de9683681a543a`.
-- P0.4B: original-byte bridge, merge `2c031b4d06145c7e178ae5f2676af1a7185b73dc`.
-- **P0.4C:** [PR #16](https://github.com/ngluonghoa/swing-trading-1-8/pull/16), merged main commit `ca34aca792d97a20f861096274322d7c00303856`; [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42164546420) PASS, **88 tests each** on Python 3.11 and 3.12.
-- [P0.4C implementation and limitations](../P0_4C_INDEPENDENT_CHECKPOINTS.md): externally pinnable checkpoint, whole-backup SHA-256, history prefix verification and restore controls. **Independent checkpoint custody and persistent production storage are not deployed**.
-- **OPEN:** actual SSI B01–B08 rights/source/calendar/time parsing and real historical data; approved detector and fill/cost/settlement simulator; backtest/OOS; separate storage approval, encryption/ACL/offsite restore and monitoring.
+- P0.1–P0.4C: foundation, versioned calendar, provenance, quality axes, migration/quarantine, local SQLite evidence and independently pinnable checkpoints; previous full Handoff sections §27.22–§27.27 retain exact scope and limits.
+- **P0.5:** [PR #18](https://github.com/ngluonghoa/swing-trading-1-8/pull/18), merge `700bf781afbf432bfe8c6a5b3ff56c1f4aa9de0d`. [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42166186119) **106 tests PASS** each on Python 3.11 and 3.12.
+- [SSI source audit details and B01–B08 evidence](../P0_5_SSI_SOURCE_TRIAGE.md): read-only SHS/VGI D1-vs-M1 open discrepancies; missing early-history SSI MCP intraday; connector response date-order conflict; source parity and RAW/ADJUSTED separation fail-closed. All source blockers still **OPEN**.
+- **P0.5 is partial**: no verified provider-native timestamp semantics, market calendar, licensed replay-ready history, FastConnect entitlement, usable volume/CA/source policy, executable detectors, fill/cost/settlement simulation or historical backtest/OOS.
+- NEXT: SSI B01–B08 entitlement/time/coverage verification with independently reviewed source evidence, source revisions and calendar; then first executable detector and simulator for first real historical backtest, without waiting for all 16 detectors.
+- MOCHI deferred, UI-1.0 DESIGN_LOCKED, CK2/FX2/Scanner unchanged; no broker trading.
 
-MOCHI backup deferred; UI-1.0 DESIGN_LOCKED; CK2, FX2 and Scanner untouched. Google Drive remains the authoritative Handoff for future decisions.
+Google Drive remains the authoritative Handoff for subsequent decisions.

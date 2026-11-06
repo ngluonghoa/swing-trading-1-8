@@ -1,6 +1,6 @@
 # Swing Trading 1.8
 
-**GĐ4/P0.21 SIGNED PINNED-FD OFFLINE METADATA ARCHIVE READER (ENGINEERING PARTIAL) — NOT a deployed or validated trading system.**
+**GĐ4/P0.22 WAL-MODE ARCHIVE REJECTION + SSI/DNSE FIXTURE-ONLY MCP CONFORMANCE (ENGINEERING PARTIAL) — NOT a deployed or validated trading system.**
 
 The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.
 
@@ -105,3 +105,5 @@ GĐ4/P0.19 adds [fail-closed POSIX SQLite owner/perms preflight and opt-in detac
 GĐ4/P0.20 adds [pinned nofollow POSIX read-only SQLite file-descriptor inspection and optional Ed25519 checkpoint verification](docs/P0_20_PINNED_FD_ED25519_VERIFY.md). It detects some pathname/inode swaps but does NOT make separate `sqlite3.connect(path)` calls race-free; requires independently trusted public key/fingerprint and signing service, neither provisioned. No production runtime, live cache approval, historic B5/BT/OOS or brokerage operation. Canonical Drive Handoff is now §27.44; GitHub full-text snapshot has been updated on the docs branch and requires exact-match revalidation on main after merge.
 
 GĐ4/P0.21 adds [signed, pinned FD byte verification in disposable in-memory SQLite](docs/P0_21_OFFLINE_SIGNED_METADATA_ARCHIVE.md) for **offline P0.18 metadata-only backups**. Rejects WAL/SHM/journal sidecars, cache quote rows, checksum/signature/inode mismatch and oversized archives; avoids any second path-based SQLite open for this narrow read. Does NOT make live P0.17 SQLite `_connection` / writes or P0.18 restores production-safe. No live host, approved SSI/DNSE licence, B5 detector, real BT/OOS or brokerage actions. Canonical Google Drive Handoff is now §27.45; the GitHub full-text snapshot is explicitly refreshed in this documentation PR and must be rechecked against Drive on main.
+
+GĐ4/P0.22 adds [explicit rejection of WAL-mode SQLite even without visible sidecars and a bounded fixture-only SSI/DNSE read-only host-envelope conformance harness](docs/P0_22_WAL_HOST_FIXTURE_CONTRACT.md). No live MCP connected, external source entitlement, safe native live WAL runtime, B5 execution, historical BT/OOS or trading authority. Canonical Google Drive Handoff remains §27.45 pending PR merge and §27.46 synchronization.

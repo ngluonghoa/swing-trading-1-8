@@ -1,6 +1,6 @@
 # Swing Trading 1.8
 
-**GĐ4/P0.29 CONDITIONAL CUSTODY HEAD FRESHNESS, KEY ROTATION AND ANTI-ROLLBACK CONTRACT (ENGINEERING PARTIAL) — NOT a deployed or validated trading system.**
+**GĐ4/P0.30 EXTERNAL EVIDENCE REVIEW — ACTUAL RIGHTS/CUSTODIAN BLOCKED (ENGINEERING PARTIAL) — NOT a deployed or validated trading system.**
 
 The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.
 
@@ -28,6 +28,8 @@ python3 -m unittest discover -s tests -v
 ```
 
 ## Current work and blockers
+
+P0.30 reviews [external provider/custodian evidence](docs/P0_30_EXTERNAL_EVIDENCE_REVIEW.md) and proposes a concrete [CAS/witness recovery protocol](docs/RIGHTS_CUSTODY_CAS_RECOVERY_SPEC.md). The [private provider confirmation checklist](docs/PROVIDER_RIGHTS_CONFIRMATION_CHECKLIST.md) is prepared, not sent. No account-specific rights/root/custodian dossier was found in the reviewed project sources; official request authentication is separate from the project-defined P0.28/P0.29 custody format. **Executable source/tests remain P0.29, 667 synthetic tests; operational recovery drills NOT_RUN.** Next P0.31 requires actual external evidence, with live source/storage/production still blocked. Branch review CI/merge and subsequent canonical Handoff sync are required.
 
 P0.29 adds an [offline custody-head/challenge and key-rotation verifier](docs/P0_29_CUSTODIED_HEAD_FRESHNESS_ROLLBACK.md) with an explicitly supplied monotonic floor and atomic-CAS **proposal only**. It shares P0.28 event-integrity checks, rejects rewritten prefixes/old heads/key-epoch rollback and keeps holds sticky across rotation. All root provenance, real head freshness, durable rollback protection and source permissions remain unverified/hard False. [ADR-0003](docs/ADR_0003_EXTERNAL_RIGHTS_CUSTODIAN.md) records the external evidence needed; no actual host/custodian is selected. [Source PR #69](https://github.com/ngluonghoa/swing-trading-1-8/pull/69) is merged as `70b35f317b84e4e096ac9e70c17d4d75551b7a73`; [PR CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42265844712) and [post-merge main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42265987261) each passed 667/667 synthetic tests on both Python 3.11 and 3.12 (+78). Canonical Handoff is §27.53, fully mirrored in this documentation sync. Next P0.30 is external provenance/custodian evidence review; real identity, independent durable custody and current vendor revocation freshness remain BLOCKED/NOT_VERIFIED.
 

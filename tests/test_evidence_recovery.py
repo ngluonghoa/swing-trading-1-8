@@ -19,5 +19,30 @@ class RecoverySmoke(unittest.TestCase):
             self.assertEqual(before, restored.verify())
 
 
+    def test_nonempty_binary_backup_and_copy_no_clobber(self):
+        from datetime import datetime, timezone
+        from hashlib import sha256
+        from swing_trading.durable_evidence import EvidenceItem, State
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            source = EvidenceStore(root / "source.sqlite")
+            source.initialize()
+            raw = b"fixture:\x00\xff"
+            entry = EvidenceItem("row-1", "fixture-record", raw,
+                                 sha256(raw).hexdigest(), State.QUARANTINED,
+                                 "SOURCE_TIME_AMBIGUOUS")
+            expected = source.append_batch(
+                "batch1", (entry,), datetime(2026, 11, 6, tzinfo=timezone.utc))
+            backup_path = root / "backup.sqlite"
+            self.assertEqual(backup_verified(source, backup_path), expected)
+            dest = root / "recovered.sqlite"
+            self.assertEqual(restore_verified(backup_path, dest).verify(), expected)
+            self.assertEqual(EvidenceStore(dest).read_verified_bytes("batch1", "row-1"), raw)
+            with self.assertRaises(FileExistsError):
+                restore_verified(backup_path, dest)
+            with self.assertRaises(FileExistsError):
+                backup_verified(source, backup_path)
+
+
 if __name__ == "__main__":
     unittest.main()

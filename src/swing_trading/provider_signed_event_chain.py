@@ -259,6 +259,8 @@ def verify_pinned_rights_event_chain(
             raise RightsChainRejected("Mixed product or unpinned signing key")
         if event.sequence != index or event.previous_sha256 != previous:
             raise RightsChainRejected("Gap, reordering or previous-link mismatch")
+        if event.published_at_utc > pin.pinned_at_utc:
+            raise RightsChainRejected("Signed event published after the pinned head")
         if event.published_at_utc > checked_at_utc or (
             last_published is not None
             and event.published_at_utc < last_published

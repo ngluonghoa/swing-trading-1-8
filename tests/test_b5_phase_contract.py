@@ -182,6 +182,16 @@ class B5PhaseReceiptTests(unittest.TestCase):
             rs, B5Ingredient.RC_PRIOR_ATR, observed_value=None)).state,
             B5PhaseReadiness.RECEIPTS_UNVERIFIED)
 
+    def test_prior_atr_and_window_policy_cannot_be_known_after_retest_starts(self):
+        _, _, _, rs = fixture_receipts()
+        atr_late = changed(rs, B5Ingredient.RC_PRIOR_ATR,
+                           first_known_time_utc=m(35))
+        self.assertEqual(evaluate(receipts=atr_late).reason, "ATR_NOT_KNOWN_BEFORE_RETEST")
+        policy_late = changed(rs, B5Ingredient.RC_WINDOW_POLICY,
+                              first_known_time_utc=m(35))
+        self.assertEqual(evaluate(receipts=policy_late).reason,
+                         "RETEST_WINDOW_POLICY_KNOWN_TOO_LATE")
+
     def test_retest_and_trigger_refer_to_same_m15_bar(self):
         _, _, _, rs = fixture_receipts()
         replacement = next(x for x in rs if x.ingredient is B5Ingredient.RF_MICRO_HIGH_BREAK)

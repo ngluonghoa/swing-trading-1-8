@@ -88,7 +88,7 @@ class EvidenceStore:
                 seq INTEGER PRIMARY KEY AUTOINCREMENT,
                 batch TEXT REFERENCES batches(id),
                 ref TEXT NOT NULL, source TEXT NOT NULL,
-                state TEXT NOT NULL, reason TEXT NOT NULL, payload BLOB NOT NULL,
+                state TEXT NOT NULL CHECK(state IN ('STAGED_UNVERIFIED','QUARANTINED')), reason TEXT NOT NULL, payload BLOB NOT NULL,
                 sha TEXT NOT NULL, stamped TEXT NOT NULL, prev TEXT NOT NULL,
                 chained TEXT NOT NULL, UNIQUE(batch,ref)
             )""")

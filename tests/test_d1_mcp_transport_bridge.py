@@ -254,7 +254,7 @@ class D1McpBridgeTests(unittest.TestCase):
             replace(x,provider="SSI")
         with self.assertRaises(ValueError):
             replace(x,raw_payload_digest_sha256="NOT_A_SHA")
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             BridgeRun(bridge()[0].run(request()).audit,("untyped",))
 
     def test_other_provider_cache_has_no_fallback_without_transport(self):

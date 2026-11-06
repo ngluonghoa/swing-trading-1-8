@@ -2,6 +2,8 @@
 
 ## Latest decisions
 
+- **P0.20 branch / CI pending:** nofollow/read-only pinned SQLite FD inspection and detached Ed25519 verifier with externally supplied pinned public-key fingerprint, optional `cryptography` extra. This does NOT solve TOCTOU for separate SQLite path-based connections or deploy a signer/host. [P0.20 document](P0_20_PINNED_FD_ED25519_VERIFY.md). Google Drive Handoff still §27.43 until code merge and §27.44 sync.
+
 - **P0.19 merged main (PR #49; final branch CI 405/405 PASS per Python 3.11/3.12):** preflight of local POSIX SQLite directory/file/symlink/hardlink/sidecar permissions and detached HMAC-SHA256 manifest integrity check, with opt-in verify/restore/prefix wrappers. **NOT** independent public-key signature, live storage approval or deployed custodian. [P0.19 scope](P0_19_STORAGE_PREFLIGHT_CHECKPOINT_CUSTODY.md). Google Drive canonical §27.43, GitHub point-in-time snapshot refreshed in documentation PR.
 
 - **P0.18 merged on main (PR #47, branch CI 387/387 PASS each Python 3.11/3.12):** metadata-only logical journal backup and independently pinnable whole-file+chain checkpoint, restore with SHA256 recheck and new-file-only publication, historical prefix validation; SSI/DNSE quote cache is never copied into backup. There is no running host, approved retention/licence, external trust custodian, production recovery or historical backtest. [P0.18 specification](P0_18_METADATA_ONLY_CHECKPOINT_RECOVERY.md). Canonical Google Drive Handoff now §27.42; GitHub snapshot synchronized on the documentation branch, final main equality to be checked.
@@ -249,3 +251,9 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 
 - Added `reference_storage_preflight.py`, `reference_checkpoint_mac.py` and synthetic tests. Local root+SQLite DB+sidecars permission scans, no symlinks/hardlinks/git trees and strict 0700/0600 modes; detached domain-separated HMAC over the entire checkpoint + key ID/seal time; opt-in authenticated metadata-only recovery.
 - **NOT_DEPLOYED:** no independently attested separate custodian, asymmetric digital signature, production storage/ACL/encryption, source retention approval, live read-only MCP runtime, B5 calibration or real historical BT/OOS.
+
+## GĐ4/P0.20 increment — 2026-11-06 (branch CI pending)
+
+- `reference_pinned_fd.py`: openat/dirfd, O_NOFOLLOW, inode/path identity and SQLite sidecar validation for one read-only inspection context. **NOT** a safe wrapper for regular `sqlite3.connect(path)` or immutable WAL snapshot.
+- `reference_checkpoint_signature.py`: verifier-only Ed25519 public-key signature with domain separation, exact checkpoint, key/store identities and pinned public-key SHA256; opt-in restore and historical prefix wrappers.
+- Retention licence, production host encryption/ACL, independent signer/key trust anchor, native SSI/DNSE historical intraday, B5 numeric slots and real BT/OOS are OPEN.

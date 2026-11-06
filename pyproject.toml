@@ -9,5 +9,8 @@ description = "Swing Trading 1.8 engineering foundation (non-trading scaffold)"
 requires-python = ">=3.11"
 dependencies = []
 
+[project.optional-dependencies]
+custody = ["cryptography>=43,<50"]
+
 [tool.setuptools.packages.find]
 where = ["src"]

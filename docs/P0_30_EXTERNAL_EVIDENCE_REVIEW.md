@@ -52,10 +52,14 @@ The [provider confirmation checklist](PROVIDER_RIGHTS_CONFIRMATION_CHECKLIST.md)
 
 The [CAS/recovery specification](RIGHTS_CUSTODY_CAS_RECOVERY_SPEC.md) defines primary/witness commit order, lost-ack reconciliation and restore rules. It separates ordinary atomic updates from detection of restoring an entire stale database. All listed operational failure drills are **SPECIFIED / NOT_RUN**. No database/cloud vendor, external witness or host has been chosen; it is a reviewable protocol proposal, not an implementation or approved architecture deployment.
 
-The existing 667 unit/security tests remain engineering evidence. Their number does not increase for this documentation/evidence review. GitHub Actions must pass on Python 3.11/3.12 for this branch before merge. They do not test the proposed external coordinator/witness, legal rights, real key ownership, provider latest-head freshness or operational recovery.
+The existing 667 unit/security tests remain engineering evidence. Their number does not increase for this documentation/evidence review. [Review PR #71](https://github.com/ngluonghoa/swing-trading-1-8/pull/71) merged as `7ca9a6cdd8a772285e8e0a35197eafd08119ca46` after [exact-head PR CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42268625183). That run and [post-merge main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42268829682) were independently checked, including logs: **667/667 on EACH Python 3.11/3.12**. They do not test the proposed external coordinator/witness, legal rights, real key ownership, provider latest-head freshness or operational recovery.
 
 ## Next step and stop condition
 
 **GĐ4/P0.31 — external dossier review, blocked pending actual input.** The immediate missing input is an existing applicable account/service rights confirmation for SSI or DNSE, or an explicit decision to seek clarification using the prepared questions. No message to a provider is authorized by this document. Only after that review can an actual authority/custodian/host proposal be assessed. Another synthetic root/checkbox/test layer does not resolve the missing input.
 
 Keep all source/retention/runtime/production gates closed. SSI B01–B08, historical native M1/M5/M15 quality/first-known/revisions/calendar/adjustments, executable calibrated B5 and realistic simulator/BT/OOS remain separate open items. UI-1.0, CK2, FX2, Scanner and MOCHI are unchanged. No market-data call, OHLCV persistence, signal or order is performed.
+
+## Canonical Handoff receipt
+
+Original native Drive Handoff updated in place to §27.54. Three current front-matter paragraphs refreshed; the other 942 original paragraphs and their order were checked unchanged. Full export: **330411 Unicode characters / 371125 UTF-8 bytes**, BOM/CRLF preserved, SHA-256 `af85fcfa4e16d7c48c177f61522db9ae2ee937f8a8c4e91ab5aa5549bb7bc1b2`. The separate Handoff documentation PR requires CI and fresh Drive-vs-main equality at closure; its PR records the observed result.

@@ -160,7 +160,7 @@ class B5FeatureTests(unittest.TestCase):
         self.assertEqual(assessment(breakout=a2).state,
                          B5FeatureState.INPUT_BLOCKED)
         self.assertEqual(assessment(pivot=replace(
-            p,event_time_utc=m(14),first_known_time_utc=m(15))).state,
+            p,event_time_utc=m(14),first_known_time_utc=m(18))).state,
                          B5FeatureState.DATA_UNVERIFIED)
 
     def test_no_prior_breakout_is_precondition_not_market_signal(self):

@@ -1,6 +1,6 @@
 # Swing Trading 1.8
 
-**GĐ4/P0.28 PINNED ED25519 SOURCE-RIGHTS EVENT PREFIX VERIFIER (ENGINEERING PARTIAL) — NOT a deployed or validated trading system.**
+**GĐ4/P0.29 CONDITIONAL CUSTODY HEAD FRESHNESS, KEY ROTATION AND ANTI-ROLLBACK CONTRACT (ENGINEERING PARTIAL) — NOT a deployed or validated trading system.**
 
 The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.
 
@@ -28,6 +28,8 @@ python3 -m unittest discover -s tests -v
 ```
 
 ## Current work and blockers
+
+P0.29 adds an [offline custody-head/challenge and key-rotation verifier](docs/P0_29_CUSTODIED_HEAD_FRESHNESS_ROLLBACK.md) with an explicitly supplied monotonic floor and atomic-CAS **proposal only**. It shares P0.28 event-integrity checks, rejects rewritten prefixes/old heads/key-epoch rollback and keeps holds sticky across rotation. All root provenance, real head freshness, durable rollback protection and source permissions remain unverified/hard False. [ADR-0003](docs/ADR_0003_EXTERNAL_RIGHTS_CUSTODIAN.md) records the external evidence needed; no actual host/custodian is selected. Branch implementation: 667 synthetic tests locally (78 new); exact GitHub Actions Python 3.11/3.12 checks required before merge. Canonical Handoff remains §27.52 until source merge and the subsequent full-text sync.
 
 Read [CURRENT_STATUS](docs/CURRENT_STATUS.md), [ADR-0001](docs/ADR_0001_MOCHI_INDEPENDENCE.md) and [ADR-0002](docs/ADR_0002_PYTHON_FIRST.md) before new code.
 

@@ -9,6 +9,7 @@ from swing_trading.ssi_source_qualification import (
     DateOrder, EndpointTimestampPolicy, SourceCoverageObservation,
     DailyFirstRecordParity, ParityState, RecordAvailability, SourceGate,
     inspect_timestamp, cross_timeframe_price_basis,
+    SessionMinuteSlots, MinuteSlotState, DailyVsMinuteVolumeParity,
 )
 
 DAY = date(2026, 11, 4)
@@ -161,6 +162,49 @@ class SSISourceQualificationTests(unittest.TestCase):
                 PriceBasis.RAW, PriceBasis.RAW,
                 independently_verified_adjustment_mapping=1
             )
+
+
+    def test_index_volume_difference_95_is_not_silently_tolerated(self):
+        report = DailyVsMinuteVolumeParity(
+            "VNINDEX", DAY, 785061515, 785061420, True, False
+        )
+        self.assertEqual(report.delta, 95)
+        self.assertEqual(report.parity_state, ParityState.MISMATCH_BLOCKED)
+        self.assertEqual(replace(report, minute_pagination_complete=False).parity_state,
+                         ParityState.MISSING_UNKNOWN)
+
+    def test_matching_index_volume_without_provenance_is_still_unverified(self):
+        report = DailyVsMinuteVolumeParity("VNINDEX", DAY, 100, 100, True, False)
+        self.assertEqual(report.parity_state, ParityState.MATCH_UNVERIFIED)
+        self.assertEqual(replace(report, daily_volume=None).parity_state,
+                         ParityState.MISSING_UNKNOWN)
+
+    def test_missing_intraday_minutes_cannot_be_called_no_trade(self):
+        for instrument, expected, missing in (
+            ("UPCOM", 270, 127), ("HNX", 240, 6),
+        ):
+            with self.subTest(instrument=instrument):
+                sample = SessionMinuteSlots(
+                    instrument, DAY, expected, expected-missing, False
+                )
+                self.assertEqual(sample.missing_slots, missing)
+                self.assertEqual(sample.state, MinuteSlotState.MISSING_UNCLASSIFIED)
+                self.assertEqual(replace(sample, calendar_verified=True).state,
+                                 MinuteSlotState.MISSING_UNCLASSIFIED)
+                self.assertEqual(replace(sample, observed_slots=expected).state,
+                                 MinuteSlotState.COMPLETE_OBSERVED_UNVERIFIED)
+
+    def test_bad_volume_and_minute_slot_types_rejected(self):
+        with self.assertRaises(ValueError):
+            DailyVsMinuteVolumeParity("VNINDEX", DAY, True, 1, True, False)
+        with self.assertRaises(TypeError):
+            DailyVsMinuteVolumeParity("VNINDEX", DAY, 1, 1, 1, False)
+        with self.assertRaises(ValueError):
+            SessionMinuteSlots("HNX", DAY, 0, 0, False)
+        with self.assertRaises(ValueError):
+            SessionMinuteSlots("HNX", DAY, 100, 101, False)
+        with self.assertRaises(TypeError):
+            SessionMinuteSlots("HNX", DAY, 100, 5, 1)
 
 
 if __name__ == "__main__":

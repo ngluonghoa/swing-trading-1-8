@@ -49,3 +49,5 @@ The [B5 causal feature pack](docs/B5_CAUSAL_FEATURE_PACK.md) prepares evidence f
 P0.6 adds [deterministic M5/M15 as-known replay, exact retransmission deduplication and revision-collision guards](docs/P0_6_M5_M15_REPLAY.md). This is synthetic source-domain verification only, not native candle reconciliation or a first historical backtest.
 
 P0.6 was merged in [PR #22](https://github.com/ngluonghoa/swing-trading-1-8/pull/22); the [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42172733020) passed 128 synthetic tests each on Python 3.11/3.12. Canonical Handoff is §27.30; all SSI B01–B08 and real historic Backtest/OOS remain OPEN/NOT_RUN.
+
+P0.7 adds a [B5 R_C/R_E/R_F phase-evidence receipt inventory](docs/P0_7_B5_PHASE_EVIDENCE_CONTRACT.md), but it is **not a calibrated or executable B5 detector**. A synthetically complete receipt manifest does not authorize a signal or backtest.

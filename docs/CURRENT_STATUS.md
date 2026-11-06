@@ -23,7 +23,7 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 
 ## Next actions
 
-1. Build and test durable append-only raw/quarantine evidence storage with checksum, atomic transaction and restore tests; maintain no-verification-promotion migration gates.
+1. Continue SSI B01–B08 source triage: independently verify endpoint date/clock semantics, provider data rights, source parity, historical coverage and official market schedules. See [P0.5 evidence](P0_5_SSI_SOURCE_TRIAGE.md).
 2. Add deterministic replay/dedup/correction and M15/M5 tests to verified fixtures.
 3. Resolve SSI B01–B08 and rights to historical data.
 4. Review and implement the first executable rule, then a cost/fill/settlement-aware simulator and qualified real historical backtest.
@@ -63,3 +63,10 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 - Added [independently pinned SQLite evidence checkpoints and restore/prefix verification](P0_4C_INDEPENDENT_CHECKPOINTS.md), with whole-backup SHA-256, count/tip cross-checks, single-snapshot history prefix inspection, strict metadata schema and synthetic negative tests.
 - **Checkpoint generation is NOT an approval**. A separately authorized custodian and safe storage for the pinned checksum/chain tip are still required; no signing service, production host, real persistent volume, encryption, off-site backup or restoration drill was deployed.
 - Future Backtest/Signal Engine still depends on a verified SSI source, calendar/timestamp semantics, one real executable detector and a cost/settlement/fill simulator. SSI B01–B08 remain OPEN; actual backtest/OOS remain NOT_RUN.
+
+## GĐ4/P0.5 increment — 2026-11-06
+
+- [SSI MCP B01–B08 source triage](P0_5_SSI_SOURCE_TRIAGE.md) performed with narrowly scoped read-only samples. SHS/VGI 04/11 D1 opens disagree with first 09:00 intraday observation; old SHS intraday windows returned empty while mid-Oct/early-Nov queries returned records. Historic M5/M15 availability remains NOT_VERIFIED.
+- Unambiguous intraday `13/10/2026` output conflicts with current MCP tool description `MM/dd/yyyy`; connector presentation semantics vs direct provider native fields still requires independent reconciliation.
+- Added strict versioned timestamp date-order and clock-label contracts, unknown-coverage classification, D1/M1 open and volume parity, missing-minute classification and RAW/ADJUSTED separation with offline negative tests.
+- **All B01–B08 remain OPEN.** No raw SSI tick archives, credentials, persistent production volume, executable trading signals or actual historical backtests were created.

@@ -1,13 +1,13 @@
 # Swing Trading 1.8
 
-**GĐ4/P0.10 D1 SESSION INVENTORY / ATR14 REPLAY ENGINEERING FOUNDATION — NOT a validated trading system.**
+**GĐ4/P0.11 CAUSAL RVOL_TOD20 / OFFICIAL CLOSURE ANCHORS FOUNDATION — NOT a validated trading system.**
 
 The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.
 
 ## Source of truth
 
 - **Python code, repeatable unit tests and CI:** this private GitHub repository.
-- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.34; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
+- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.35; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
 - **Source snapshots:** [docs/source-snapshots](docs/source-snapshots/00_MASTER_HANDOFF.txt) are point-in-time text exports. They are not automatically synchronized and do not replace the original documents.
 - **Approved market data and experiment evidence:** Google Drive where access, licensing, retention and source quality are explicitly verified.
 - **MOCHI:** secondary code clone and document backup, deferred while the device is offline. The plugin must remain independent of MOCHI.
@@ -71,3 +71,6 @@ GĐ4/P0.10 implements a [D1 expected-session manifest audit and ATR14 append/cor
 P0.10 [PR #31](https://github.com/ngluonghoa/swing-trading-1-8/pull/31) merged and passed [214/214 main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42184622891) on Python 3.11 and 3.12. Canonical Master Handoff is now §27.34. Its D1 session inventory is externally unverified; ATR parity is deterministic synthetic software validation, not independent SSI/source/market proof.
 
 GĐ4/P0.11 adds [source-linked RVOL_TOD20 same-exchange-local-slot cumulative-volume arithmetic and official 2026 HOSE/HNX closure-notice collision checks](docs/P0_11_RVOL_TOD_CLOSURE_ANCHORS.md). These are **synthetic, nonactionable engineering validations**, not a complete independently verified calendar, licensed SSI cumulative intraday history or approved detection threshold.
+
+
+P0.11 merged via [PR #33](https://github.com/ngluonghoa/swing-trading-1-8/pull/33); [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42187628379) **244/244 PASS** synthetic unit/negative tests on Python 3.11 and 3.12. Canonical Master Handoff now §27.35. Same-slot cumulative RVOL_TOD20 remains source/market unverified and nonactionable; only listed HOSE/HNX 2026 closure anchors have primary-source notices, not a full trading calendar.

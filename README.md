@@ -1,6 +1,6 @@
 # Swing Trading 1.8
 
-**GĐ4/P0.22 WAL-MODE ARCHIVE REJECTION + SSI/DNSE FIXTURE-ONLY MCP CONFORMANCE (ENGINEERING PARTIAL) — NOT a deployed or validated trading system.**
+**GĐ4/P0.23 REAL SSI/DNSE SOURCE CAPABILITY PROBE + METADATA-ONLY EVIDENCE GATES (ENGINEERING PARTIAL) — NOT a deployed or validated trading system.**
 
 The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.
 
@@ -107,3 +107,5 @@ GĐ4/P0.20 adds [pinned nofollow POSIX read-only SQLite file-descriptor inspecti
 GĐ4/P0.21 adds [signed, pinned FD byte verification in disposable in-memory SQLite](docs/P0_21_OFFLINE_SIGNED_METADATA_ARCHIVE.md) for **offline P0.18 metadata-only backups**. Rejects WAL/SHM/journal sidecars, cache quote rows, checksum/signature/inode mismatch and oversized archives; avoids any second path-based SQLite open for this narrow read. Does NOT make live P0.17 SQLite `_connection` / writes or P0.18 restores production-safe. No live host, approved SSI/DNSE licence, B5 detector, real BT/OOS or brokerage actions. Canonical Google Drive Handoff is now §27.45; the GitHub full-text snapshot is explicitly refreshed in this documentation PR and must be rechecked against Drive on main.
 
 GĐ4/P0.22 adds [explicit rejection of WAL-mode SQLite even without visible sidecars and a bounded fixture-only SSI/DNSE read-only host-envelope conformance harness](docs/P0_22_WAL_HOST_FIXTURE_CONTRACT.md). No live MCP connected, external source entitlement, safe native live WAL runtime, B5 execution, historical BT/OOS or trading authority. Canonical Google Drive Handoff is now §27.46; GitHub full-text snapshot explicitly refreshed in this docs PR, requiring final exact-match on main.
+
+GĐ4/P0.23 [observed real connected SSI/DNSE read-only probe outcomes and documented them without raw OHLCV storage](docs/P0_23_LIVE_SOURCE_CAPABILITY_EVIDENCE.md): SHS 13/10/2026 SSI daily 2 rows, SSI alternative intraday 215 rows, SSI full paginated intraday DOWNSTREAM_UNAVAILABLE on one call, DNSE 248 DAY rows. Availability does **not** prove licensed retention, first-known, complete M1/M5/M15 or readiness for B5 real BT/OOS. New ephemeral audit code holds hard-false rights/readiness gates. Canonical Google Drive Handoff remains §27.46 pending source PR merge and subsequent explicit §27.47 sync.

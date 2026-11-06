@@ -2,6 +2,8 @@
 
 ## Latest decisions
 
+- **P0.21 branch / CI pending:** opt-in Ed25519 signed offline P0.18 metadata archive verifier reads bytes using pinned POSIX FDs, checks SHA256 and SQLite integrity in isolated `:memory:` database, and rejects sidecars, quote-bearing cache, unsafe file modes and unsigned/tampered manifests. Does **not** make live path-based SQLite code safe for production. [P0.21 design](P0_21_OFFLINE_SIGNED_METADATA_ARCHIVE.md). Canonical Handoff remains §27.44 until merged source and §27.45 sync.
+
 - **P0.20 merged main (PR #51, final branch CI 423/423 PASS per Python 3.11/3.12):** nofollow/read-only pinned SQLite FD inspection and detached Ed25519 verifier with externally supplied pinned public-key fingerprint, optional `cryptography` extra. This does NOT solve TOCTOU for separate SQLite path-based connections or deploy a signer/host. [P0.20 document](P0_20_PINNED_FD_ED25519_VERIFY.md). Google Drive Handoff now §27.44; GitHub point-in-time source snapshot synchronized on the documentation branch, pending main verification.
 
 - **P0.19 merged main (PR #49; final branch CI 405/405 PASS per Python 3.11/3.12):** preflight of local POSIX SQLite directory/file/symlink/hardlink/sidecar permissions and detached HMAC-SHA256 manifest integrity check, with opt-in verify/restore/prefix wrappers. **NOT** independent public-key signature, live storage approval or deployed custodian. [P0.19 scope](P0_19_STORAGE_PREFLIGHT_CHECKPOINT_CUSTODY.md). Google Drive canonical §27.43, GitHub point-in-time snapshot refreshed in documentation PR.
@@ -257,3 +259,8 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 - `reference_pinned_fd.py`: openat/dirfd, O_NOFOLLOW, inode/path identity and SQLite sidecar validation for one read-only inspection context. **NOT** a safe wrapper for regular `sqlite3.connect(path)` or immutable WAL snapshot.
 - `reference_checkpoint_signature.py`: verifier-only Ed25519 public-key signature with domain separation, exact checkpoint, key/store identities and pinned public-key SHA256; opt-in restore and historical prefix wrappers.
 - Retention licence, production host encryption/ACL, independent signer/key trust anchor, native SSI/DNSE historical intraday, B5 numeric slots and real BT/OOS are OPEN.
+
+## GĐ4/P0.21 engineering increment — 2026-11-06 (branch CI pending)
+
+- `reference_offline_verified_archive.py` and negative tests: Ed25519 detached trusted-signature gate, O_NOFOLLOW pinned FD + SHA256 fixed-size streaming, `sqlite3.deserialize` into read-only in-memory copy, verify P0.17 journal chain and zero cached quote rows. Explicitly OFFLINE METADATA ONLY; no source OHLCV copied or exposed.
+- Open gates: approved hosted SQLite/VFS + ACL/encryption, actual independent trust anchor and source entitlement, native historical SSI/DNSE M1/M5/M15 and B5/BT/OOS. UI and other modules unchanged.

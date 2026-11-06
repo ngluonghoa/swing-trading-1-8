@@ -1,6 +1,6 @@
 # Swing Trading 1.8
 
-**GĐ4/P0.17 LOCAL REFERENCE JOURNAL + CONSENT-GATED DIAGNOSTIC CACHE — NOT a deployed or validated trading system.**
+**GĐ4/P0.18 METADATA-ONLY JOURNAL CHECKPOINT / QUOTE-FREE RESTORE — NOT a deployed or validated trading system.**
 
 The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.
 
@@ -97,3 +97,5 @@ GĐ4/P0.16 introduces [read-only SSI/DNSE MCP envelope adapters and explicitly s
 GĐ4/P0.16 [source PR #43](https://github.com/ngluonghoa/swing-trading-1-8/pull/43) merged, [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42207319126) **360/360 synthetic tests PASS** each Python 3.11 and 3.12. Canonical native Handoff §27.40. SSI/DNSE adapters are read-only injectable Python callables, **not live auto-wired user-facing Plugin MCP**. Metadata digest and volatile cache are segregated by provider; no licensed persistent history, certified source/first-known, B5 backtest or orders.
 
 GĐ4/P0.17 adds [local metadata-only reference journal and opt-in expiry-bounded SSI/DNSE diagnostic cache](docs/P0_17_REFERENCE_JOURNAL.md). Quotes are never persisted by default; any quote retention requires separately supplied licence and protected-storage approvals, and all stored reads stay reference-only and nonactionable. This SQLite library is **not a deployed service or authenticated live MCP runtime**. Historical B5/BT/OOS and source entitlement are still OPEN. Canonical Google Drive Handoff is now §27.41; the corresponding GitHub full-text snapshot is an explicitly verified point-in-time copy.
+
+GĐ4/P0.18 adds [metadata-only SSI/DNSE journal checkpoint and verified restore](docs/P0_18_METADATA_ONLY_CHECKPOINT_RECOVERY.md): construct a fresh SQLite backup containing append-only audit metadata **but NO quote cache data**, pin whole-file digest/chain tip with an externally held checkpoint, restore to a new path only, and verify historical prefix. This is synthetic engineering only, not a running backup schedule, approved retention/licence, signed custodian, protected production host, historical B5 backtest or trade system. Canonical Handoff §27.41 remains current until successful source-document sync to §27.42.

@@ -56,8 +56,9 @@ def fixture_receipts():
         receipts.append(B5PhaseReceipt(
             ingredient=ingredient,
             anchor_pivot_event_id=pivot.event_id,
-            evidence_id="fixture-" + ingredient.value,
+            evidence_id=("fixture-" + ingredient.value) if is_policy else bar.source_event_ids[0],
             instrument_id=retest.market_bar_key.instrument_id,
+            exchange=retest.market_bar_key.exchange,
             price_basis=retest.market_bar_key.price_basis,
             calendar_version=retest.market_bar_key.calendar_version,
             event_time_utc=m(20) if is_policy else bar.bar_end_utc,
@@ -144,6 +145,18 @@ class B5PhaseReceiptTests(unittest.TestCase):
         self.assertEqual(evaluate(receipts=changed(rs, B5Ingredient.RC_WINDOW_POLICY,
                                                   instrument_id="OTHER")).state,
                          B5PhaseReadiness.RECEIPTS_UNVERIFIED)
+
+    def test_cross_exchange_must_not_join(self):
+        _, _, _, rs = fixture_receipts()
+        self.assertEqual(evaluate(receipts=changed(
+            rs, B5Ingredient.RF_VOLUME, exchange="OTHER")).state,
+            B5PhaseReadiness.RECEIPTS_UNVERIFIED)
+
+    def test_event_id_must_be_in_source_bar(self):
+        _, _, _, rs = fixture_receipts()
+        result = evaluate(receipts=changed(rs, B5Ingredient.RF_VOLUME,
+                                           evidence_id="not-a-source-event"))
+        self.assertEqual(result.reason, "EVIDENCE_EVENT_NOT_IN_SOURCE_BAR")
 
     def test_cross_basis_and_calendar_must_not_join(self):
         _, _, _, rs = fixture_receipts()

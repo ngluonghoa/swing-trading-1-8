@@ -14,4 +14,4 @@ Latest decision: **§27.24 (GĐ4/P0.3)**, updated on 2026-11-06. This file is a 
 - NEXT: durable raw/quarantine audit store with verified recovery; independently verified endpoint timestamp/calendar/source rights; approved source-resolution policy and executable detectors.
 - MOCHI backup deferred; UI v1.0 locked. No other trading project was modified.
 
-**Known synchronization limitation:** `00_MASTER_HANDOFF.txt` is a historical full-text snapshot only through **§27.21**. The original Google Doc is authoritative for §27.22, §27.23, §27.24 and newer updates. Do not label this pointer as a full mirror.
+**Full snapshot now synchronized:** [`00_MASTER_HANDOFF.txt`](00_MASTER_HANDOFF.txt) was updated directly from the canonical Google Doc through **§27.24**, and its text was read back and compared **exactly** with the Google Drive export. It is a *verified point-in-time full-text snapshot*, not a continuously synchronized mirror; for subsequent changes, check the Google Doc and repeat the sync. Google Docs native formatting is not captured by the plain-text file.

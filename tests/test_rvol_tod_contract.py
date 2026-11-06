@@ -76,7 +76,10 @@ class TODContractTests(unittest.TestCase):
 
     def test_all_zero_prior_requires_nonzero_denominator(self):
         t,p=sample()
-        new=tuple(replace(item,cumulative_matched_volume=0) for item in p)
+        new=tuple(
+            replace(item, snapshot=snap(replace(item.snapshot.selected,volume=0)),
+                    cumulative_matched_volume=0) for item in p
+        )
         self.assertEqual(calculate(prior=new).reason,
                          "ZERO_PRIOR_CUMULATIVE_DENOMINATOR")
 
@@ -104,17 +107,14 @@ class TODContractTests(unittest.TestCase):
                     timedelta(minutes=15))
         obs=replace(candidate.snapshot.selected.observation_key,market_bar_key=key)
         rev=replace(candidate.snapshot.selected.observation_revision,observation_key=obs)
-        row=replace(candidate.snapshot.selected,market_bar_key=key,observation_key=obs,
-                    observation_revision=rev,
-                    bar_end_utc=candidate.snapshot.selected.bar_end_utc+timedelta(minutes=15),
-                    retrieved_at_utc=candidate.snapshot.selected.retrieved_at_utc+
-                    timedelta(minutes=15),
-                    verified_at_utc=candidate.snapshot.selected.verified_at_utc+
-                    timedelta(minutes=15))
-        # Revision retrieved time must match source record.
-        revision=replace(row.observation_revision,first_known_time_utc=row.bar_end_utc,
-                         retrieved_at_utc=row.retrieved_at_utc)
-        row=replace(row,observation_revision=revision)
+        old=candidate.snapshot.selected
+        end=old.bar_end_utc+timedelta(minutes=15)
+        retrieved=old.retrieved_at_utc+timedelta(minutes=15)
+        verified=old.verified_at_utc+timedelta(minutes=15)
+        revision=replace(rev,first_known_time_utc=end,retrieved_at_utc=retrieved)
+        row=replace(old,market_bar_key=key,observation_key=obs,
+                    observation_revision=revision,bar_end_utc=end,
+                    retrieved_at_utc=retrieved,verified_at_utc=verified)
         altered=replace(candidate,snapshot=snap(row),slot_end_local_hhmm="09:45",
                         cumulative_first_known_utc=row.bar_end_utc,
                         cumulative_verified_utc=row.verified_at_utc)
@@ -232,7 +232,7 @@ class TODContractTests(unittest.TestCase):
                          "INVALID_IMMUTABLE_PRIOR_SESSIONS")
         with self.assertRaises(ValueError):
             calculate(asof=AS_OF.replace(tzinfo=None))
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             replace(t,elapsed_trading_minutes=True)
         with self.assertRaises(ValueError):
             replace(t,cumulative_matched_volume=-1)

@@ -180,7 +180,9 @@ class OfflineSignedArchiveTests(unittest.TestCase):
             "cache-not-permitted", "store1", NOW,
             count, tip, sha256(full.read_bytes()).hexdigest(), 0
         )
-        with self.assertRaises(ReferenceJournalCorrupt):
+        # The earlier rollback-mode/cache-integrity check OR the newly
+        # enforced WAL header check must reject this signed live SQLite copy.
+        with self.assertRaises((ReferenceJournalCorrupt, UnsafeReferenceStorage)):
             self.check(archive=full, checkpoint=cp, signature=self.make_seal(cp))
 
     def test_signed_wal_mode_database_rejected_even_without_sidecars(self):

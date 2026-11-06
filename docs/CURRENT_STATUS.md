@@ -2,7 +2,7 @@
 
 ## Latest decisions
 
-- Google Drive Master Handoff §27.30 is the latest execution update (P0.6 causal M5/M15 replay: 128 engineering tests per Python 3.11 and 3.12 main CI PASS). §27.29 covers B5 causal feature extraction without an executable detector; §27.28 covers SSI P0.5 and §27.27 covers P0.4C. The [full GitHub Master Handoff text snapshot](source-snapshots/00_MASTER_HANDOFF.txt) has now been synchronized through §27.30 and verified by exact text comparison against the Google Drive export; see [snapshot status](source-snapshots/HANDOFF_LATEST_POINTER.md). The native Drive document remains the authority for future edits and formatting.
+- Google Drive Master Handoff §27.31 is the latest execution update (P0.7 B5 phase evidence receipts: 147 engineering tests per Python 3.11/3.12 main CI PASS). §27.30 covers P0.6 M5/M15 replay; §27.29 covers B5 feature extraction without executable detector; §27.28 SSI P0.5 and §27.27 P0.4C. The [full GitHub Master Handoff text snapshot](source-snapshots/00_MASTER_HANDOFF.txt) has now been synchronized through §27.31 and verified by exact text comparison against the Google Drive export; see [snapshot status](source-snapshots/HANDOFF_LATEST_POINTER.md). The native Drive document remains the authority for future edits and formatting.
 - GitHub is the only authoritative **code** repository. GitHub Actions CI is the repeatable test environment; ChatGPT Python handles on-demand local calculations when inputs can be provided.
 - The ChatGPT Python environment is ephemeral and has no direct network access. GitHub Actions is not a 24/7 server. A persistent production/plugin runtime and cache must be independently approved and verified.
 - Unused auxiliary execution utilities and their token instructions have been removed from the current repository tree; they are not required, connected or part of the test/release workflow. Historical Git commits are not rewritten.
@@ -96,3 +96,9 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 - All outcomes remain BASE_UNVERIFIED / RECEIPTS_MISSING / RECEIPTS_UNVERIFIED / PRESENT_UNCALIBRATED, with `detector_approved=False` and `actionable=False` (even for complete synthetic receipts).
 - Synthetic tests cover SHORT/SWING, both E variants, missing/duplicate receipts, mixed instrument/exchange/basis/calendar, future-known evidence, conflicting revisions, timestamp order and ATR/micro-high chronology.
 - **Still OPEN:** SSI B01–B08, licensed historical M15/M5 and native bars, real causal predicate formulas, P01–P17 calibration, B5 detector execution, risk/settlement simulation, historical backtest BT-01..16 and OOS. UI-1.0, MOCHI and CK2/FX2/Scanner unchanged.
+
+## P0.7 merged engineering evidence and canonical §27.31 — 2026-11-06
+
+- [P0.7 PR #25](https://github.com/ngluonghoa/swing-trading-1-8/pull/25) merged into main commit `e3b49a35a8ddc07f0f450a2343b32451a543a721`. [Main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42176318156) PASS **147/147** synthetic unit/negative tests on Python 3.11 and Python 3.12.
+- Native Google Drive Master Handoff advanced to §27.31; the complete GitHub text export is a point-in-time exact-match snapshot, not continuous two-way syncing.
+- All SSI source rights/coverage B01–B08 remain OPEN; B5 has no calibrated R_C/R_E/R_F detector or actionable signal, and historical backtest/OOS remain NOT_RUN.

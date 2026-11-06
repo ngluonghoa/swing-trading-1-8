@@ -24,7 +24,7 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 ## Next actions
 
 1. Continue SSI B01–B08 source triage: independently verify endpoint date/clock semantics, provider data rights, source parity, historical coverage and official market schedules. See [P0.5 evidence](P0_5_SSI_SOURCE_TRIAGE.md).
-2. P0.6 deterministic replay/dedup/correction and synthetic M15/M5 tests are implemented (pending branch CI/merge); next validate approved real calendar/source semantics for M5/M15 and independently reconcile native/derived bars.
+2. P0.6 deterministic replay/dedup/correction and synthetic M15/M5 tests are implemented ; next validate approved real calendar/source semantics for M5/M15 and independently reconcile native/derived bars.
 3. Resolve SSI B01–B08 and rights to historical data.
 4. Review and implement the first executable rule, then a cost/fill/settlement-aware simulator and qualified real historical backtest.
 5. Backup code and versioned documents to MOCHI only when online; do not treat this as prerequisite for tasks 1–4.

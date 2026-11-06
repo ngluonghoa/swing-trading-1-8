@@ -1,6 +1,6 @@
 # Swing Trading 1.8
 
-**GĐ4/P0.18 METADATA-ONLY JOURNAL CHECKPOINT / QUOTE-FREE RESTORE — NOT a deployed or validated trading system.**
+**GĐ4/P0.19 POSIX STORAGE PREFLIGHT + DETACHED CHECKPOINT MAC (ENGINEERING PARTIAL) — NOT a deployed or validated trading system.**
 
 The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.
 
@@ -99,3 +99,5 @@ GĐ4/P0.16 [source PR #43](https://github.com/ngluonghoa/swing-trading-1-8/pull/
 GĐ4/P0.17 adds [local metadata-only reference journal and opt-in expiry-bounded SSI/DNSE diagnostic cache](docs/P0_17_REFERENCE_JOURNAL.md). Quotes are never persisted by default; any quote retention requires separately supplied licence and protected-storage approvals, and all stored reads stay reference-only and nonactionable. This SQLite library is **not a deployed service or authenticated live MCP runtime**. Historical B5/BT/OOS and source entitlement are still OPEN. Canonical Google Drive Handoff is now §27.41; the corresponding GitHub full-text snapshot is an explicitly verified point-in-time copy.
 
 GĐ4/P0.18 adds [metadata-only SSI/DNSE journal checkpoint and verified restore](docs/P0_18_METADATA_ONLY_CHECKPOINT_RECOVERY.md): construct a fresh SQLite backup containing append-only audit metadata **but NO quote cache data**, pin whole-file digest/chain tip with an externally held checkpoint, restore to a new path only, and verify historical prefix. This is synthetic engineering only, not a running backup schedule, approved retention/licence, signed custodian, protected production host, historical B5 backtest or trade system. Canonical Google Drive Handoff now §27.42; this GitHub full-text snapshot was explicitly refreshed and must be compared against Drive after the documentation PR merges.
+
+GĐ4/P0.19 adds [fail-closed POSIX SQLite owner/perms preflight and opt-in detached HMAC checkpoint verification](docs/P0_19_STORAGE_PREFLIGHT_CHECKPOINT_CUSTODY.md). This is NOT a signed independent-custody deployment; HMAC requires a shared secret and the holder of the verification key can also forge a seal. No actual host/volume, key custodian, licensing or production cache activation. Canonical Google Drive Handoff remains §27.42 until source merge and explicit §27.43 sync.

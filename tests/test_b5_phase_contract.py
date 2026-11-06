@@ -208,7 +208,35 @@ class B5PhaseReceiptTests(unittest.TestCase):
                             event_time_utc=original.event_time_utc,
                             first_known_time_utc=original.first_known_time_utc,
                             source_revision=original.source_revision)
-        self.assertEqual(evaluate(receipts=premature).reason, "MICRO_HIGH_NOT_AFTER_RETEST")
+        self.assertEqual(evaluate(receipts=premature).reason, "RF_CLOSED_BAR_NOT_AFTER_RETEST")
+
+    def test_rf_support_and_volume_must_close_after_retest(self):
+        p, a, b, rs = fixture_receipts()
+        raw = candle()
+        early_support = rebar(
+            raw, timeframe=Timeframe.H1, start=m(10), end=m(20),
+            known=m(20), retrieved=m(21), verified=m(25),
+        )
+        base = next(x for x in rs if x.ingredient is B5Ingredient.RF_SUPPORT_H1_D1)
+        early = replace(base, bar=resolved(early_support),
+                        evidence_id=early_support.source_event_ids[0],
+                        event_time_utc=early_support.bar_end_utc,
+                        first_known_time_utc=early_support.verified_at_utc,
+                        source_revision=early_support.observation_revision.source_revision_or_payload_digest)
+        altered = tuple(early if x.ingredient is B5Ingredient.RF_SUPPORT_H1_D1
+                        else x for x in rs)
+        self.assertEqual(evaluate(receipts=altered).reason,
+                         "RF_CLOSED_BAR_NOT_AFTER_RETEST")
+        base = next(x for x in rs if x.ingredient is B5Ingredient.RF_VOLUME)
+        early = replace(base, bar=resolved(early_support),
+                        evidence_id=early_support.source_event_ids[0],
+                        event_time_utc=early_support.bar_end_utc,
+                        first_known_time_utc=early_support.verified_at_utc,
+                        source_revision=early_support.observation_revision.source_revision_or_payload_digest)
+        altered = tuple(early if x.ingredient is B5Ingredient.RF_VOLUME
+                        else x for x in rs)
+        self.assertEqual(evaluate(receipts=altered).reason,
+                         "RF_CLOSED_BAR_NOT_AFTER_RETEST")
 
     def test_wrong_timeframe_and_ambiguous_source_conflict_block(self):
         _, _, _, rs = fixture_receipts()

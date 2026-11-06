@@ -1,13 +1,13 @@
 # Swing Trading 1.8
 
-**GĐ4/P0.14 SSI HISTORY AVAILABILITY / B5 TEMPORAL SPLIT AUDIT — NOT a validated trading system.**
+**GĐ4/P0.15 SSI→DNSE D1 REFERENCE FALLBACK ENGINEERING — NOT a validated trading system.**
 
 The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.
 
 ## Source of truth
 
 - **Python code, repeatable unit tests and CI:** this private GitHub repository.
-- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.38; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
+- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.39; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
 - **Source snapshots:** [docs/source-snapshots](docs/source-snapshots/00_MASTER_HANDOFF.txt) are point-in-time text exports. They are not automatically synchronized and do not replace the original documents.
 - **Approved market data and experiment evidence:** Google Drive where access, licensing, retention and source quality are explicitly verified.
 - **MOCHI:** secondary code clone and document backup, deferred while the device is offline. The plugin must remain independent of MOCHI.
@@ -89,3 +89,5 @@ GĐ4/P0.14 adds a [synthetic B5 SHORT/SWING temporal split/label purge/embargo a
 P0.14 [PR #39](https://github.com/ngluonghoa/swing-trading-1-8/pull/39) merged and [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42198383542) **316/316 synthetic tests PASS** each Python 3.11 and 3.12. Latest canonical Handoff is §27.38. Historical SHS/HNX secondary intraday access has empty dates despite positive daily trades; candidate B5 split isolation is structurally audited only with externally unverified session data. No approved B5 numeric parameters, official BT/OOS, provider entitlement, trading signals or orders.
 
 GĐ4/P0.15 adds a [read-only SSI-first DNSE D1 reference fallback router](docs/P0_15_DNSE_D1_FALLBACK_REFERENCE.md). DNSE `price_get_history` (one year, DAY only) supplied 248 D1 session-label observations for SHS/SSI/DIG/VGI; specific normalized price/volume samples matched SSI daily, while older SHS adjusted prices showed nonexact rounding/price-basis differences. The Python router requires injected read-only provider adapters, invokes DNSE only on SSI missing/declared unavailable and **never for intraday**, preserves distinct source provenance, blocks current-day premature D1 and future-fetched historical replay. Output is REFERENCE_ONLY, NEVER source-certified/eligible for indicators, backtesting, B5 or orders. Live MCP adapter wiring is **not deployed**; no plugin UI change.
+
+P0.15 [source PR #41](https://github.com/ngluonghoa/swing-trading-1-8/pull/41) merged; [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42204138440) **341/341 synthetic tests PASS** each Python 3.11 and 3.12. Canonical Handoff now §27.39. SSI-first DNSE D1 reference-only router needs live MCP adapter wiring in an approved runtime; same-day D1 close and provider-adjusted price basis are not independently certified. Not an intraday feed, indicator input, historical backtest or trade execution.

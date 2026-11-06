@@ -2,6 +2,8 @@
 
 ## Latest decisions
 
+- **P0.18 source branch (CI pending):** metadata-only logical journal backup and independently pinnable whole-file+chain checkpoint, restore with SHA256 recheck and new-file-only publication, historical prefix validation; SSI/DNSE quote cache is never copied into backup. There is no running host, approved retention/licence, external trust custodian, production recovery or historical backtest. [P0.18 specification](P0_18_METADATA_ONLY_CHECKPOINT_RECOVERY.md). Canonical Handoff still §27.41 pending merge/sync.
+
 - **P0.17 merged on main (PR #45; branch CI 376/376 PASS on Python 3.11/3.12):** local SQLite reference journal, append-only metadata SHA256 chain and consent-gated expiring provider-specific diagnostic quote cache. All storage/retention permissions are caller assertions only; no host deployment, approved data licence, independent custody, source certification or trading authority. See [P0.17 document](P0_17_REFERENCE_JOURNAL.md). Canonical Google Drive Handoff updated to §27.41; GitHub snapshot requires exact text verification after this documentation merge.
 
 
@@ -235,3 +237,8 @@ SSI B01–B08 source parity/entitlement, approved P01–P17 thresholds and execu
 
 - Implemented `reference_journal.py` and synthetic negative tests. Explicit run ID / provider, audit-clock rejection, immutable journal SHA256 linkage and stale-tip rollback; optional cache expiry/purge; default metadata-only persistence.
 - **NOT_DEPLOYED/NOT_VERIFIED:** approved external persistent volume or data-retention licence, encryption/secure deletion, independent journal checkpoint and restore, authenticated continuous MCP host, production L1–L5, B5 executable, SSI B01–B08, BT/OOS and orders.
+
+## GĐ4/P0.18 implementation branch — 2026-11-06 (CI pending)
+
+- Added `reference_journal_recovery.py` plus quote-free logical snapshot, `JournalCheckpoint`, separately pinned restore and prefix-guard tests. Shared SSI/DNSE cache is still **one SQLite database**; checkpoint export includes only metadata journal rows, and never quote data even in deleted pages/WAL of the exported file.
+- Not production-ready: source quote retention and live SQLite/WAL sanitization, independent signed checkpoint custody, runtime/volume approval, disaster recovery exercises, native historical M1/M5/M15 source rights and actionable signal gates remain OPEN.

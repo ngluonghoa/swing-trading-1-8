@@ -5,8 +5,7 @@ the two already authenticated MCP read functions and a trustworthy UTC receipt
 clock. No persistence, trading source qualification, orders or background jobs.
 """
 from dataclasses import dataclass
-from datetime import date, datetime, timezone
-from decimal import Decimal
+from datetime import date, datetime
 from enum import Enum
 from hashlib import sha256
 import json

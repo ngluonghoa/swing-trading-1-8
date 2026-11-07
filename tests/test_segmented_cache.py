@@ -69,7 +69,7 @@ class WeeklySegmentsTest(unittest.TestCase):
 
     def test_append_next_week_changes_only_new_window(self):
         self.commit()
-        rows=tuple(fake(i) for i in range(21))
+        rows=self.bars+(fake(21),)
         r=self.commit(rows,head=self.cloud.head(self.identity))
         self.assertEqual((r.created_windows,r.reused_windows),(1,3))
         self.assertEqual(self.cloud.object_count,4)
@@ -91,7 +91,7 @@ class WeeklySegmentsTest(unittest.TestCase):
         another=key("TEST002")
         self.cloud.commit(another,self.bars,expected_head=None,observed_at_utc=NOW)
         other=self.cloud.head(another)
-        edited=(replace(self.bars[0],close=Decimal(109),revision="r2",
+        edited=(replace(self.bars[0],close=Decimal(101),revision="r2",
                         first_known_utc=NOW-timedelta(hours=1)),)+self.bars[1:]
         self.commit(edited,head=self.cloud.head(self.identity))
         self.assertEqual(self.cloud.head(another),other)

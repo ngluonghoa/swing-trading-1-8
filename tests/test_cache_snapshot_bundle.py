@@ -190,7 +190,7 @@ class SnapshotTests(unittest.TestCase):
         with self.assertRaises(ValueError):self.make()
     def test_broken_bar_digest_denied(self):
         with sqlite3.connect(self.src) as c:
-            c.execute("UPDATE fixture_bars SET c='999999' WHERE cache_key=(SELECT MIN(cache_key) FROM fixture_bars) AND start_utc=(SELECT MIN(start_utc) FROM fixture_bars)")
+            c.execute("UPDATE fixture_bars SET c='100.5' WHERE cache_key=(SELECT MIN(cache_key) FROM fixture_bars) AND start_utc=(SELECT MIN(start_utc) FROM fixture_bars)")
         with self.assertRaises(RuntimeError):self.make()
     def test_no_snapshot_partial_output_after_bad_manifest_args(self):
         with self.assertRaises(ValueError):self.make(snapshot_id="invalid id")

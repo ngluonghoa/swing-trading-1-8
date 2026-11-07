@@ -2,6 +2,8 @@
 
 ## H2 retroactive architecture hardening (existing modules)
 
+[H2 acceptance matrix](docs/H2_ACCEPTANCE_MATRIX.md) distinguishes verified maintenance gates from remaining production blockers.
+
 H2-A [all-module AST inventory](docs/H2_LEGACY_MODERNIZATION.md) audits every source and test, provider/core dependency direction and import cycles; H2-B [existing legacy port retrofits](docs/H2_LEGACY_PORTS_B.md) added explicit SSI/DNSE injection, typed replay construction and consistent C3B/C4A fixture read ports; H2-C [semantic cache swap preview](docs/H2_CACHE_COMPATIBILITY_C.md) rejects mismatched revisions/first-known/EMA/ATR despite matching method signatures; H2-D [whole-repo quality gates](docs/H2_QUALITY_GATES_D.md) enhances test mapping and lint. This remains SYNTHETIC/OFFLINE engineering; not a licensed market source, production cache, active LKG or operational release. Source UI v1.0 remains locked; withdrawn C3C has not returned.
 
 ## H1 engineering maintainability — source-only, NOT a trading release
@@ -16,7 +18,7 @@ The system design specifies two separate strategies — SHORT (3–10 trading se
 ## Source of truth
 
 - **Python code, repeatable unit tests and CI:** this private GitHub repository.
-- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.65 (H1); [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
+- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.66 (H2); [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
 - **Source snapshots:** [docs/source-snapshots](docs/source-snapshots/00_MASTER_HANDOFF.txt) are point-in-time text exports. They are not automatically synchronized and do not replace the original documents.
 - **Approved market data and experiment evidence:** Google Drive where access, licensing, retention and source quality are explicitly verified.
 - **MOCHI:** secondary code clone and document backup, deferred while the device is offline. The plugin must remain independent of MOCHI.

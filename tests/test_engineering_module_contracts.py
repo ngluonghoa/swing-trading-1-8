@@ -277,5 +277,30 @@ class ArchitectureBoundaryTests(unittest.TestCase):
             visit(module)
 
 
+    def test_all_package_modules_have_acyclic_internal_import_graph(self):
+        modules = {file.stem for file in SOURCE.glob("*.py")}
+        edges = {module: self.imports(module) & modules for module in modules}
+        visited = set()
+        stack = []
+
+        def visit(module):
+            if module in stack:
+                raise AssertionError("Internal import cycle: " + " -> ".join(stack + [module]))
+            if module in visited:
+                return
+            stack.append(module)
+            for dependency in sorted(edges[module]):
+                visit(dependency)
+            stack.pop()
+            visited.add(module)
+
+        for module in sorted(modules):
+            visit(module)
+
+    def test_old_c3c_artifacts_not_reintroduced(self):
+        for name in ("drive_c3c_receipt.py",):
+            self.assertFalse((SOURCE / name).exists(), name)
+
+
 if __name__ == "__main__":
     unittest.main()

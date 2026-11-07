@@ -46,7 +46,9 @@ jobs:
             src/swing_trading/backtest.py \
             src/swing_trading/partition_chunk_cache.py \
             src/swing_trading/segmented_cache.py \
-            tests/test_h2_legacy_ports.py
+            tests/test_h2_legacy_ports.py \
+            src/swing_trading/cache_swap_preview.py \
+            tests/test_h2_cache_swap.py
       - name: Validate installed dependencies
         run: python -m pip check
       - name: Audit all legacy package modules and dependency boundaries

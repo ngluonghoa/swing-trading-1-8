@@ -350,6 +350,10 @@ class SyntheticDrivePartitionIndex:
         if name in self._chunks and self._chunks[name] != raw:
             raise ValueError("Content-addressed name has mismatching fixture bytes")
         if current is not None and current.chunk_sha256 == content_sha:
+            # Even on an unchanged five-minute scan, reject missing/corrupt
+            # previously published cache bytes instead of silently reusing.
+            self.load(identity, pinned_manifest_sha256=current.digest,
+                      minimum_generation=current.generation)
             return PartitionWrite.REUSED
         self._chunks.setdefault(name, raw)
         if simulate_crash_after_chunk:

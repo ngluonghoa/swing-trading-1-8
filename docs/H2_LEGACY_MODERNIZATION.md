@@ -1,6 +1,6 @@
 # H2 — Legacy modernization and standardization (Swing Trading 1.8)
 
-Status: H2-A audit implemented; H2-B..H2-E are separate modernization steps to be implemented and independently accepted. User approved retroactive standardization of ALL existing code through C4B, not just H1 standards for future code.
+Status: H2-A audit merged (#105); H2-B actual legacy port retrofits merged (#106); H2-C semantic cache swap checks merged (#107); H2-D whole-project quality gate and coverage map is in progress in this PR; H2-E canonical Handoff/snapshot sync still pending independent postmerge verification. User approved retroactive standardization of ALL existing code through C4B, not just H1 standards for future code.
 
 ## Protected baseline
 
@@ -42,6 +42,10 @@ Explicit contract for read/write/restore and exact source identity. Test 5→20�
 ## H2-D — Regression and substitution
 
 Use consumer-driven tests against actual old modules (not only H1 dummy classes), with explicit source/clock/cache boundaries and no accidental callbacks before validation. Include removal under pinned consumers, duplicate/unknown adapter rejection, permission fail-closed, partial history, stale corrections, wrong provider, and before/after behavior fixtures. Python 3.11/3.12 full CI and build install must be green.
+
+## H2-D measured upgrade
+
+Audit schema v2 now records *actual static imports from test files*, not merely whether test filenames match source names. Most recent green CI found 63 Python package modules and 63 test files, no unresolved import or cycle and no source module missing static direct test imports. This is **NOT** proof of branch coverage or exercise of each method. Full-tree Ruff E9/F821/F822/F823 correctness lint now runs on src/tests/scripts; changed retrofitted files get stricter E4/E7/E9/F checks. Full unit test count after H2-D: 1305 per Python version in branch CI. Real source integration, signing and production migrations still not done.
 
 ## H2-E — Governance and acceptance
 

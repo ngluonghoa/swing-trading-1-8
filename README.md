@@ -1,6 +1,6 @@
 # Swing Trading 1.8
 
-**GĐ4/P0.29b EXTERNAL TRUST BLOCKED + C3A SYNTHETIC CACHE BACKUP + C2A/C2B/C2C SOURCE QA + C1/C1B/C1C ROUTING — NOT a deployed trading system.**
+**GĐ4/P0.29b EXTERNAL TRUST BLOCKED + C3B PARTITIONED DRIVE CHUNK/MANIFEST DESIGN + C3A SYNTHETIC BACKUP + C2A/C2B/C2C SOURCE QA — NOT a deployed trading system.**
 
 The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.
 
@@ -26,6 +26,10 @@ No additional hosted execution service, extra access token or powered-on MOCHI i
 python3 -m pip install -e .
 python3 -m unittest discover -s tests -v
 ```
+
+## GĐ4/C3B — persistent Google Drive target via per-partition chunk + manifest (synthetic reference)
+
+[PR #95](https://github.com/ngluonghoa/swing-trading-1-8/pull/95) merged main `16b83c98097acc0be0933622cec04b4ce7a2f100`; [postmerge CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42360929529) **1141/1141 tests PASS EACH Python 3.11/3.12** (+54). [C3B contract](docs/P0_C3B_PARTITION_CHUNK_MANIFEST_CACHE.md) implements *in-memory fake Drive* with deterministic SSI/DNSE/VCBS+venue+symbol+TF+version partition chunks, immutable content-addressed names and versioned per-partition manifests, checksum/parity, stale writer and restore guards. Synthetic 5→20→1→20 exercises 5+15 new chunks then zero unchanged writes, and a single historical correction updates only that partition. Three private Swing Trading Drive **staging folders created** for manifests/chunks/audit; NO actual chunk was uploaded, no real rights/transport/source delta or broker action. Local SQLite/RAM is ephemeral compute, **not the primary every-scan Drive blob**; C3A whole SQLite snapshot remains optional fixture recovery only. Handoff §27.63, Data Contract §26; next C3C synthetic real Drive connector readback.
 
 ## GĐ4/C3A — synthetic WAL-safe local snapshots, optional future Drive staging
 

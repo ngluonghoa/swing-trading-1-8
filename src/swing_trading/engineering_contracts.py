@@ -7,6 +7,7 @@ equivalence, operational safety, or permission to release a trading system.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import inspect
 import re
 
 _CONTRACT = re.compile(r"^[a-z][a-z0-9_.-]{0,79}$")
@@ -89,7 +90,7 @@ def check_port(
     for operation in required.operations:
         if operation not in supplied.operations:
             reasons.append("UNDECLARED_OPERATION:" + operation)
-        elif not callable(getattr(implementation, operation, None)):
+        elif not callable(inspect.getattr_static(implementation, operation, None)):
             reasons.append("MISSING_CALLABLE:" + operation)
     return PortCompatibility(not reasons, tuple(reasons))
 
@@ -101,3 +102,74 @@ def require_compatible_port(
     result = check_port(required, supplied, implementation)
     if not result.compatible:
         raise ValueError("; ".join(result.reasons))
+
+
+class EngineeringPortRegistry:
+    """In-memory engineering-only registry for add/replace/remove dry-runs.
+
+    Explicit consumer pins prevent accidental removal or incompatible hot swap.
+    This has NO persistence, locking, adapter authentication or live deployment.
+    """
+
+    def __init__(self) -> None:
+        self._ports: dict[tuple[str, str], tuple[PortDescriptor, object]] = {}
+        self._consumers: dict[str, tuple[PortDescriptor, tuple[str, str]]] = {}
+
+    @staticmethod
+    def _key(descriptor: PortDescriptor) -> tuple[str, str]:
+        if not isinstance(descriptor, PortDescriptor):
+            raise TypeError("Typed PortDescriptor required")
+        return descriptor.contract_id, descriptor.scope
+
+    def add(self, descriptor: PortDescriptor, implementation: object) -> None:
+        key = self._key(descriptor)
+        if key in self._ports:
+            raise ValueError("DUPLICATE_PORT_EXPLICIT_REPLACE_REQUIRED")
+        require_compatible_port(descriptor, descriptor, implementation)
+        self._ports[key] = descriptor, implementation
+
+    def resolve(self, required: PortDescriptor) -> object:
+        key = self._key(required)
+        if key not in self._ports:
+            raise KeyError("MISSING_EXPLICIT_PORT")
+        supplied, implementation = self._ports[key]
+        require_compatible_port(required, supplied, implementation)
+        return implementation
+
+    def bind_consumer(self, consumer_id: str, required: PortDescriptor) -> object:
+        if not isinstance(consumer_id, str) or not _CONTRACT.fullmatch(consumer_id):
+            raise ValueError("Explicit nonsecret consumer ID required")
+        if consumer_id in self._consumers:
+            raise ValueError("DUPLICATE_CONSUMER")
+        implementation = self.resolve(required)
+        self._consumers[consumer_id] = required, self._key(required)
+        return implementation
+
+    def detach_consumer(self, consumer_id: str) -> None:
+        if consumer_id not in self._consumers:
+            raise KeyError("UNKNOWN_CONSUMER")
+        del self._consumers[consumer_id]
+
+    def replace(self, required: PortDescriptor, supplied: PortDescriptor,
+                implementation: object) -> None:
+        key = self._key(required)
+        if key not in self._ports:
+            raise KeyError("MISSING_EXPLICIT_PORT")
+        require_compatible_port(required, supplied, implementation)
+        for pinned_required, pinned_key in self._consumers.values():
+            if pinned_key == key:
+                require_compatible_port(pinned_required, supplied, implementation)
+        # All validations complete BEFORE any state mutation.
+        self._ports[key] = supplied, implementation
+
+    def remove(self, required: PortDescriptor) -> None:
+        key = self._key(required)
+        if key not in self._ports:
+            raise KeyError("MISSING_EXPLICIT_PORT")
+        if any(pinned_key == key for _, pinned_key in self._consumers.values()):
+            raise ValueError("PORT_HAS_ATTACHED_CONSUMERS")
+        del self._ports[key]
+
+    @property
+    def count(self) -> int:
+        return len(self._ports)

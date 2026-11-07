@@ -24,7 +24,7 @@ from swing_trading.incremental_cache import (
 from swing_trading.partition_chunk_cache import SyntheticDrivePartitionIndex
 from swing_trading.replay import ReplayClock
 from swing_trading.segmented_cache import SyntheticWeeklyChunkStore
-from swing_trading.contracts import DecisionStatus, SignalDecision, Strategy
+from swing_trading.contracts import DecisionStatus, SignalDecision
 from test_d1_mcp_transport_bridge import bridge, ssi_payload, dnse_payload
 from test_dnse_d1_reference_fallback import request, NOW as D1_NOW
 

@@ -1,13 +1,13 @@
 # Swing Trading 1.8
 
-**GĐ4/P0.28 RIGHTS-CHAIN + VN R1–R7 + C1/C1B THREE-PROVIDER SYNTHETIC CACHE (ENGINEERING PARTIAL) — NOT a deployed or validated trading system.**
+**GĐ4/P0.28 RIGHTS-CHAIN + VN R1–R7 + C1/C1B/C1C THREE-PROVIDER ADAPTIVE ROUTING REFERENCE PREVIEW — NOT a deployed or validated trading system.**
 
 The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.
 
 ## Source of truth
 
 - **Python code, repeatable unit tests and CI:** this private GitHub repository.
-- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.55; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
+- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.56; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
 - **Source snapshots:** [docs/source-snapshots](docs/source-snapshots/00_MASTER_HANDOFF.txt) are point-in-time text exports. They are not automatically synchronized and do not replace the original documents.
 - **Approved market data and experiment evidence:** Google Drive where access, licensing, retention and source quality are explicitly verified.
 - **MOCHI:** secondary code clone and document backup, deferred while the device is offline. The plugin must remain independent of MOCHI.
@@ -26,6 +26,10 @@ No additional hosted execution service, extra access token or powered-on MOCHI i
 python3 -m pip install -e .
 python3 -m unittest discover -s tests -v
 ```
+
+## Task-aware Adaptive Source Router — offline reference-only
+
+[C1C PR #81](https://github.com/ngluonghoa/swing-trading-1-8/pull/81) merged main. [744/744 tests per Python 3.11/3.12](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42329267224). [C1C contract](docs/P0_C1C_ADAPTIVE_SOURCE_ROUTER_PREVIEW.md): DNSE is **conditional D1 priority** after price-basis, completeness, calendar, volume and freshness checks; SSI supplies native M1 inputs for derived M5/M15; VCBS is a separately validated D1 reference. Equal-capability sources may reorder after at least five recent comparable task-scoped probes with failure penalties. Every output is **reference-only**, with data storage, indicator/trading authorization and real adapter integration HARD DISABLED. No provider reliability SLA or automatic production fallback is established. Original GĐ4/P0.29 source-rights provenance remains NEXT.
 
 ## Third data source: MCP VCBS — reference-only, synthetic cache namespace
 

@@ -2,9 +2,11 @@
 
 Canonical Google Doc: https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit
 
-**Latest decision: §27.64 / GĐ4/C4A+C4B — synthetic weekly sub-chunks plus VN causal Backtest execution fixture; no real Drive/source/backtest license.**
+**Latest decision: §27.65 / GĐ4/H1 — user-approved engineering hardening, versioned module contracts, consumer-pinned safe add/replace/remove and CI/release identity; C3C remains rolled back.**
 
-The [full-text GitHub snapshot](00_MASTER_HANDOFF.txt) was refreshed from the canonical Google Doc through §27.62. It is a **point-in-time plain-text copy**, not an automatic two-way synchronization. Exact equality must be checked on `main` after merge, and the native Google Doc remains authoritative for later changes.
+The [full-text GitHub snapshot](00_MASTER_HANDOFF.txt) was refreshed from the canonical Google Doc through §27.65. It is a **point-in-time plain-text copy**, not an automatic two-way synchronization. Exact equality must be checked on `main` after merge, and the native Google Doc remains authoritative for later changes.
+
+**§27.65 H1:** [PR #103](https://github.com/ngluonghoa/swing-trading-1-8/pull/103) MERGED main `22325b897e07c8bdc14887c6cc3edb69f9cc5d8b`; [postmerge main Actions](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42398943271) SUCCESS 1250/1250 each Python 3.11/3.12 (+63 H1 tests), separate 63/63 module-contract job, ruff, pip check and wheel build/fresh import PASS. `engineering_contracts.py` uses side-effect-free ABI verification and pinned engineering-only registry (add/replace/remove); `engineering_release.py` creates SHA-bound NONRELEASE snapshots. C3C PR #100/#101 were reverted by PR #102; data rights, live cache/5-min delta, protected main, LKG, real backtest/OOS and production releases remain unimplemented. Canonical Smart Cache §28 and H1 governance note; next reimplement C3C independently. Exact native-doc text snapshot synced separately.
 
 **§27.64 C4A+C4B:** [PR #97](https://github.com/ngluonghoa/swing-trading-1-8/pull/97) and [PR #98](https://github.com/ngluonghoa/swing-trading-1-8/pull/98) merged, latest main `20ee4579a65e56efe7f0502411019f4e7b95bd60`, 1187/1187 PASS each Python 3.11/3.12 in [Actions 42363426310](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42363426310). 21 new tests weekly within-partition immutable chunk reuse, selective week restore; 25 new tests synthetic Vietnam cash-equity execution/fee/settlement/ambiguous-stop-target safety. No actual cloud cache, real Backtest/P&L or trading.
 

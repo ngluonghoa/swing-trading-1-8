@@ -22,3 +22,35 @@ jobs:
         run: python -m compileall -q src tests
       - name: Run engineering tests
         run: python -m unittest discover -s tests -v
+
+  engineering-contracts:
+    name: Contract, source-boundary and wheel checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install package and pinned engineering tools
+        run: |
+          python -m pip install -e ".[custody]"
+          python -m pip install ruff==0.14.6 build==1.2.2
+      - name: Lint changed engineering contract surface
+        run: |
+          ruff check --select E4,E7,E9,F \
+            src/swing_trading/engineering_contracts.py \
+            src/swing_trading/engineering_release.py \
+            tests/test_engineering_module_contracts.py \
+            tests/test_engineering_release.py
+      - name: Validate installed dependencies
+        run: python -m pip check
+      - name: Run substitution and compatibility contracts
+        run: python -m unittest discover -s tests -p "test_engineering_*.py" -v
+      - name: Build distribution wheel
+        run: python -m build --wheel --no-isolation --outdir dist
+      - name: Smoke-test isolated wheel installation
+        run: |
+          python -m venv /tmp/st18-contract-wheel
+          /tmp/st18-contract-wheel/bin/python -m pip install --no-deps dist/*.whl
+          cd /tmp
+          /tmp/st18-contract-wheel/bin/python -c "import swing_trading; from swing_trading.engineering_contracts import PortDescriptor; from swing_trading.engineering_release import EngineeringSnapshot; assert swing_trading.__version__ == '0.0.1'"

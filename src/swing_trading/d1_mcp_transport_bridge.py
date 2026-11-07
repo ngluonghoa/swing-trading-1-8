@@ -5,8 +5,7 @@ the two already authenticated MCP read functions and a trustworthy UTC receipt
 clock. No persistence, trading source qualification, orders or background jobs.
 """
 from dataclasses import dataclass
-from datetime import date, datetime, timezone
-from decimal import Decimal
+from datetime import date, datetime
 from enum import Enum
 from hashlib import sha256
 import json
@@ -18,6 +17,7 @@ from .dnse_d1_reference_fallback import (
     route_d1_reference, _decimal, _volume,
 )
 from .market_data import PriceBasis
+from .engineering_contracts import PortDescriptor, require_compatible_port
 from .replay import require_utc
 
 
@@ -168,6 +168,48 @@ class BridgeRun:
             raise ValueError("Source events must follow SSI-first route")
 
 
+@dataclass(frozen=True)
+class D1ReferenceTransport:
+    """Explicitly labelled legacy provider callback; engineering-only port.
+
+    This wrapper validates source identity and endpoint before wiring callbacks.
+    It cannot attest OAuth, current vendor permissions, time/data quality, or
+    production source authority, and exposes only an injected read function.
+    """
+    provider: D1Provider
+    endpoint: str
+    callback: Callable[[dict], dict]
+    version: str = "1.0.0"
+    reference_only: bool = True
+    licensed_market_data_authorized: bool = False
+
+    def __post_init__(self) -> None:
+        endpoints = {
+            D1Provider.SSI: "marketdata_list_daily_stock_infor",
+            D1Provider.DNSE: "price_get_history",
+        }
+        if type(self.provider) is not D1Provider or self.provider not in endpoints:
+            raise TypeError("Explicit supported provider enum required")
+        if self.endpoint != endpoints[self.provider]:
+            raise ValueError("D1_PROVIDER_ENDPOINT_MISMATCH")
+        if not callable(self.callback):
+            raise TypeError("Read-only source callback required")
+        if self.reference_only is not True or self.licensed_market_data_authorized is not False:
+            raise PermissionError("No provider rights or actionable data granted")
+        PortDescriptor("source.d1_reference", self.version, self.provider.value,
+                       ("fetch_readonly",))
+
+    @property
+    def descriptor(self) -> PortDescriptor:
+        return PortDescriptor("source.d1_reference", self.version, self.provider.value,
+                              ("fetch_readonly",))
+
+    def fetch_readonly(self, arguments: dict) -> dict:
+        if not isinstance(arguments, dict):
+            raise TypeError("Typed source request mapping required")
+        return self.callback(arguments)
+
+
 class ReadOnlyMcpD1Bridge:
     """Parses real MCP envelope shapes with injected authorized host callbacks.
 
@@ -175,6 +217,25 @@ class ReadOnlyMcpD1Bridge:
     and DNSE price_get_history, but no connector is imported or called by this
     library on its own. Only returned, selected reference quote is cached.
     """
+    @classmethod
+    def from_transports(cls, *, ssi: D1ReferenceTransport,
+                        dnse: D1ReferenceTransport,
+                        clock: Callable[[], datetime],
+                        cache: ProviderSeparatedReferenceCache) -> "ReadOnlyMcpD1Bridge":
+        """Preferred H2 wiring: source labelling before any injected callback.
+
+        The historical callable constructor stays unchanged for backwards
+        compatibility with the already-approved offline reference fixtures.
+        These contracts do NOT authorize new real connector usage.
+        """
+        if not isinstance(ssi, D1ReferenceTransport) or not isinstance(dnse, D1ReferenceTransport):
+            raise TypeError("Two explicitly typed D1 source ports required")
+        for value, provider in ((ssi, D1Provider.SSI), (dnse, D1Provider.DNSE)):
+            required = PortDescriptor("source.d1_reference", "1.0.0",
+                                      provider.value, ("fetch_readonly",))
+            require_compatible_port(required, value.descriptor, value)
+        return cls(ssi.fetch_readonly, dnse.fetch_readonly, clock, cache)
+
     def __init__(self, ssi_call: Callable[[dict], dict], dnse_call: Callable[[dict], dict],
                  clock: Callable[[], datetime], cache: ProviderSeparatedReferenceCache):
         if not all(callable(x) for x in (ssi_call, dnse_call, clock)):

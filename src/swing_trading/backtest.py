@@ -4,6 +4,7 @@ from datetime import datetime
 
 from .causal import CausalMarketEvent
 from .contracts import ZoneRuleRegistry, MarketDataPort
+from .engineering_contracts import PortDescriptor, require_compatible_port
 from .replay import ReplayClock, require_utc
 
 
@@ -30,6 +31,31 @@ class BacktestHarness:
     clock: ReplayClock
     market_data: MarketDataPort
     rules: ZoneRuleRegistry
+
+    @classmethod
+    def from_contracts(
+        cls, *, clock: ReplayClock, market_data: MarketDataPort,
+        market_port: PortDescriptor, rules: ZoneRuleRegistry,
+        rules_port: PortDescriptor,
+    ) -> "BacktestHarness":
+        """H2 safe constructor using versioned synthetic-only input contracts.
+
+        The pre-existing constructor remains stable. This check does not
+        authenticate a provider or make the prototype a trading backtester.
+        """
+        if not isinstance(clock, ReplayClock):
+            raise TypeError("Explicit causal ReplayClock required")
+        require_compatible_port(
+            PortDescriptor("replay.causal_events", "1.0.0",
+                           "SYNTHETIC_TEST_ONLY", ("available_events",)),
+            market_port, market_data,
+        )
+        require_compatible_port(
+            PortDescriptor("rules.zone_registry", "1.0.0",
+                           "SYNTHETIC_TEST_ONLY", ("evaluate",)),
+            rules_port, rules,
+        )
+        return cls(clock, market_data, rules)
 
     def visible_events(self) -> tuple[CausalMarketEvent, ...]:
         events = self.market_data.available_events(self.clock.as_of_utc)

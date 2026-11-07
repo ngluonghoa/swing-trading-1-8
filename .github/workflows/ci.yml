@@ -41,7 +41,12 @@ jobs:
             src/swing_trading/engineering_contracts.py \
             src/swing_trading/engineering_release.py \
             tests/test_engineering_module_contracts.py \
-            tests/test_engineering_release.py
+            tests/test_engineering_release.py \
+            src/swing_trading/d1_mcp_transport_bridge.py \
+            src/swing_trading/backtest.py \
+            src/swing_trading/partition_chunk_cache.py \
+            src/swing_trading/segmented_cache.py \
+            tests/test_h2_legacy_ports.py
       - name: Validate installed dependencies
         run: python -m pip check
       - name: Audit all legacy package modules and dependency boundaries

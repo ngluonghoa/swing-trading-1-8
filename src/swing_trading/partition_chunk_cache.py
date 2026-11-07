@@ -15,8 +15,9 @@ from hashlib import sha256
 import json
 import re
 
+from .engineering_contracts import PortDescriptor
 from .incremental_cache import (
-    CacheIdentity, FixtureBar, IndicatorCheckpoint, Provider,
+    CacheIdentity, FixtureBar, IndicatorCheckpoint,
     SyntheticIncrementalStore, full_recompute,
 )
 
@@ -304,6 +305,23 @@ class SyntheticDrivePartitionIndex:
 
     def active_manifest_sha(self, identity: CacheIdentity) -> str | None:
         return self._active.get(identity.fingerprint)
+
+    @property
+    def read_port_descriptor(self) -> PortDescriptor:
+        """Read-only structural fixture contract; not a licensed storage port."""
+        return PortDescriptor("cache.readonly_fixture", "1.0.0",
+                              "SYNTHETIC_TEST_ONLY", ("get_head", "read_partition"))
+
+    def get_head(self, identity: CacheIdentity) -> str | None:
+        """Untrusted candidate head; verified only by read_partition."""
+        if not isinstance(identity, CacheIdentity):
+            raise TypeError("Typed cache namespace required")
+        return self.active_manifest_sha(identity)
+
+    def read_partition(self, identity: CacheIdentity, *, pinned_digest: str
+                       ) -> tuple[FixtureBar, ...]:
+        """Unified H2 read contract, preserving the existing C3B wire format."""
+        return self.load(identity, pinned_manifest_sha256=pinned_digest)
 
     def _manifest_chain(self, identity: CacheIdentity) -> tuple[FixturePartitionManifest, ...]:
         key = identity.fingerprint

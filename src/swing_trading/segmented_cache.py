@@ -17,6 +17,7 @@ from hashlib import sha256
 import json
 import re
 
+from .engineering_contracts import PortDescriptor
 from .incremental_cache import CacheIdentity, FixtureBar, SyntheticIncrementalStore, full_recompute
 from .partition_chunk_cache import encode_fixture_chunk, decode_fixture_chunk
 
@@ -138,6 +139,21 @@ class SyntheticWeeklyChunkStore:
         if not isinstance(identity, CacheIdentity):
             raise TypeError("Typed identity required")
         return self._heads.get(identity.fingerprint)
+
+    @property
+    def read_port_descriptor(self) -> PortDescriptor:
+        """Read-only structural fixture contract; not an authorized Drive port."""
+        return PortDescriptor("cache.readonly_fixture", "1.0.0",
+                              "SYNTHETIC_TEST_ONLY", ("get_head", "read_partition"))
+
+    def get_head(self, identity: CacheIdentity) -> str | None:
+        """Untrusted candidate head; verified only by read_partition."""
+        return self.head(identity)
+
+    def read_partition(self, identity: CacheIdentity, *, pinned_digest: str
+                       ) -> tuple[FixtureBar, ...]:
+        """Unified H2 read contract; C4A still checks every weekly chunk."""
+        return self.load(identity, pinned_head=pinned_digest)
 
     def _lineage(self, identity: CacheIdentity) -> tuple[FixtureWindowIndex, ...]:
         history = self._history.get(identity.fingerprint, [])

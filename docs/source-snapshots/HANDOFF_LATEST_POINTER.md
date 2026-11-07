@@ -2,9 +2,11 @@
 
 Canonical Google Doc: https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit
 
-**Latest decision: §27.56 / GĐ4/C1C — D1 DNSE conditional priority, M1 SSI, VCBS reference; quality-first adaptive provider ranking (OFFLINE REFERENCE-ONLY)**, 2026-11-07. GĐ4/P0.29 independent vendor-rights provenance is still NEXT.
+**Latest decision: §27.57 / GĐ4/P0.29a — separately signed custody head, claimed-floor anti-rollback and dual-signed key rotation (CONDITIONAL PREVIEW)**, 2026-11-07. External trust-root / independent custody P0.29b remains NEXT.
 
-The [full-text GitHub snapshot](00_MASTER_HANDOFF.txt) was refreshed from the canonical Google Doc through §27.56. It is a **point-in-time plain-text copy**, not an automatic two-way synchronization. Exact equality must be checked on `main` after merge, and the native Google Doc remains authoritative for later changes.
+The [full-text GitHub snapshot](00_MASTER_HANDOFF.txt) was refreshed from the canonical Google Doc through §27.57. It is a **point-in-time plain-text copy**, not an automatic two-way synchronization. Exact equality must be checked on `main` after merge, and the native Google Doc remains authoritative for later changes.
+
+**§27.57 P0.29a conditional custody head:** [PR #83](https://github.com/ngluonghoa/swing-trading-1-8/pull/83) independently merged main `e0b187ddb4e6c21d3ed7b5f4a2e7ddd19c7bc5bd`, [postmerge main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42330641285) 795/795 PASS on each Python 3.11/3.12 (+51). [P0.29a custody/antirollback preview](../P0_29_CUSTODIED_RIGHTS_HEAD_PREVIEW.md) verifies signed custody-head freshness, same-account/source relative monotonic floor, two-signature epoch rollover and exact P0.28 signed-prefix continuity. **No independently verified vendor signer, current head, protected floor or data rights; no cache/trading permissions.** Next external P0.29b & parallel C2. No Work-era branches reused.
 
 **§27.56 Adaptive Source Router preview:** [PR #81](https://github.com/ngluonghoa/swing-trading-1-8/pull/81) merged from §27.55, main `50f3c1614a159ea7f1b5be2fa5fa9b600927390b`, [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42329267224) 744/744 each Python 3.11/3.12 (+44). [Reference-only C1C router contract](../P0_C1C_ADAPTIVE_SOURCE_ROUTER_PREVIEW.md): after external quality/freshness/parity gates, conditional D1 DNSE > SSI > VCBS; native M1 SSI only; >5 comparable probe samples enables performance reprioritization; no adapter, vendor rights, live signals or persistence. Native Data Contract §21 synced; original P0.29 still NEXT.
 

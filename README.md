@@ -1,13 +1,13 @@
 # Swing Trading 1.8
 
-**GĐ4/P0.28 RIGHTS-CHAIN + VN R1–R7 + C1/C1B/C1C THREE-PROVIDER ADAPTIVE ROUTING REFERENCE PREVIEW — NOT a deployed or validated trading system.**
+**GĐ4/P0.29a CONDITIONAL CUSTODY HEAD + VN R1–R7 + C1/C1B/C1C ADAPTIVE ROUTING PREVIEW — NOT a deployed or validated trading system.**
 
 The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.
 
 ## Source of truth
 
 - **Python code, repeatable unit tests and CI:** this private GitHub repository.
-- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.56; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
+- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.57; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
 - **Source snapshots:** [docs/source-snapshots](docs/source-snapshots/00_MASTER_HANDOFF.txt) are point-in-time text exports. They are not automatically synchronized and do not replace the original documents.
 - **Approved market data and experiment evidence:** Google Drive where access, licensing, retention and source quality are explicitly verified.
 - **MOCHI:** secondary code clone and document backup, deferred while the device is offline. The plugin must remain independent of MOCHI.
@@ -26,6 +26,10 @@ No additional hosted execution service, extra access token or powered-on MOCHI i
 python3 -m pip install -e .
 python3 -m unittest discover -s tests -v
 ```
+
+## GĐ4/P0.29a — conditional custody-head anti-rollback (NO provider authorization)
+
+[P0.29a independent PR #83](https://github.com/ngluonghoa/swing-trading-1-8/pull/83) merged main. [795/795 tests per Python 3.11/3.12](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42330641285). [Design/acceptance](docs/P0_29_CUSTODIED_RIGHTS_HEAD_PREVIEW.md): separately signed custodian head, claimed external high-watermark sequence/tip/account, dual-signed one-epoch key rotation and optional exact P0.28 signed prefix validation. It is **OFFLINE conditional cryptographic verification only**: self-supplied keys/floor cannot prove vendor issuer ownership, authenticated current revocation, non-rollback durable storage, source licensing or account retention rights. All live cache/indicator/BT/trading permissions remain HARD FALSE. Next P0.29b external trust/host design, parallel C2 three-source QA. Discarded Work branches unused.
 
 ## Task-aware Adaptive Source Router — offline reference-only
 

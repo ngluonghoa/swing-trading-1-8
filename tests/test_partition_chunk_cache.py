@@ -324,7 +324,7 @@ class ChunkTests(unittest.TestCase):
         with self.assertRaises(PermissionError):require_real_market_cache_transport()
 
     def test_mixed_5_20_1_20_scopes_and_one_dirty_partition(self):
-        keys=tuple(identity("TEST%03d"%i) for i in range(20))
+        keys=tuple(identity("TEST%03d"%(i+1)) for i in range(20))
         for key in keys[1:]:self.apply(key,tuple(bar(i) for i in range(20)),at=20,full=True)
         p1=self.cloud.sync_selected(self.store,keys[:5],created_at_utc=NOW)
         first={key.fingerprint:self.pin(key) for key in keys[:5]}

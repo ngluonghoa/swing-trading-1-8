@@ -1,13 +1,13 @@
 # Swing Trading 1.8
 
-**GĐ4/P0.29b EXTERNAL TRUST BLOCKED + C2A/C2B/C2C THREE-MCP SOURCE QA + C1/C1B/C1C ROUTING — NOT a deployed trading system.**
+**GĐ4/P0.29b EXTERNAL TRUST BLOCKED + C3A SYNTHETIC CACHE BACKUP + C2A/C2B/C2C SOURCE QA + C1/C1B/C1C ROUTING — NOT a deployed trading system.**
 
 The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.
 
 ## Source of truth
 
 - **Python code, repeatable unit tests and CI:** this private GitHub repository.
-- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.61; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
+- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.62; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
 - **Source snapshots:** [docs/source-snapshots](docs/source-snapshots/00_MASTER_HANDOFF.txt) are point-in-time text exports. They are not automatically synchronized and do not replace the original documents.
 - **Approved market data and experiment evidence:** Google Drive where access, licensing, retention and source quality are explicitly verified.
 - **MOCHI:** secondary code clone and document backup, deferred while the device is offline. The plugin must remain independent of MOCHI.
@@ -26,6 +26,10 @@ No additional hosted execution service, extra access token or powered-on MOCHI i
 python3 -m pip install -e .
 python3 -m unittest discover -s tests -v
 ```
+
+## GĐ4/C3A — synthetic WAL-safe local snapshots, optional future Drive staging
+
+[Source PR #93](https://github.com/ngluonghoa/swing-trading-1-8/pull/93) independently merged main `d410af3f4b808f09ef8c47beeb235369d2fb2245`, [postmerge GitHub CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42347204990) **1087/1087 synthetic unit tests PASS EACH Python 3.11/3.12** (+44). [C3A architecture](docs/P0_C3A_SYNTHETIC_CACHE_SNAPSHOT.md) implements SQLite online backup of opt-in fabricated fixtures only, manifest SHA256/lineage generation, strict schema + causal checkpoint parity, and a no-overwrite verified restore. A distinct nonpublic [Drive cache staging folder](https://drive.google.com/drive/folders/1Wuaale6klzOH19204vCdjlNPfl-wubhp) exists, but **NO SQLite cache bytes have been uploaded**, no Drive transport/runtime integration or real-market data cache is approved. Cache source/rights, off-host monotonic custody, P0.29c and production trading remain BLOCKED. Master Handoff §27.62, Data Contract §25. Next C3B synthetic-only Drive transport/readback QA; actual weekday C2C independent.
 
 ## GĐ4/C2C — offline live-session metrics readiness, no real-session authorization
 

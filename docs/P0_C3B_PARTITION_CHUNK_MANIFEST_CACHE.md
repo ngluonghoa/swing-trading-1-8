@@ -1,0 +1,30 @@
+# GĐ4/C3B — Per-partition immutable chunk + manifest architecture (Swing Trading 1.8)
+
+**Date:** 2026-11-07, Asia/Ho_Chi_Minh. **Implementation state: offline/synthetic reference only**. User approved **Google Drive as persistent cache target** and adopting the Forex project’s immutable chunk/manifest approach rather than uploading a whole SQLite file at each scan. C3A SQLite WAL-safe whole-file snapshot/restore remains a separate optional local disaster-recovery tool, **not** the primary Drive synchronization artifact. GitHub remains source code and spec repository; it MUST NOT hold real quote/cache files.
+
+## Verified destination layout
+
+Created beneath the pre-existing private staging root [CACHE_SWING_TRADING_1_8__STAGING_SYNTHETIC_ONLY](https://drive.google.com/drive/folders/1Wuaale6klzOH19204vCdjlNPfl-wubhp):
+- [00_MANIFESTS_AND_INDEX__STAGING](https://drive.google.com/drive/folders/1_U6v9e1WVo3BWZCLyRYSLRLehAsmQqox): eventual versioned per-partition manifests, independently checked active pointer/index.
+- [01_IMMUTABLE_CHUNKS__STAGING](https://drive.google.com/drive/folders/1tC_ksJWo7ecjimVo-fPrg1b7iPdWA7tf): future content-addressed immutable fixture chunk objects.
+- [02_AUDIT_AND_QUARANTINE__STAGING](https://drive.google.com/drive/folders/1jgR15oDKr9HPL0EPTKD8SI3VwB7tSYfK): eventual provenance/validation receipts and orphan/corrupt object quarantine.
+
+This directory layout does NOT constitute a licensed production upload, external key custodian, concurrency lock, or verified real Drive bytes. Keep provider-specific licence and privacy controls CLOSED.
+
+## Architecture and partitioning
+
+A cache partition key is the complete existing `CacheIdentity.fingerprint`: project, source provider SSI/DNSE/VCBS, endpoint, instrument, exchange, timeframe, session, RAW/ADJUSTED price basis, corporate-action adjustment revision, VN market-calendar and aggregation policy revisions, indicator/version/parameter fingerprint, vendor rights/resolution/quality versions and fixture environment. Provider source rows and volume definitions MUST NOT be silently mixed. One logical partition becomes one **immutable content-addressed synthetic chunk**, named `st18-<partition_sha256>-<chunk_sha256>.fixture.json`. A separate strict canonical manifest contains generation, preceding manifest digest, chunk hash/name/bytes, UTC materialization timestamp, bar count/checkpoint count and explicit `market_data_authorized=false`, `drive_upload_performed=false`. No names/accounts/credentials are exposed in the manifest. Version-only identity changes create separate partitions.
+
+New module `src/swing_trading/partition_chunk_cache.py` implements `encode_fixture_chunk` and `decode_fixture_chunk` with exact schema, finite Decimal, OHLC digest check, UTC causal chronology and EMA20/ATR14 checkpoint cold-parity validation. Chunk contents include ONLY developer-supplied **fabricated** fixture bars and derived checkpoints (not real vendor licensed data). `SyntheticDrivePartitionIndex` is **in-memory fake Drive**, with per-partition append-only manifest history, anti-stale head comparison, stage-then-publish, no-overwrite content-addressed objects, broken pointer/corrupt/missing object fail-closed, and selective restore into a new synthetic SQLite partition. `sync_selected` operates **only on selected partitions**, reuses byte-identical ones and retains the others without writes. Any result's actual Drive/source API calls remain zero. No actual HTTP, Drive data upload, external SAS/auth, persistent cache, provider ingestion, signal output or trades are implemented here.
+
+### Five-minute scan behavior to test
+
+SYNTHETIC scan 5 tickers ➝ later 20 tickers ➝ then 1 ➝ then 20 (each selected partition may cover one provider/TF/session). After an initial cold load of five, a wider scan should only create 15 additional chunks if nothing changed in the first five; repeat single/20 should produce **zero new chunk/manifest generations** when source fixtures are unchanged. If one existing ticker is corrected, only its partition chunk/manifest is versioned and its SQLite EMA20/ATR14 tail is recalculated by the existing C1 store; all other partitions retain their heads. Multiple provider/timeframe identities stay isolated. This is not proof the SSI/DNSE/VCBS endpoints support a genuine changed-since query: request scope, provider bytes, source revisions and throttling remain externally unverified.
+
+### Security and restart boundaries
+
+A local `expected_head` comparison is only a **single-process simulation**, NOT a Google Drive CAS, distributed fencing token, independently signed manifest, trusted monotonic counter or external anti-rollback. A caller-supplied pinned head/floor may be controlled by the same attacker. In production, stage immutable chunks, verify post-upload readback, publish manifest/index only under a protected single-writer or conditional transaction mechanism, and keep independent append-only monotonic witness. Handle orphan staged chunks, 403/429/5xx, duplicate Drive names, changes outside overlap, retention revocation and zero-data on expired licences. The C3A whole SQLite snapshot may serve local recovery but MUST NOT be silently uploaded as a fast-changing global cache. Local SQLite is temporary compute; Google Drive is long-lived storage, not a compute host/scheduler.
+
+**Hard blockers:** independent account/provider rights for real storage, source-rights revocation and temporal head (P0.29c), vendor native bar/basis/volume/source correction proof, protected OAuth/Drive raw-byte adapter, encryption/ACL/region/retention, actual RTO/RPO and 5-minute cloud metrics. Keep all flags denying real cache and trading; UI v1.0 DESIGN_LOCKED, SHORT/SWING and B1–B8/S1–S8 with eight-step audit unchanged; Forex/CK2/Scanner/MOCHI separate.
+
+**Next:** after all synthetic CI, evaluate a tiny harmless synthetic-only real Drive upload/readback (separate authenticated connector smoke) and create independent receipt verification. Do not infer any actual price cache from folder existence. Once external data rights are approved, design a separate rights-bound production path.

@@ -1,13 +1,13 @@
 # Swing Trading 1.8
 
-**GĐ4/P0.29b EXTERNAL TRUST BLOCKED + C2A/C2B THREE-MCP SOURCE QA + C1/C1B/C1C ROUTING — NOT a deployed trading system.**
+**GĐ4/P0.29b EXTERNAL TRUST BLOCKED + C2A/C2B/C2C THREE-MCP SOURCE QA + C1/C1B/C1C ROUTING — NOT a deployed trading system.**
 
 The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.
 
 ## Source of truth
 
 - **Python code, repeatable unit tests and CI:** this private GitHub repository.
-- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.60; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
+- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.61; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
 - **Source snapshots:** [docs/source-snapshots](docs/source-snapshots/00_MASTER_HANDOFF.txt) are point-in-time text exports. They are not automatically synchronized and do not replace the original documents.
 - **Approved market data and experiment evidence:** Google Drive where access, licensing, retention and source quality are explicitly verified.
 - **MOCHI:** secondary code clone and document backup, deferred while the device is offline. The plugin must remain independent of MOCHI.
@@ -26,6 +26,10 @@ No additional hosted execution service, extra access token or powered-on MOCHI i
 python3 -m pip install -e .
 python3 -m unittest discover -s tests -v
 ```
+
+## GĐ4/C2C — offline live-session metrics readiness, no real-session authorization
+
+[Source PR #91](https://github.com/ngluonghoa/swing-trading-1-8/pull/91) independently merged `main` `8d28b9faa8dfaf8a867f9b991b29e6e564667845`; [postmerge CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42343379452) **1043/1043 synthetic tests PASS** each Python 3.11/3.12 (+55). [C2C metadata-only readiness](docs/P0_C2C_SESSION_TELEMETRY_READINESS.md) distinguishes caller monotonic latency, within-scope median/p95, per-phase and weekday coverage, reported source age, corrections, HTTP body vs full reported network bytes. This is NOT a live-market measurement on Saturday, an independently authenticated source, provider entitlement, trusted network benchmark, actual 5-minute bandwidth saving, production Smart Cache or broker routing. Master Handoff §27.61; Data Contract §24. Further on-session evidence needs separately approved rights and monitored client. P0.29c remains BLOCKED.
 
 ## GĐ4/C2B — fail-closed fair-scope D1 quality and endpoint-only speed descriptions
 

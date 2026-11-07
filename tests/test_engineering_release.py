@@ -2,7 +2,6 @@
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-import re
 import tomllib
 import unittest
 

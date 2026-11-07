@@ -1,13 +1,13 @@
 # Swing Trading 1.8
 
-**GĐ4/P0.28 RIGHTS-CHAIN + VN R1–R7 + C1 SYNTHETIC INCREMENTAL CACHE (ENGINEERING PARTIAL) — NOT a deployed or validated trading system.**
+**GĐ4/P0.28 RIGHTS-CHAIN + VN R1–R7 + C1/C1B THREE-PROVIDER SYNTHETIC CACHE (ENGINEERING PARTIAL) — NOT a deployed or validated trading system.**
 
 The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.
 
 ## Source of truth
 
 - **Python code, repeatable unit tests and CI:** this private GitHub repository.
-- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.54; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
+- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.55; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
 - **Source snapshots:** [docs/source-snapshots](docs/source-snapshots/00_MASTER_HANDOFF.txt) are point-in-time text exports. They are not automatically synchronized and do not replace the original documents.
 - **Approved market data and experiment evidence:** Google Drive where access, licensing, retention and source quality are explicitly verified.
 - **MOCHI:** secondary code clone and document backup, deferred while the device is offline. The plugin must remain independent of MOCHI.
@@ -26,6 +26,10 @@ No additional hosted execution service, extra access token or powered-on MOCHI i
 python3 -m pip install -e .
 python3 -m unittest discover -s tests -v
 ```
+
+## Third data source: MCP VCBS — reference-only, synthetic cache namespace
+
+[VCBS source integration PR #79](https://github.com/ngluonghoa/swing-trading-1-8/pull/79) merged main, [700/700 tests per Python 3.11/3.12](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42326719230). [Detailed capability contract](docs/P0_C1B_VCBS_SOURCE_CAPABILITY.md): independent VCBS namespace alongside SSI/DNSE in synthetic cache, D1 bounded date-window support but **no verified changed-since cursor**, price-only intraday not native M1 OHLCV, quote prices VND/1000 versus historical D1 VND, adjusted O/H/L not certified. **No real VCBS quote retention, source-rights approval, authenticated adapter wiring, actionable signals or automatic fallback.** Original GĐ4/P0.29 rights trust remains NEXT.
 
 ## Five-minute incremental Smart Cache foundation — synthetic only
 

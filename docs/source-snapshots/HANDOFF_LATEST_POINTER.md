@@ -2,9 +2,11 @@
 
 Canonical Google Doc: https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit
 
-**Latest decision: §27.54 / GĐ4/C1 — synthetic incremental five-minute fetch planning, restartable fixture checkpoints and EMA20/ATR14 causal replay**, 2026-11-07. GĐ4/P0.29 independent vendor-rights provenance is still NEXT.
+**Latest decision: §27.55 / GĐ4/C1B — third-provider VCBS capability audit, strict source namespace and nonactionable D1 guards**, 2026-11-07. GĐ4/P0.29 independent vendor-rights provenance is still NEXT.
 
-The [full-text GitHub snapshot](00_MASTER_HANDOFF.txt) was refreshed from the canonical Google Doc through §27.54. It is a **point-in-time plain-text copy**, not an automatic two-way synchronization. Exact equality must be checked on `main` after merge, and the native Google Doc remains authoritative for later changes.
+The [full-text GitHub snapshot](00_MASTER_HANDOFF.txt) was refreshed from the canonical Google Doc through §27.55. It is a **point-in-time plain-text copy**, not an automatic two-way synchronization. Exact equality must be checked on `main` after merge, and the native Google Doc remains authoritative for later changes.
+
+**§27.55 VCBS third provider:** [PR #79](https://github.com/ngluonghoa/swing-trading-1-8/pull/79) merged main `2936d5bc2f5ab81a433eaba26521b3147cc23a16`, [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42326719230) 700/700 synthetic tests PASS each Python 3.11 and 3.12 (+29). [VCBS capability/safety contract](../P0_C1B_VCBS_SOURCE_CAPABILITY.md). D1 bounded date-window is not a true changed-since cursor; VCBS intraday price-by-minute is not native M1 OHLCV; no live VCBS storage, source rights or production adapter is granted. Canonical Data Contract §20 synced. Original GĐ4/P0.29 still NEXT.
 
 **§27.54 cache foundation:** [PR #77](https://github.com/ngluonghoa/swing-trading-1-8/pull/77), main `4561812d73883da2df6720d1a9a4355c1d65d05b`, [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42324745381) 671/671 synthetic PASS each Python 3.11 and 3.12 (+54). [C1 design/acceptance](../P0_C1_INCREMENTAL_SMART_CACHE_FOUNDATION.md) adds conservative provider capability planner, fixture-only SQLite persistence and restartable EMA20/ATR14 checkpoint replay; no actual SSI/DNSE live data cache, certified provider delta APIs, source authorization or L1–L5 product runtime. [Data Contract snapshot](05_GD3_DATA_CONTRACT_SMART_CACHE_ARCH.txt) through §19 updated from canonical Drive. Original GĐ4/P0.29 remains NEXT.
 

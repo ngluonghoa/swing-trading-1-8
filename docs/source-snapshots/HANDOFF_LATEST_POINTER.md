@@ -2,9 +2,11 @@
 
 Canonical Google Doc: https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit
 
-**Latest decision: §27.55 / GĐ4/C1B — third-provider VCBS capability audit, strict source namespace and nonactionable D1 guards**, 2026-11-07. GĐ4/P0.29 independent vendor-rights provenance is still NEXT.
+**Latest decision: §27.56 / GĐ4/C1C — D1 DNSE conditional priority, M1 SSI, VCBS reference; quality-first adaptive provider ranking (OFFLINE REFERENCE-ONLY)**, 2026-11-07. GĐ4/P0.29 independent vendor-rights provenance is still NEXT.
 
-The [full-text GitHub snapshot](00_MASTER_HANDOFF.txt) was refreshed from the canonical Google Doc through §27.55. It is a **point-in-time plain-text copy**, not an automatic two-way synchronization. Exact equality must be checked on `main` after merge, and the native Google Doc remains authoritative for later changes.
+The [full-text GitHub snapshot](00_MASTER_HANDOFF.txt) was refreshed from the canonical Google Doc through §27.56. It is a **point-in-time plain-text copy**, not an automatic two-way synchronization. Exact equality must be checked on `main` after merge, and the native Google Doc remains authoritative for later changes.
+
+**§27.56 Adaptive Source Router preview:** [PR #81](https://github.com/ngluonghoa/swing-trading-1-8/pull/81) merged from §27.55, main `50f3c1614a159ea7f1b5be2fa5fa9b600927390b`, [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42329267224) 744/744 each Python 3.11/3.12 (+44). [Reference-only C1C router contract](../P0_C1C_ADAPTIVE_SOURCE_ROUTER_PREVIEW.md): after external quality/freshness/parity gates, conditional D1 DNSE > SSI > VCBS; native M1 SSI only; >5 comparable probe samples enables performance reprioritization; no adapter, vendor rights, live signals or persistence. Native Data Contract §21 synced; original P0.29 still NEXT.
 
 **§27.55 VCBS third provider:** [PR #79](https://github.com/ngluonghoa/swing-trading-1-8/pull/79) merged main `2936d5bc2f5ab81a433eaba26521b3147cc23a16`, [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42326719230) 700/700 synthetic tests PASS each Python 3.11 and 3.12 (+29). [VCBS capability/safety contract](../P0_C1B_VCBS_SOURCE_CAPABILITY.md). D1 bounded date-window is not a true changed-since cursor; VCBS intraday price-by-minute is not native M1 OHLCV; no live VCBS storage, source rights or production adapter is granted. Canonical Data Contract §20 synced. Original GĐ4/P0.29 still NEXT.
 

@@ -2,9 +2,11 @@
 
 Canonical Google Doc: https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit
 
-**Latest decision: §27.62 / GĐ4/C3A — fixture-only SQLite backup/restore and a Google Drive staging namespace, NOT licensed production cache**, 2026-11-07. P0.29c external trust remains blocked.
+**Latest decision: §27.63 / GĐ4/C3B — Google Drive chunk + manifest by partition (synthetic-only), not full SQLite upload; real Drive data upload still NOT RUN.**
 
 The [full-text GitHub snapshot](00_MASTER_HANDOFF.txt) was refreshed from the canonical Google Doc through §27.62. It is a **point-in-time plain-text copy**, not an automatic two-way synchronization. Exact equality must be checked on `main` after merge, and the native Google Doc remains authoritative for later changes.
+
+**§27.63 C3B partition chunk+manifest:** [PR #95](https://github.com/ngluonghoa/swing-trading-1-8/pull/95) merged main `16b83c98097acc0be0933622cec04b4ce7a2f100`; [postmerge CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42360929529) **1141/1141 PASS each Python 3.11 and 3.12** (+54). User-approved Drive persistence uses content-addressed partition chunks and per-partition manifests, not full SQLite every 5 minutes. [C3B reference](../P0_C3B_PARTITION_CHUNK_MANIFEST_CACHE.md) implements only fake in-memory Drive; three Drive staging folders created but contain no actual chunk, no licensed market data. 5→20→1→20 synthetic scope reuses old ticker partitions; one late correction updates only one partition. Cache source document §26; C3C real harmless Drive connector smoke NEXT, P0.29c EXTERNAL BLOCKED.
 
 **§27.62 C3A fixture snapshot / Drive staging:** [PR #93](https://github.com/ngluonghoa/swing-trading-1-8/pull/93) merged main `d410af3f4b808f09ef8c47beeb235369d2fb2245`; [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42347204990) **1087/1087 synthetic PASS each Python 3.11/3.12** (+44). [C3A offline-only contract](../P0_C3A_SYNTHETIC_CACHE_SNAPSHOT.md) creates WAL-safe SQLite backup, metadata-only digest/generation manifest, full checkpoint parity and pinned no-overwrite restore. A separate Google Drive [synthetic-only staging folder](https://drive.google.com/drive/folders/1Wuaale6klzOH19204vCdjlNPfl-wubhp) was created, but NO snapshot uploaded and no real provider storage licensed/implemented. Data Contract §25, C3B future synthetic transfer only; P0.29c EXTERNAL BLOCKED and UI v1.0 locked.
 

@@ -104,7 +104,7 @@ class VNFixtureExecutionTests(unittest.TestCase):
             replace(RULES,sell_tax_rate=D("-0.01"))
 
     def test_unknown_t_plus_is_not_automatic(self):
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             self.evaluate(release=None)
 
     def test_ambiguous_same_bar_touch(self):

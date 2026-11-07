@@ -16,6 +16,13 @@ scripts/h2_architecture_audit.py uses Python AST and does not import any provide
 
 Fail closed on unresolved internal imports, dependency cycles across the FULL package, core importing infrastructure/provider/SQLite/cloud, or reintroduction of the rolled-back C3C source/test. This is static engineering evidence only: source authorization=false, deployment approval=false, and backtest/OOS verified=false. A direct named test is not the same thing as dynamic line coverage; no coverage percentage is asserted.
 
+## Measured H2-A initial inventory (first audited CI run)
+
+- Source package: **62** .py modules (including package initializer); **61** test_*.py files after H2-A test addition. The whole-package AST gate passed with zero unresolved imports, zero detected cycles, zero forbidden core infrastructure imports, and no old C3C file.
+- Highest consumer fan-in: replay 31, market_data 17, incremental_cache 8, source_quality 8, contracts 7. These require especially conservative compatibility handling.
+- Nine modules lack a *same-named* test file: causal, contracts, engine, engineering_contracts, reference_checkpoint_mac, reference_checkpoint_signature, reference_pinned_fd, reference_storage_preflight, replay. These are NOT necessarily untested: e.g. foundation/backtest, reference signature/host and engineering module tests directly exercise several. This is a mapping review, not measured line/branch coverage.
+- CI audit artifact is available from the H2-A GitHub Actions job; the inventory is produced at every run, not a manually curated list that can go stale.
+
 ## H2-B — Retrofit old module boundaries and dependency injection
 
 Provider: d1_mcp_transport_bridge.py, dnse_d1_reference_fallback.py, vcbs_source_contract.py and adaptive_source_router.py. Use explicit provider/namespace and semantic version contracts at injection boundaries. Preserve read-only SSI/DNSE/VCBS behavior, source isolation, known-first semantics and fail-closed error states. No automatic fallback or live source-rights promotion.

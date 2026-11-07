@@ -2,9 +2,11 @@
 
 Canonical Google Doc: https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit
 
-**Latest decision: §27.53 / GĐ4 — VN cash-equity seven-layer rollback governance and fail-closed profile preflight**, 2026-11-07. GĐ4/P0.29 independent vendor-rights provenance still NEXT.
+**Latest decision: §27.54 / GĐ4/C1 — synthetic incremental five-minute fetch planning, restartable fixture checkpoints and EMA20/ATR14 causal replay**, 2026-11-07. GĐ4/P0.29 independent vendor-rights provenance is still NEXT.
 
-The [full-text GitHub snapshot](00_MASTER_HANDOFF.txt) was refreshed from the canonical Google Doc through §27.53. It is a **point-in-time plain-text copy**, not an automatic two-way synchronization. Exact equality must be checked on `main` after merge, and the native Google Doc remains authoritative for later changes.
+The [full-text GitHub snapshot](00_MASTER_HANDOFF.txt) was refreshed from the canonical Google Doc through §27.54. It is a **point-in-time plain-text copy**, not an automatic two-way synchronization. Exact equality must be checked on `main` after merge, and the native Google Doc remains authoritative for later changes.
+
+**§27.54 cache foundation:** [PR #77](https://github.com/ngluonghoa/swing-trading-1-8/pull/77), main `4561812d73883da2df6720d1a9a4355c1d65d05b`, [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42324745381) 671/671 synthetic PASS each Python 3.11 and 3.12 (+54). [C1 design/acceptance](../P0_C1_INCREMENTAL_SMART_CACHE_FOUNDATION.md) adds conservative provider capability planner, fixture-only SQLite persistence and restartable EMA20/ATR14 checkpoint replay; no actual SSI/DNSE live data cache, certified provider delta APIs, source authorization or L1–L5 product runtime. [Data Contract snapshot](05_GD3_DATA_CONTRACT_SMART_CACHE_ARCH.txt) through §19 updated from canonical Drive. Original GĐ4/P0.29 remains NEXT.
 
 **§27.53 source:** [PR #75](https://github.com/ngluonghoa/swing-trading-1-8/pull/75), main `e4f1710936dc669cd2bed3094e843884a8da2cc3`, [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42322475273) 617/617 synthetic PASS per Python 3.11 and 3.12. New [VN rollback ADR](../ADR_0003_VN_RELEASE_ROLLBACK_GOVERNANCE.md), [acceptance matrix](../VN_ROLLBACK_ACCEPTANCE_MATRIX.md), and `vn_release_rollback.py` read-only preview. NO LKG, live rollback, actual BT/OOS or orders. Branches from discarded Work P0.29–F1 not reused.
 

@@ -1,13 +1,13 @@
 # Swing Trading 1.8
 
-**GĐ4/P0.28 RIGHTS-CHAIN + VN CASH-EQUITY R1–R7 ROLLBACK PREFLIGHT (ENGINEERING PARTIAL) — NOT a deployed or validated trading system.**
+**GĐ4/P0.28 RIGHTS-CHAIN + VN R1–R7 + C1 SYNTHETIC INCREMENTAL CACHE (ENGINEERING PARTIAL) — NOT a deployed or validated trading system.**
 
 The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.
 
 ## Source of truth
 
 - **Python code, repeatable unit tests and CI:** this private GitHub repository.
-- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.53; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
+- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.54; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
 - **Source snapshots:** [docs/source-snapshots](docs/source-snapshots/00_MASTER_HANDOFF.txt) are point-in-time text exports. They are not automatically synchronized and do not replace the original documents.
 - **Approved market data and experiment evidence:** Google Drive where access, licensing, retention and source quality are explicitly verified.
 - **MOCHI:** secondary code clone and document backup, deferred while the device is offline. The plugin must remain independent of MOCHI.
@@ -26,6 +26,10 @@ No additional hosted execution service, extra access token or powered-on MOCHI i
 python3 -m pip install -e .
 python3 -m unittest discover -s tests -v
 ```
+
+## Five-minute incremental Smart Cache foundation — synthetic only
+
+[C1 source PR #77](https://github.com/ngluonghoa/swing-trading-1-8/pull/77) merged main, [main CI 671/671 each Python 3.11/3.12](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42324745381). [C1 design note](docs/P0_C1_INCREMENTAL_SMART_CACHE_FOUNDATION.md) documents a conservative window/full-session/blocked fetch planner; synthetic fixture-only SQLite closed-bar/EMA20/ATR14 checkpoint persistence and correction replay. An offline fixture 09:45→09:50 returns 9 cold and 2 incremental M5 bars but this is **not evidence that connected SSI/DNSE permits a delta request**. Full live L1–L5, real licensed data storage, production host, API bandwidth savings and automatic scans remain NOT_DEPLOYED. Original GĐ4/P0.29 vendor-rights provenance work remains NEXT, independent of the six revoked Work branches.
 
 ## VN release/rollback governance
 

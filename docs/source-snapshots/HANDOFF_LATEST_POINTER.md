@@ -2,9 +2,11 @@
 
 Canonical Google Doc: https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit
 
-**Latest decision: §27.52 / GĐ4 — conditional Ed25519 pinned source-rights event prefix and sticky signed hold verifier**, 2026-11-06.
+**Latest decision: §27.53 / GĐ4 — VN cash-equity seven-layer rollback governance and fail-closed profile preflight**, 2026-11-07. GĐ4/P0.29 independent vendor-rights provenance still NEXT.
 
-The [full-text GitHub snapshot](00_MASTER_HANDOFF.txt) was refreshed from the canonical Google Doc through §27.52. It is a **point-in-time plain-text copy**, not an automatic two-way synchronization. Exact equality must be checked on `main` after merge, and the native Google Doc remains authoritative for later changes.
+The [full-text GitHub snapshot](00_MASTER_HANDOFF.txt) was refreshed from the canonical Google Doc through §27.53. It is a **point-in-time plain-text copy**, not an automatic two-way synchronization. Exact equality must be checked on `main` after merge, and the native Google Doc remains authoritative for later changes.
+
+**§27.53 source:** [PR #75](https://github.com/ngluonghoa/swing-trading-1-8/pull/75), main `e4f1710936dc669cd2bed3094e843884a8da2cc3`, [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42322475273) 617/617 synthetic PASS per Python 3.11 and 3.12. New [VN rollback ADR](../ADR_0003_VN_RELEASE_ROLLBACK_GOVERNANCE.md), [acceptance matrix](../VN_ROLLBACK_ACCEPTANCE_MATRIX.md), and `vn_release_rollback.py` read-only preview. NO LKG, live rollback, actual BT/OOS or orders. Branches from discarded Work P0.29–F1 not reused.
 
 Editorial reconciliation on 2026-11-06 corrected stale read-first / PRE-CODE wording, a stray foreign-language token in §27.29 and obsolete sync-as-TODO wording in §27.28–§27.30. That editorial correction did not itself advance the technical milestone (which has since progressed to §27.40).
 

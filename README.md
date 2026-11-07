@@ -1,13 +1,13 @@
 # Swing Trading 1.8
 
-**GĐ4/P0.29b EXTERNAL TRUST BLOCKED + C4A WEEKLY DIRTY-ONLY SYNTHETIC CHUNKS + C4B VN BACKTEST EXECUTION FIXTURE + C3B PARTITION CACHE — NOT a deployed trading system.**
+**GĐ4/P0.29b EXTERNAL TRUST BLOCKED + C3C CONNECTED DRIVE HARMLESS FILE READBACK + C4A WEEKLY SYNTHETIC CHUNKS + C4B VN BACKTEST FIXTURE — NOT a deployed trading system.**
 
 The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.
 
 ## Source of truth
 
 - **Python code, repeatable unit tests and CI:** this private GitHub repository.
-- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.64; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
+- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.65; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
 - **Source snapshots:** [docs/source-snapshots](docs/source-snapshots/00_MASTER_HANDOFF.txt) are point-in-time text exports. They are not automatically synchronized and do not replace the original documents.
 - **Approved market data and experiment evidence:** Google Drive where access, licensing, retention and source quality are explicitly verified.
 - **MOCHI:** secondary code clone and document backup, deferred while the device is offline. The plugin must remain independent of MOCHI.
@@ -26,6 +26,12 @@ No additional hosted execution service, extra access token or powered-on MOCHI i
 python3 -m pip install -e .
 python3 -m unittest discover -s tests -v
 ```
+
+## GĐ4/C3C — actual connected Google Drive HARMLESS synthetic file smoke
+
+User-approved next development step [C3C PR #100](https://github.com/ngluonghoa/swing-trading-1-8/pull/100) has been merged. An actual 237-byte fixed fake text fixture [chunk](https://drive.google.com/file/d/1KO0q-TlcZDD5ZLf1A7v3KzK02d_PO2K6/view) and 742-byte 16-field [manifest](https://drive.google.com/file/d/17pu_kzMg-brIRsv0CoXgDhZKB8Lc7r0m/view) were uploaded to the original private Google Drive chunk and manifest staging folders, downloaded separately, SHA-256/size/parent/ID/MIME/private owner-only independently verified. All files explicitly deny market data, source rights and trading. [Independent postmerge GitHub main CI 42393986166](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42393986166) 1217/1217 tests PASS on Python 3.11 and 3.12, +30 strict offline readback/fail-closed tests. [Evidence and boundary](docs/P0_C3C_GOOGLE_DRIVE_CONNECTOR_SYNTHETIC_READBACK.md). The two temporary source Google Docs were deleted, fixtures retained.
+
+**Important limitation:** This is a connector file-ref text/plain export smoke (BOM + CRLF), NOT actual C3B or C4A serialized bar chunks, a Python-native Drive client, protected KMS/witness/CAS, licensed SSI/DNSE/VCBS real market cache, production scanner, Backtest or live trading. No actual 5-minute source/network savings were measured. UI remains DESIGN_LOCKED. Handoff §27.65, Data Contract §28. Next C3D application-native binary chunk transport + correct source/rights/trust gates.
 
 ## GĐ4/C4A + C4B — weekly chunk reuse + VN Backtest execution safety fixtures
 

@@ -2,9 +2,11 @@
 
 Canonical Google Doc: https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit
 
-**Latest decision: §27.64 / GĐ4/C4A+C4B — synthetic weekly sub-chunks plus VN causal Backtest execution fixture; no real Drive/source/backtest license.**
+**Latest decision: §27.65 / GĐ4/C3C — harmless synthetic-only actual connected Google Drive chunk/manifest file smoke; not application-native market cache.**
 
-The [full-text GitHub snapshot](00_MASTER_HANDOFF.txt) was refreshed from the canonical Google Doc through §27.62. It is a **point-in-time plain-text copy**, not an automatic two-way synchronization. Exact equality must be checked on `main` after merge, and the native Google Doc remains authoritative for later changes.
+The [full-text GitHub snapshot](00_MASTER_HANDOFF.txt) was refreshed from the canonical Google Doc through §27.65. It is a **point-in-time plain-text copy**, not an automatic two-way synchronization. Exact equality must be checked on `main` after merge, and the native Google Doc remains authoritative for later changes.
+
+**§27.65 C3C:** [PR #100](https://github.com/ngluonghoa/swing-trading-1-8/pull/100) merged main `705916b29cd39349f745b04b966ea8667b86753c`; [postmerge main Actions 42393986166](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42393986166) 1217/1217 PASS each Python 3.11 and 3.12. Connected Drive uploaded and downloaded one 237B fixed harmless nonmarket chunk and 742B metadata-only manifest with checksum/folder/owner-only verification, 30 offline fail-closed tests. NOT C3B/C4A market chunk transport, real provider data, measured scan performance, external witness/KMS/CAS, complete backtest or trades. Canonical Smart Cache §28; next C3D native binary fixture adapter and source rights gates.
 
 **§27.64 C4A+C4B:** [PR #97](https://github.com/ngluonghoa/swing-trading-1-8/pull/97) and [PR #98](https://github.com/ngluonghoa/swing-trading-1-8/pull/98) merged, latest main `20ee4579a65e56efe7f0502411019f4e7b95bd60`, 1187/1187 PASS each Python 3.11/3.12 in [Actions 42363426310](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42363426310). 21 new tests weekly within-partition immutable chunk reuse, selective week restore; 25 new tests synthetic Vietnam cash-equity execution/fee/settlement/ambiguous-stop-target safety. No actual cloud cache, real Backtest/P&L or trading.
 

@@ -1,6 +1,6 @@
 # Google Drive source snapshot index
 
-These files are **plain-text exports** of live Google Docs initially fetched on 2026-11-06 (Asia/Ho_Chi_Minh); snapshots 00 and 05 were refreshed on 2026-11-07 through Handoff §27.65 and Data Contract §28. Filenames preserve the reference numbering, while layout and rich Google Docs formatting are not preserved. The Google Docs below remain the canonical originals; GitHub snapshots are immutable only at a given commit and do **not** auto-sync.
+These files are **plain-text exports** of live Google Docs initially fetched on 2026-11-06 (Asia/Ho_Chi_Minh); snapshots 00 and 05 were refreshed on 2026-11-07 through Handoff §27.64 and Data Contract §27. Filenames preserve the reference numbering, while layout and rich Google Docs formatting are not preserved. The Google Docs below remain the canonical originals; GitHub snapshots are immutable only at a given commit and do **not** auto-sync.
 
 | File snapshot | Original Google Doc |
 | --- | --- |

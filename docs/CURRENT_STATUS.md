@@ -1,6 +1,8 @@
-# CURRENT_STATUS — 2026-11-06
+# CURRENT_STATUS — 2026-11-07
 
 ## Latest decisions
+
+- **VN R1–R7 rollback governance/fail-closed preflight merged on main (PR #75; main CI 617/617 PASS each Python 3.11/3.12):** independently authored from GĐ4/P0.28 checkpoint; 7-layer FullExecutionProfile/compatibility/SAFE_MODE design adapted to cash equities HOSE/HNX/UPCoM, T+2 pending versus settled-sellable, corporate actions, restricted/pledged shares and price band/tick; 28 synthetic negative/identity tests. [ADR-0003](ADR_0003_VN_RELEASE_ROLLBACK_GOVERNANCE.md) and [VN acceptance matrix](VN_ROLLBACK_ACCEPTANCE_MATRIX.md). **Read-only preflight only: NO approved LKG, no production rollback/pointer, no broker orders, no real backtest or trusted source rights**. Canonical Handoff advanced to §27.53, original next GĐ4/P0.29 remains OPEN; six revoked ChatGPT Work branches were not reused.
 
 - **P0.28 merged on main (PR #67; final branch CI 589/589 PASS each Python 3.11/3.12):** pinned Ed25519 source-rights event prefix verifier (`provider_signed_event_chain.py`) checks canonical signed claim/hold events, exact externally supplied key/fingerprint/head sequence/tip, chain links, replay IDs/nonces, expiry and sticky revocation. Cryptographic proof is CONDITIONAL on unverified key/head input; no independent vendor signer or live stream, no actual source access/retention/backtest/trading. [P0.28 design](P0_28_PINNED_RIGHTS_EVENT_CHAIN.md). Canonical Google Drive Handoff now §27.52; GitHub source snapshot refreshed on docs branch, exact main comparison pending.
 

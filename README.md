@@ -1,13 +1,13 @@
 # Swing Trading 1.8
 
-**GĐ4/P0.28 PINNED ED25519 SOURCE-RIGHTS EVENT PREFIX VERIFIER (ENGINEERING PARTIAL) — NOT a deployed or validated trading system.**
+**GĐ4/P0.28 RIGHTS-CHAIN + VN CASH-EQUITY R1–R7 ROLLBACK PREFLIGHT (ENGINEERING PARTIAL) — NOT a deployed or validated trading system.**
 
 The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.
 
 ## Source of truth
 
 - **Python code, repeatable unit tests and CI:** this private GitHub repository.
-- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.52; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
+- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.53; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
 - **Source snapshots:** [docs/source-snapshots](docs/source-snapshots/00_MASTER_HANDOFF.txt) are point-in-time text exports. They are not automatically synchronized and do not replace the original documents.
 - **Approved market data and experiment evidence:** Google Drive where access, licensing, retention and source quality are explicitly verified.
 - **MOCHI:** secondary code clone and document backup, deferred while the device is offline. The plugin must remain independent of MOCHI.
@@ -26,6 +26,10 @@ No additional hosted execution service, extra access token or powered-on MOCHI i
 python3 -m pip install -e .
 python3 -m unittest discover -s tests -v
 ```
+
+## VN release/rollback governance
+
+[ADR-0003](docs/ADR_0003_VN_RELEASE_ROLLBACK_GOVERNANCE.md) defines Forex-parity R1–R7 governance **adapted for Vietnamese cash equities**; [VN rollback acceptance matrix](docs/VN_ROLLBACK_ACCEPTANCE_MATRIX.md) distinguishes tested synthetic preview from actual production rollback. [Source PR #75](https://github.com/ngluonghoa/swing-trading-1-8/pull/75) merged from the independent P0.28 baseline, main CI [617/617 per Python 3.11/3.12](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42322475273). `vn_release_rollback.py` can only inspect version IDs, changed rollback layers, T+2 settled sellability claims and session-specific price/tick claims: it ALWAYS returns SAFE_MODE_ONLY with no execution authority. NO LKG, qualified external source rights, operational restore, broker operations or actual historical BT/OOS. Original GĐ4/P0.29 rights-head freshness/custodian work remains NEXT; discarded Work P0.29–F1 code not reused.
 
 ## Current work and blockers
 

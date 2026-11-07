@@ -15,7 +15,7 @@ Maintain Swing Trading 1.8 as a modular monolith with explicit ports/adapters so
 
 ## Module contract tests — highest-priority requirement
 
-The new engineering_contracts.py provides PortDescriptor and strict check_port / require_compatible_port. The structural check does not call an adapter and cannot certify its behavior or security. Each port is keyed by an explicit provider or namespace.
+The new engineering_contracts.py provides PortDescriptor and strict check_port / require_compatible_port. The check uses static attribute inspection, so malicious properties or __getattr__ hooks cannot execute during ABI preflight. EngineeringPortRegistry supports isolated add, explicit replace, consumer pins, detach and removal; incompatible replacements fail atomically and attached ports cannot be removed. This is a memory-only engineering dry-run, not live hot-swap or production authorization. Each port is keyed by an explicit provider or namespace.
 
 The tests/test_engineering_module_contracts.py consumer suite checks:
 

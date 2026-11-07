@@ -1,13 +1,13 @@
 # Swing Trading 1.8
 
-**GĐ4/P0.29b EXTERNAL TRUST CHECKLIST / WITNESSED FLOOR FIXTURE + VN R1–R7 + C1/C1B/C1C ROUTING PREVIEW — NOT a deployed or validated trading system.**
+**GĐ4/P0.29b EXTERNAL TRUST BLOCKED + C2A CONNECTED MCP CAPABILITY AUDIT + C1/C1B/C1C ROUTING — NOT a deployed trading system.**
 
 The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.
 
 ## Source of truth
 
 - **Python code, repeatable unit tests and CI:** this private GitHub repository.
-- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.58; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
+- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.59; [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
 - **Source snapshots:** [docs/source-snapshots](docs/source-snapshots/00_MASTER_HANDOFF.txt) are point-in-time text exports. They are not automatically synchronized and do not replace the original documents.
 - **Approved market data and experiment evidence:** Google Drive where access, licensing, retention and source quality are explicitly verified.
 - **MOCHI:** secondary code clone and document backup, deferred while the device is offline. The plugin must remain independent of MOCHI.
@@ -26,6 +26,10 @@ No additional hosted execution service, extra access token or powered-on MOCHI i
 python3 -m pip install -e .
 python3 -m unittest discover -s tests -v
 ```
+
+## GĐ4/C2A — connected SSI/DNSE/VCBS endpoint capability and five-minute refresh boundaries
+
+[PR #87](https://github.com/ngluonghoa/swing-trading-1-8/pull/87) merged main with [917/917 tests each Python 3.11 and 3.12](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42335487601). [C2A contract](docs/P0_C2A_CONNECTED_MCP_CAPABILITY_AUDIT.md): seven actual connected MCP argument surfaces; SSI intraday source is whole-session or latest only, DNSE connected stock OHLC history DAY/symbol-only, VCBS RAW D1 supports calendar date window but VCBS minute price series are NOT native M1 OHLCV. **No connected MCP proves changes-since revision cursor**; C1 5-minute M1 planner is conservative FULL_SESSION for SSI and UNKNOWN elsewhere. Shape checks return metadata-only counts, no licensed quotes stored. External vendor source rights, P0.29c independently protected current head, production L1–L5, real full-versus-incremental network savings and broker actions are NOT VERIFIED. UI design remains locked.
 
 ## GĐ4/P0.29b — external source trust checklist and witnessed-floor fixture (NO approval)
 

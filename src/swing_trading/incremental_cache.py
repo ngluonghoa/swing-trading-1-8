@@ -1,6 +1,6 @@
 """OFFLINE SYNTHETIC-ONLY incremental candle and EMA/ATR checkpoint cache.
 
-No real SSI/DNSE quotes may be passed into this store. There is NO runtime
+No real SSI/DNSE/VCBS quotes may be passed into this store. There is NO runtime
 licence gate, approved production host, source adapter, or trading authority.
 The class exists to test the architecture and cold/warm/revision equivalence.
 """
@@ -47,6 +47,7 @@ def _sha(v: object) -> str:
 class Provider(str, Enum):
     SSI = "SSI"
     DNSE = "DNSE"
+    VCBS = "VCBS"
 
 
 @dataclass(frozen=True)

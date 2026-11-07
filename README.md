@@ -1,5 +1,10 @@
 # Swing Trading 1.8
 
+## H1 engineering maintainability — source-only, NOT a trading release
+
+New [H1 maintenance governance](docs/ENGINEERING_HARDENING_H1.md), [contract compatibility checks](src/swing_trading/engineering_contracts.py), [engineering build identity](src/swing_trading/engineering_release.py), and [Changelog](CHANGELOG.md) establish fail-closed module substitution rules. The new tests exercise simulated SSI/DNSE/VCBS adapter swaps, safe add/replace/remove with pinned consumers, hostile dynamic-attribute rejection, cache namespace/digest integrity, first-known replay, core dependency boundaries and version mismatches; CI also checks lint, build and clean wheel import. This is NOT a deployed release manager, licensed market cache, operational Last Known Good, end-to-end historical Backtest/OOS or broker authorization. C3C remains rolled back; C3B/C4A/C4B and locked UI are preserved.
+
+
 **GĐ4/P0.29b EXTERNAL TRUST BLOCKED + C4A WEEKLY DIRTY-ONLY SYNTHETIC CHUNKS + C4B VN BACKTEST EXECUTION FIXTURE + C3B PARTITION CACHE — NOT a deployed trading system.**
 
 The system design specifies two separate strategies — SHORT (3–10 trading sessions) and SWING (10–60) — with a strict eight-step audit pipeline and 16 B/S zones. The engineering implementation is still partial: none of the 16 zones may issue an actionable signal until source quality, calibrated executable predicates, and reporting/release gates are verified. The approved visual UI-1.0 remains DESIGN_LOCKED.

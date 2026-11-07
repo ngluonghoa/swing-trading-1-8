@@ -6,7 +6,7 @@ Entries document engineering source changes only. They do not imply a live relea
 
 - Versioned structural port descriptors, explicit source namespace and fail-closed compatibility checks; no live-data or trading permissions conferred.
 - Immutable engineering build snapshots and diff previews for source/contract/docs/dependency fingerprints; no signed operational LKG.
-- New consumer-driven regression coverage for provider substitution, causal replay, cache partition isolation, contract version mismatch and internal dependency cycles.
+- New consumer-driven regression coverage for provider substitution, add/replace/remove with consumer pins, atomic incompatible-swap rollback, no dynamic-attribute side effects, causal replay, cache partition isolation, contract version mismatch and internal dependency cycles.
 - CI checks on Python 3.11/3.12 plus a separate lint, dependency-consistency, contract and clean-wheel-install job.
 - PR checklist and maintenance governance document; UI v1.0, C3B/C4A/C4B and the separate Forex repository unchanged.
 - Package version deliberately remains 0.0.1; no release tag is created.

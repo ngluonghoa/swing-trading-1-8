@@ -2,9 +2,11 @@
 
 Canonical Google Doc: https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit
 
-**Latest decision: §27.63 / GĐ4/C3B — Google Drive chunk + manifest by partition (synthetic-only), not full SQLite upload; real Drive data upload still NOT RUN.**
+**Latest decision: §27.64 / GĐ4/C4A+C4B — synthetic weekly sub-chunks plus VN causal Backtest execution fixture; no real Drive/source/backtest license.**
 
 The [full-text GitHub snapshot](00_MASTER_HANDOFF.txt) was refreshed from the canonical Google Doc through §27.62. It is a **point-in-time plain-text copy**, not an automatic two-way synchronization. Exact equality must be checked on `main` after merge, and the native Google Doc remains authoritative for later changes.
+
+**§27.64 C4A+C4B:** [PR #97](https://github.com/ngluonghoa/swing-trading-1-8/pull/97) and [PR #98](https://github.com/ngluonghoa/swing-trading-1-8/pull/98) merged, latest main `20ee4579a65e56efe7f0502411019f4e7b95bd60`, 1187/1187 PASS each Python 3.11/3.12 in [Actions 42363426310](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42363426310). 21 new tests weekly within-partition immutable chunk reuse, selective week restore; 25 new tests synthetic Vietnam cash-equity execution/fee/settlement/ambiguous-stop-target safety. No actual cloud cache, real Backtest/P&L or trading.
 
 **§27.63 C3B partition chunk+manifest:** [PR #95](https://github.com/ngluonghoa/swing-trading-1-8/pull/95) merged main `16b83c98097acc0be0933622cec04b4ce7a2f100`; [postmerge CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42360929529) **1141/1141 PASS each Python 3.11 and 3.12** (+54). User-approved Drive persistence uses content-addressed partition chunks and per-partition manifests, not full SQLite every 5 minutes. [C3B reference](../P0_C3B_PARTITION_CHUNK_MANIFEST_CACHE.md) implements only fake in-memory Drive; three Drive staging folders created but contain no actual chunk, no licensed market data. 5→20→1→20 synthetic scope reuses old ticker partitions; one late correction updates only one partition. Cache source document §26; C3C real harmless Drive connector smoke NEXT, P0.29c EXTERNAL BLOCKED.
 

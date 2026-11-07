@@ -14,7 +14,7 @@ from swing_trading.causal import CausalMarketEvent
 from swing_trading.d1_mcp_transport_bridge import (
     D1ReferenceTransport, ReadOnlyMcpD1Bridge, ProviderSeparatedReferenceCache,
 )
-from swing_trading.dnse_d1_reference_fallback import D1Provider, D1ReadState
+from swing_trading.dnse_d1_reference_fallback import D1Provider
 from swing_trading.engineering_contracts import (
     EngineeringPortRegistry, PortDescriptor, require_compatible_port,
 )
@@ -149,9 +149,12 @@ class ExistingD1BridgeRetrofitTests(unittest.TestCase):
         broken = {"status": "ok", "data": {"stocks": "not-list"}}
         typed, _ = typed_bridge(ssi=broken)
         legacy, _ = bridge(ssi_response=broken)
-        self.assertEqual(typed.run(request()).audit.state,
-                         legacy.run(request()).audit.state)
-        self.assertEqual(typed.run(request()).audit.state, D1ReadState.BLOCKED)
+        # Existing bridge deliberately raises on a malformed transport envelope;
+        # refactoring must preserve that fail-closed exception, not invent BLOCKED.
+        with self.assertRaisesRegex(ValueError, "lacks stocks list"):
+            typed.run(request())
+        with self.assertRaisesRegex(ValueError, "lacks stocks list"):
+            legacy.run(request())
 
     def test_bad_request_mapping_never_invokes_source(self):
         s, _, count = provider_ports()

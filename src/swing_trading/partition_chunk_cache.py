@@ -17,7 +17,7 @@ import re
 
 from .engineering_contracts import PortDescriptor
 from .incremental_cache import (
-    CacheIdentity, FixtureBar, IndicatorCheckpoint, Provider,
+    CacheIdentity, FixtureBar, IndicatorCheckpoint,
     SyntheticIncrementalStore, full_recompute,
 )
 

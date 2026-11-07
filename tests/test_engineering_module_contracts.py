@@ -15,7 +15,8 @@ from swing_trading.contracts import (
 )
 from swing_trading.engine import evaluate_unimplemented_zones
 from swing_trading.engineering_contracts import (
-    PortCompatibility, PortDescriptor, check_port, require_compatible_port,
+    EngineeringPortRegistry, PortCompatibility, PortDescriptor, check_port,
+    require_compatible_port,
 )
 from swing_trading.incremental_cache import CacheIdentity, FixtureBar, Provider
 from swing_trading.partition_chunk_cache import (
@@ -300,6 +301,109 @@ class ArchitectureBoundaryTests(unittest.TestCase):
     def test_old_c3c_artifacts_not_reintroduced(self):
         for name in ("drive_c3c_receipt.py",):
             self.assertFalse((SOURCE / name).exists(), name)
+
+
+class ConsumerPinAndRemovalTests(unittest.TestCase):
+    def setUp(self):
+        self.registry = EngineeringPortRegistry()
+        self.required = descriptor()
+        self.original = DummySource("SSI")
+        self.registry.add(self.required, self.original)
+
+    def test_adding_three_isolated_providers(self):
+        for provider in ("DNSE", "VCBS"):
+            self.registry.add(descriptor(scope=provider), DummySource(provider))
+        self.assertEqual(self.registry.count, 3)
+        for provider in ("SSI", "DNSE", "VCBS"):
+            with self.subTest(provider=provider):
+                impl = self.registry.resolve(descriptor(scope=provider))
+                self.assertEqual(impl.provider, provider)
+
+    def test_duplicate_add_does_not_replace_port(self):
+        with self.assertRaisesRegex(ValueError, "DUPLICATE_PORT"):
+            self.registry.add(self.required, DummySource("SSI"))
+        self.assertIs(self.registry.resolve(self.required), self.original)
+
+    def test_explicit_same_scope_replace_preserves_consumer(self):
+        self.registry.bind_consumer("scan.engine", self.required)
+        replacement = DummySource("SSI")
+        self.registry.replace(self.required, descriptor(version="1.2.0"), replacement)
+        self.assertIs(self.registry.resolve(self.required), replacement)
+
+    def test_incompatible_replacement_is_atomic(self):
+        replacement = DummySource("DNSE")
+        with self.assertRaisesRegex(ValueError, "SCOPE_MISMATCH"):
+            self.registry.replace(self.required, descriptor(scope="DNSE"), replacement)
+        self.assertIs(self.registry.resolve(self.required), self.original)
+
+    def test_consumer_pins_cannot_be_downgraded(self):
+        self.registry.replace(self.required, descriptor(version="1.1.0"), DummySource("SSI"))
+        current = self.registry.bind_consumer("scan.engine", descriptor(version="1.1.0"))
+        with self.assertRaisesRegex(ValueError, "INCOMPATIBLE_CONTRACT_VERSION"):
+            self.registry.replace(self.required, descriptor(version="1.0.0"), DummySource("SSI"))
+        self.assertIs(self.registry.resolve(descriptor(version="1.1.0")), current)
+
+    def test_remove_attached_port_denied(self):
+        self.registry.bind_consumer("scan.engine", self.required)
+        with self.assertRaisesRegex(ValueError, "PORT_HAS_ATTACHED_CONSUMERS"):
+            self.registry.remove(self.required)
+        self.assertIs(self.registry.resolve(self.required), self.original)
+
+    def test_explicit_detach_then_remove_then_readd(self):
+        self.registry.bind_consumer("scan.engine", self.required)
+        self.registry.detach_consumer("scan.engine")
+        self.registry.remove(self.required)
+        self.assertEqual(self.registry.count, 0)
+        with self.assertRaises(KeyError):
+            self.registry.resolve(self.required)
+        replacement = DummySource("SSI")
+        self.registry.add(self.required, replacement)
+        self.assertIs(self.registry.resolve(self.required), replacement)
+
+    def test_unknown_consumer_detach_rejected(self):
+        with self.assertRaises(KeyError):
+            self.registry.detach_consumer("unknown")
+
+    def test_duplicate_consumer_id_rejected(self):
+        self.registry.bind_consumer("scanner", self.required)
+        with self.assertRaises(ValueError):
+            self.registry.bind_consumer("scanner", self.required)
+
+    def test_registry_inspection_never_calls_adapter(self):
+        self.registry.bind_consumer("scanner", self.required)
+        self.registry.resolve(self.required)
+        self.registry.detach_consumer("scanner")
+        self.registry.remove(self.required)
+        self.assertEqual(self.original.calls, 0)
+
+    def test_dynamic_attribute_spoof_is_rejected_without_side_effect(self):
+        class DynamicOnly:
+            reads = 0
+
+            def __getattr__(self, name):
+                self.reads += 1
+                return lambda *_: None
+
+        dangerous = DynamicOnly()
+        result = check_port(self.required, self.required, dangerous)
+        self.assertFalse(result.compatible)
+        self.assertIn("MISSING_CALLABLE:fetch_readonly", result.reasons)
+        self.assertEqual(dangerous.reads, 0)
+
+    def test_property_spoof_is_rejected_without_side_effect(self):
+        class PropertyOnly:
+            def __init__(self):
+                self.reads = 0
+
+            @property
+            def fetch_readonly(self):
+                self.reads += 1
+                return lambda *_: None
+
+        dangerous = PropertyOnly()
+        result = check_port(self.required, self.required, dangerous)
+        self.assertFalse(result.compatible)
+        self.assertEqual(dangerous.reads, 0)
 
 
 if __name__ == "__main__":

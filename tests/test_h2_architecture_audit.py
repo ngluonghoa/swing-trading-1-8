@@ -4,7 +4,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
 
-from scripts.h2_architecture_audit import analyze, cycles, direct_imports, owner
+from scripts.h2_architecture_audit import analyze, cycles, direct_imports, owner, mapped_test_references
 
 
 class ArchitectureInventoryTests(unittest.TestCase):
@@ -15,7 +15,7 @@ class ArchitectureInventoryTests(unittest.TestCase):
         self.assertEqual(len(result["modules"]), result["source_module_count"])
         self.assertEqual(len({x["module"] for x in result["modules"]}),
                          result["source_module_count"])
-        self.assertEqual(result["schema"], "h2.architecture.inventory.v1")
+        self.assertEqual(result["schema"], "h2.architecture.inventory.v2")
 
     def test_static_boundary_gate_no_violations(self):
         report = analyze()
@@ -104,6 +104,43 @@ class ArchitectureInventoryTests(unittest.TestCase):
         self.assertEqual(owner("provider_signed_event_chain"), "evidence_and_rights")
         self.assertEqual(owner("engineering_release"), "engineering_governance")
         self.assertEqual(owner("backtest"), "domain_and_reference")
+
+
+    def test_test_import_mapping_uses_actual_imports_not_file_names(self):
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "test_not_named_after_module.py"
+            source.write_text("from swing_trading.replay import ReplayClock\n"
+                              "from swing_trading import contracts\n"
+                              "import swing_trading.cache_swap_preview\n",
+                              encoding="utf-8")
+            mappings = mapped_test_references(
+                [source], {"replay", "contracts", "cache_swap_preview", "engine"}
+            )
+            self.assertEqual(
+                mappings, {
+                    "cache_swap_preview": [source.name],
+                    "contracts": [source.name],
+                    "replay": [source.name],
+                },
+            )
+            self.assertNotIn("engine", mappings)
+
+    def test_test_filename_is_not_evidence_of_exercised_module(self):
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            file = root / "test_replay.py"
+            file.write_text("import unittest\n", encoding="utf-8")
+            self.assertEqual(mapped_test_references([file], {"replay"}), {})
+
+    def test_real_snapshot_test_references_remain_informational(self):
+        report = analyze()
+        by_name = {m["module"]: m for m in report["modules"]}
+        self.assertTrue(by_name["backtest"]["statically_imported_by_tests"])
+        self.assertTrue(by_name["backtest"]["direct_test_files"])
+        self.assertTrue(by_name["cache_swap_preview"]["statically_imported_by_tests"])
+        self.assertTrue(by_name["engineering_contracts"]["statically_imported_by_tests"])
+        self.assertFalse(report["runtime_release_approved"])
 
 
 if __name__ == "__main__":

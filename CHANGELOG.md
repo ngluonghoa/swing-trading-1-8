@@ -2,6 +2,14 @@
 
 Entries document engineering source changes only. They do not imply a live release or an approved trading system.
 
+## Unreleased — H2 legacy modernization (2026-11-08)
+
+- H2-A: CI scans all existing Python source modules, imports, dependencies and test-map audit artifact; protects withdrawn C3C and legacy core boundaries.
+- H2-B: retrofitted the actual SSI/DNSE D1 reference bridge, legacy BacktestHarness, C3B and C4A cache read ports with versioned explicit contracts and before/after parity tests.
+- H2-C: compared pinned fake cache histories across legacy backends, rejecting changed source revision, first-known timestamp and global indicator checkpoint; never authorizes a live data migration.
+- H2-D: static test import coverage mapping replaces misleading same-named test assumption; all source/test/script files now pass whole-tree correctness lint, while modified modules run stricter F lint.
+- No market strategy, UI, SQLite wire/schema, Forex Trading, approved production release, vendor entitlement or signed LKG changes. The package version remains 0.0.1.
+
 ## Unreleased — H1 maintenance / contract hardening (2026-11-08)
 
 - Versioned structural port descriptors, explicit source namespace and fail-closed compatibility checks; no live-data or trading permissions conferred.

@@ -121,12 +121,41 @@ def cycles(edges: dict[str, set[str]]) -> tuple[tuple[str, ...], ...]:
     return tuple(sorted(found))
 
 
+def mapped_test_references(test_files: list[Path], module_names: set[str]
+                           ) -> dict[str, list[str]]:
+    """Map actual static test imports, not just test filename conventions.
+
+    This is not dynamic test coverage: an import in a test does NOT imply that
+    any methods, branches or security boundaries have been exercised.
+    """
+    references: dict[str, set[str]] = defaultdict(set)
+    for file in test_files:
+        tree = ast.parse(file.read_text(encoding="utf-8"), filename=file.name)
+        mentioned = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+                parts = node.module.split(".")
+                if parts[0] == "swing_trading" and len(parts) > 1:
+                    mentioned.add(parts[1])
+                elif node.module == "swing_trading":
+                    mentioned.update(alias.name for alias in node.names)
+            elif isinstance(node, ast.Import):
+                for alias in node.names:
+                    parts = alias.name.split(".")
+                    if parts[0] == "swing_trading" and len(parts) > 1:
+                        mentioned.add(parts[1])
+        for module in mentioned & module_names:
+            references[module].add(file.name)
+    return {name: sorted(files) for name, files in sorted(references.items())}
+
+
 def analyze(package_dir: Path = PACKAGE_DIR, test_dir: Path = TEST_DIR) -> dict:
     if not package_dir.is_dir() or not test_dir.is_dir():
         raise ValueError("Explicit source and test directories are required")
     sources = sorted(package_dir.glob("*.py"))
     test_files = sorted(test_dir.glob("test_*.py"))
     names = {p.stem for p in sources}
+    test_references = mapped_test_references(test_files, names)
     deps: dict[str, set[str]] = {}
     modules = []
     violations: list[str] = []
@@ -142,16 +171,18 @@ def analyze(package_dir: Path = PACKAGE_DIR, test_dir: Path = TEST_DIR) -> dict:
             leak = sorted((internal | external) & FORBIDDEN_IN_CORE)
             if leak:
                 violations.append("CORE_IMPORTS_INFRASTRUCTURE:" + file.stem + ":" + ",".join(leak))
-        direct = "test_" + file.stem + ".py"
-        module_tests = [f.name for f in test_files if f.name == direct]
+        named_test = "test_" + file.stem + ".py"
+        referencing_tests = test_references.get(file.stem, [])
         modules.append({
             "module": file.stem,
             "owner": owner(file.stem),
             "lines": source.count("\n") + (not source.endswith("\n")),
             "internal_imports": sorted(internal & names),
             "external_imports": sorted(external),
-            "direct_test": bool(module_tests),
-            "direct_test_files": module_tests,
+            "named_test_file_exists": named_test in {item.name for item in test_files},
+            "statically_imported_by_tests": bool(referencing_tests),
+            "direct_test": bool(referencing_tests),
+            "direct_test_files": referencing_tests,
         })
     for loop in cycles(deps):
         violations.append("IMPORT_CYCLE:" + "->".join(loop))
@@ -166,8 +197,8 @@ def analyze(package_dir: Path = PACKAGE_DIR, test_dir: Path = TEST_DIR) -> dict:
         for imported in imports:
             downstream[imported].append(module)
     return {
-        "schema": "h2.architecture.inventory.v1",
-        "scope": "offline_ast_only_not_runtime_coverage",
+        "schema": "h2.architecture.inventory.v2",
+        "scope": "offline_ast_only_static_test_imports_not_runtime_coverage",
         "source_module_count": len(modules),
         "test_file_count": len(test_files),
         "missing_direct_test_modules": uncovered,

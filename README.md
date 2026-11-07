@@ -1,5 +1,9 @@
 # Swing Trading 1.8
 
+## H2 retroactive architecture hardening (existing modules)
+
+H2-A [all-module AST inventory](docs/H2_LEGACY_MODERNIZATION.md) audits every source and test, provider/core dependency direction and import cycles; H2-B [existing legacy port retrofits](docs/H2_LEGACY_PORTS_B.md) added explicit SSI/DNSE injection, typed replay construction and consistent C3B/C4A fixture read ports; H2-C [semantic cache swap preview](docs/H2_CACHE_COMPATIBILITY_C.md) rejects mismatched revisions/first-known/EMA/ATR despite matching method signatures; H2-D [whole-repo quality gates](docs/H2_QUALITY_GATES_D.md) enhances test mapping and lint. This remains SYNTHETIC/OFFLINE engineering; not a licensed market source, production cache, active LKG or operational release. Source UI v1.0 remains locked; withdrawn C3C has not returned.
+
 ## H1 engineering maintainability — source-only, NOT a trading release
 
 New [H1 maintenance governance](docs/ENGINEERING_HARDENING_H1.md), [contract compatibility checks](src/swing_trading/engineering_contracts.py), [engineering build identity](src/swing_trading/engineering_release.py), and [Changelog](CHANGELOG.md) establish fail-closed module substitution rules. The new tests exercise simulated SSI/DNSE/VCBS adapter swaps, safe add/replace/remove with pinned consumers, hostile dynamic-attribute rejection, cache namespace/digest integrity, first-known replay, core dependency boundaries and version mismatches; CI also checks lint, build and clean wheel import. This is NOT a deployed release manager, licensed market cache, operational Last Known Good, end-to-end historical Backtest/OOS or broker authorization. C3C remains rolled back; C3B/C4A/C4B and locked UI are preserved.

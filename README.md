@@ -2,6 +2,8 @@
 
 ## H3 deep legacy module review (in progress)
 
+**H3-C1 first security triage slice:** [PR #116](https://github.com/ngluonghoa/swing-trading-1-8/pull/116) merged main `25d46c1c70459383100bdd8e82151835eea0d91b`; [postmerge CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42448460215) PASS 1332/1332 tests EACH Python 3.11/3.12 (+9 POSIX pinned-FD fail-closed regressions), plus engineering gates. [Manual H3-C1 security findings](docs/H3_C1_PINNED_FD_TRIAGE.md) preserve intentional missing-sidecar semantics but keep host/TOCTOU risks OPEN. No source module or production behavior changed; H3-C/D/E still in progress, C3C postponed.
+
 [H3 partial acceptance](docs/H3_PROGRESS_AND_ACCEPTANCE.md) and [actual legacy cache refactor evidence](docs/H3_INCREMENTAL_CACHE_REFACTOR_B.md); [H3 review plan](docs/H3_DEEP_ARCHITECTURE_REVIEW.md) and [63-module preliminary disposition matrix](docs/H3_MODULE_DISPOSITION_PROVISIONAL.md) provide static complexity/coupling/duplicate/exception audit. This is NOT completed manual refactoring or production release; REPLACE/REMOVE need independently proven consumers and rollback. H2 source governance remains intact, C3C stays revoked.
 
 ## H2 retroactive architecture hardening (existing modules)

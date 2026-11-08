@@ -2,11 +2,13 @@
 
 Canonical Google Doc: https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit
 
-**Latest decision: §27.67 / GĐ4/H3 — deep 63-module assessment and validated incremental-cache transaction refactor; 31 KEEP/32 IMPROVE provisional, H3 still in progress, C3C remains rolled back.**
+**Latest decision: §27.67 / GĐ4/H3 — H3-A 63-module preliminary review, H3-B actual legacy cache refactor, H3-C1 nine pinned-FD security regression guards; 31 KEEP/32 IMPROVE provisional, H3-C2/D/E pending, C3C remains rolled back.**
 
 The [full-text GitHub snapshot](00_MASTER_HANDOFF.txt) was refreshed from the canonical Google Doc through §27.67. It is a **point-in-time plain-text copy**, not an automatic two-way synchronization. Exact equality must be checked on `main` after merge, and the native Google Doc remains authoritative for later changes.
 
 **H2-E final engineering closeout:** [PR #109](https://github.com/ngluonghoa/swing-trading-1-8/pull/109) merged main `148cdb08e4816390951311190b0a8bbe5e8a5615`; [postmerge Actions](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42403621437) PASS 1305/1305 EACH Python and full-size canonical Handoff/Smart Cache snapshots equal to native Google Docs. This subsequent docs-only receipt records completion of engineering H2, not a production release; next C3C new implementation.
+
+**§27.67 H3-C1 NEW EVIDENCE:** [PR #116](https://github.com/ngluonghoa/swing-trading-1-8/pull/116) merged main `25d46c1c70459383100bdd8e82151835eea0d91b` and [postmerge CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42448460215) PASS **1332/1332 EACH Python 3.11/3.12**. Nine new tests prove narrow pinned-FD sidecar/marker exception behavior and error fail-closed boundary. [Manual triage report](../H3_C1_PINNED_FD_TRIAGE.md). No source refactor, no independent host or vendor rights; H3 pending. No new Handoff section §27.68.
 
 **§27.67 H3 PARTIAL:** [PR #111](https://github.com/ngluonghoa/swing-trading-1-8/pull/111) merged 52944205aa1010d569bd35edccfd67ded4ada5af; [PR #112](https://github.com/ngluonghoa/swing-trading-1-8/pull/112) merged b022487e21aa552814cdba2144c4be60e38e50e2; [main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42443799090) PASS 1323/1323 EACH Python 3.11/3.12. 63-module provisional matrix [here](../H3_MODULE_DISPOSITION_PROVISIONAL.md); actual old incremental_cache function max 121→83 lines and static branch 49→23; 8 new golden transactional parity tests. 32 IMPROVE candidates NOT all refactored, 0 REPLACE/REMOVE authorized; full H3 still OPEN. Smart Cache §30 and full Handoff §27.67 authoritative after native/docs sync. H2 and revoked C3C remain intact.
 

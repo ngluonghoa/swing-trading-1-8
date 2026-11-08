@@ -50,7 +50,8 @@ class H3ReviewTests(unittest.TestCase):
         b = analyze_deep()
         self.assertEqual(a, b)
         rendered = render_matrix(a)
-        self.assertEqual(rendered.count("| "), 2 + a["module_count"])
+        self.assertEqual(sum(line.startswith("| ") for line in rendered.splitlines()),
+                         2 + a["module_count"])
         for item in a["modules"]:
             self.assertIn("| " + item["module"] + " |", rendered)
 

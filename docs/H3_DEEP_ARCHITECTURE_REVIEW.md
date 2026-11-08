@@ -1,6 +1,6 @@
 # H3 — Deep architecture review and controlled legacy refactoring
 
-Status: H3-A **automated static review implemented**. Human architectural acceptance and H3-B..H3-E refactors are separate reviewed PRs. H3 is user-approved because H2 only retrofitted four preexisting modules; the other old modules need evidence-based assessment, not blanket rewrites.
+Status: H3-A deep 63-module audit MERGED PR #111, H3-B real legacy incremental cache decomposition MERGED PR #112; remaining H3-C/D/E manual review and selective refactors remain OPEN. Native Handoff §27.67, Smart Cache §30 and full source snapshots are being synced separately. H3 is user-approved because H2 only retrofitted four preexisting modules; the other old modules need evidence-based assessment, not blanket rewrites.
 
 ## Baseline protection
 
@@ -35,6 +35,10 @@ Full 63-module provisional table: [H3_MODULE_DISPOSITION_PROVISIONAL.md](H3_MODU
 1. First protect complex historical synthetic cache code incremental_cache.py with actual golden scenarios: append, revision, metadata-only change, complete-scope deletes, open bars, source clocks, SQLite atomic rollback and global EMA20/ATR14 checkpoints. Separate validation/transaction/checkpoint responsibilities one at a time. No schema, wire format, retained revision or indicator math change.
 2. Review existing reference_pinned_fd silent exception path for safety intent and fail-closed semantics before any edit. Security-related exception handling may be deliberately conservative. Never remove security handling because a static score is high.
 3. Review B5 formula/phase temporal cases and provider rights modules separately with frozen snapshots and actual source attribution; any published behavior change requires separate user approval.
+
+## H3-B accepted engineering slice
+
+[Documented C1/C3B synthetic SQLite refactor](H3_INCREMENTAL_CACHE_REFACTOR_B.md) is merged main b022487e21aa552814cdba2144c4be60e38e50e2 with [postmerge main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42443799090) PASS 1323 tests per Python. H3-A+B do NOT amount to complete H3.
 
 ## H3-C — Module disposition proof
 

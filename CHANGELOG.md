@@ -2,6 +2,12 @@
 
 Entries document engineering source changes only. They do not imply a live release or an approved trading system.
 
+## Unreleased — H3-B controlled old cache refactor (2026-11-08)
+
+- Actual incremental_cache.py method extracted pure temporal scope, dirty checkpoint replay and SQLite cursor persistence into focused helpers under the unchanged existing transaction.
+- Max legacy cache function length 121→83; rough branch count 49→23; total module LOC 411→441 due explicit helper boundaries. 8 golden transactional/lineage/EMA-ATR/source-clock tests added; 1323 tests PASS per Python 3.11 and 3.12 after source merge.
+- Regenerated full 63-module H3 matrix; manual decisions for remaining candidates and complete H3 assessment still OPEN, not a production release.
+
 ## Unreleased — H3-A deep legacy assessment (2026-11-08)
 
 - AST-based reproducible review/matrix on all 63 existing Python modules: ~31 KEEP and 32 IMPROVE heuristics; 0 automated REPLACE/REMOVE; no live source or deployment claims.

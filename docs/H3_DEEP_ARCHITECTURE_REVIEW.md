@@ -22,6 +22,14 @@ scripts/h3_deep_module_review.py analyzes ALL Python modules by AST, uses the H2
 
 The complexity score is a static risk *heuristic*, not McCabe-certified cyclomatic complexity. Exception flags and duplicates are audit prompts, not proof of a production bug. IMPORT-only test references are not coverage; full branch coverage and mutation testing have NOT been measured.
 
+## Initial manual assessment — avoid false-positive refactors
+
+- reference_pinned_fd.py: the flagged FileNotFoundError handlers in verify_path_names/pin_reference_sqlite_files deliberately treat *absence* of SQLite sidecars or a .git sentinel as success; every present sidecar or Git marker is rejected in the opposite branch. They are not generic exception swallowing. Preserve them; H3-B may add fault-injection tests for unexpected OS errors/path swap, but cannot remove these catches just to reduce a static score.
+- replay.py (31 downstream imports, ~26 LOC): small strict causal clock. KEEP existing behavior until consumer-level golden tests prove a need for change; high fan-in alone is not a refactor rationale.
+- incremental_cache.py: 121-line apply_fixture_window, branch score 49. IMPROVE candidate because validation, transactional append/revise/delete, lineage, checkpoint replay and cursor update coexist in one function. First use golden before/after fixtures; split responsibilities without editing SQL schema or economic math. User has NOT approved a changed cache policy.
+
+Full 63-module provisional table: [H3_MODULE_DISPOSITION_PROVISIONAL.md](H3_MODULE_DISPOSITION_PROVISIONAL.md). CI fails if this table diverges from the AST-generated version. Initial manual observations above are hypotheses based on inspection, **not** final approval for all 63 modules.
+
 ## H3-B — Prioritized bounded improvements
 
 1. First protect complex historical synthetic cache code incremental_cache.py with actual golden scenarios: append, revision, metadata-only change, complete-scope deletes, open bars, source clocks, SQLite atomic rollback and global EMA20/ATR14 checkpoints. Separate validation/transaction/checkpoint responsibilities one at a time. No schema, wire format, retained revision or indicator math change.

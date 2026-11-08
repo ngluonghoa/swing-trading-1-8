@@ -56,7 +56,8 @@ jobs:
             scripts/h3_deep_module_review.py \
             tests/test_h3_deep_module_review.py \
             src/swing_trading/incremental_cache.py \
-            tests/test_h3_cache_transaction_parity.py
+            tests/test_h3_cache_transaction_parity.py \
+            tests/test_h3_pinned_fd_guard_regression.py
       - name: Validate installed dependencies
         run: python -m pip check
       - name: Audit all legacy package modules and dependency boundaries

@@ -150,6 +150,36 @@ class CacheUpdate:
     market_authorized: bool = False
 
 
+def _validate_fixture_window(identity: CacheIdentity, observations: tuple[FixtureBar, ...], *,
+                             observed_at_utc: datetime, scope_start_utc: datetime,
+                             scope_end_utc: datetime, complete_scope: bool,
+                             full_session_reconciled: bool) -> tuple[datetime, datetime, datetime, set[str]]:
+    """Validate pure temporal/source scope BEFORE any transactional DB write."""
+    now,start,end = (_utc(x) for x in (observed_at_utc,scope_start_utc,scope_end_utc))
+    if start >= end or end > now or not isinstance(identity,CacheIdentity):
+        raise ValueError("Expected typed identity and completed observation window")
+    if not isinstance(observations,tuple) or any(not isinstance(x,FixtureBar) for x in observations):
+        raise TypeError("Immutable tuple of synthetic fixtures required")
+    if type(complete_scope) is not bool or type(full_session_reconciled) is not bool:
+        raise TypeError("Scope completeness and reconciliation must be booleans")
+    if full_session_reconciled and not complete_scope:
+        raise ValueError("Cannot certify full scope with incomplete fixture response")
+    if full_session_reconciled and start > min((b.start_utc for b in observations),default=start):
+        raise ValueError("Full scope must include observed start")
+    seen = set()
+    previous = None
+    for b in observations:
+        if previous is not None and b.start_utc <= previous:
+            raise ValueError("Out-of-order or duplicate fixture bars")
+        previous = b.start_utc
+        if not start <= b.start_utc < end or b.first_known_utc > now:
+            raise ValueError("Outside request window or unknown at observation clock")
+        if b.closed and b.end_utc > now:
+            raise ValueError("Cannot persist a bar before it actually closes")
+        seen.add(b.start_utc.isoformat())
+    return now,start,end,seen
+
+
 class SyntheticIncrementalStore:
     """Explicit opt-in *fixture* SQLite store; never connects to any market API.
 
@@ -240,6 +270,44 @@ class SyntheticIncrementalStore:
             return SourceCursor(_parse_utc(latest),_parse_utc(row["last_checked_utc"]),
                                 _parse_utc(row["last_full_reconciled_utc"]) if row["last_full_reconciled_utc"] else None)
 
+    def _recompute_dirty_tail(self, c: sqlite3.Connection, key: str,
+                              dirty: datetime) -> int:
+        """Rebuild only causal EMA20/ATR14 checkpoints in the SAME transaction."""
+        recomputed = 0
+        c.execute("DELETE FROM fixture_checkpoints WHERE cache_key=? AND start_utc>=?",(key,dirty.isoformat()))
+        preceding = c.execute("SELECT * FROM fixture_checkpoints WHERE cache_key=? AND start_utc<? ORDER BY start_utc DESC LIMIT 1",
+                              (key,dirty.isoformat())).fetchone()
+        state = (IndicatorCheckpoint(_parse_utc(preceding["start_utc"]),Decimal(preceding["ema20"]),
+                  Decimal(preceding["atr14"]) if preceding["atr14"] is not None else None,
+                  preceding["atr_seen"],Decimal(preceding["atr_seed_sum"]),Decimal(preceding["last_close"])) if preceding else None)
+        for row in c.execute("SELECT * FROM fixture_bars WHERE cache_key=? AND start_utc>=? ORDER BY start_utc",
+                             (key,dirty.isoformat())).fetchall():
+            b = self._bar(row)
+            state = advance_checkpoint(b,state)
+            c.execute("INSERT INTO fixture_checkpoints(cache_key,start_utc,ema20,atr14,atr_seen,atr_seed_sum,last_close) VALUES(?,?,?,?,?,?,?)",
+                      (key,b.start_utc.isoformat(),_d(state.ema20),
+                       _d(state.atr14) if state.atr14 is not None else None,
+                       state.atr_seen,_d(state.atr_seed_sum),_d(state.last_close)))
+            recomputed += 1
+        return recomputed
+
+    @staticmethod
+    def _persist_fixture_cursor(c: sqlite3.Connection, key: str, now: datetime,
+                                full_session_reconciled: bool) -> str | None:
+        """Persist checked/reconciled clocks without committing this transaction."""
+        prior = c.execute("SELECT * FROM fixture_cursor WHERE cache_key=?",(key,)).fetchone()
+        if prior is not None and _parse_utc(prior["last_checked_utc"]) > now:
+            raise ValueError("Cannot regress cache observation clock")
+        last_full = (now.isoformat() if full_session_reconciled else
+                     prior["last_full_reconciled_utc"] if prior else None)
+        c.execute("""INSERT INTO fixture_cursor(cache_key,last_checked_utc,last_full_reconciled_utc)
+            VALUES(?,?,?) ON CONFLICT(cache_key) DO UPDATE SET
+            last_checked_utc=excluded.last_checked_utc,
+            last_full_reconciled_utc=excluded.last_full_reconciled_utc""",
+                  (key,now.isoformat(),last_full))
+        latest = c.execute("SELECT MAX(start_utc) FROM fixture_bars WHERE cache_key=?",(key,)).fetchone()[0]
+        return latest
+
     def apply_fixture_window(self, identity: CacheIdentity, observations: tuple[FixtureBar, ...], *,
                              observed_at_utc: datetime, scope_start_utc: datetime,
                              scope_end_utc: datetime, complete_scope: bool,
@@ -250,28 +318,12 @@ class SyntheticIncrementalStore:
         the explicitly bounded returned window; partial API pages MUST be false.
         No live API, rights flags, or source certification can be inferred.
         """
-        now,start,end = (_utc(x) for x in (observed_at_utc,scope_start_utc,scope_end_utc))
-        if start >= end or end > now or not isinstance(identity,CacheIdentity):
-            raise ValueError("Expected typed identity and completed observation window")
-        if not isinstance(observations,tuple) or any(not isinstance(x,FixtureBar) for x in observations):
-            raise TypeError("Immutable tuple of synthetic fixtures required")
-        if type(complete_scope) is not bool or type(full_session_reconciled) is not bool:
-            raise TypeError("Scope completeness and reconciliation must be booleans")
-        if full_session_reconciled and not complete_scope:
-            raise ValueError("Cannot certify full scope with incomplete fixture response")
-        if full_session_reconciled and start > min((b.start_utc for b in observations),default=start):
-            raise ValueError("Full scope must include observed start")
-        seen = set()
-        previous = None
-        for b in observations:
-            if previous is not None and b.start_utc <= previous:
-                raise ValueError("Out-of-order or duplicate fixture bars")
-            previous = b.start_utc
-            if not start <= b.start_utc < end or b.first_known_utc > now:
-                raise ValueError("Outside request window or unknown at observation clock")
-            if b.closed and b.end_utc > now:
-                raise ValueError("Cannot persist a bar before it actually closes")
-            seen.add(b.start_utc.isoformat())
+        now,start,end,seen = _validate_fixture_window(
+            identity, observations, observed_at_utc=observed_at_utc,
+            scope_start_utc=scope_start_utc, scope_end_utc=scope_end_utc,
+            complete_scope=complete_scope,
+            full_session_reconciled=full_session_reconciled,
+        )
         key = identity.fingerprint
         inserted = revised = deleted = unchanged = lineage_only = ignored_open = 0
         dirty: datetime | None = None
@@ -328,32 +380,10 @@ class SyntheticIncrementalStore:
                             c.execute("INSERT INTO fixture_lineage(cache_key,start_utc,event_type,old_digest,new_digest,observed_at_utc) VALUES (?,?,?,?,?,?)",
                                       (key,stamp,"DELETE",old["digest"],None,now.isoformat()))
                 if dirty is not None:
-                    c.execute("DELETE FROM fixture_checkpoints WHERE cache_key=? AND start_utc>=?",(key,dirty.isoformat()))
-                    preceding = c.execute("SELECT * FROM fixture_checkpoints WHERE cache_key=? AND start_utc<? ORDER BY start_utc DESC LIMIT 1",
-                                          (key,dirty.isoformat())).fetchone()
-                    state = (IndicatorCheckpoint(_parse_utc(preceding["start_utc"]),Decimal(preceding["ema20"]),
-                              Decimal(preceding["atr14"]) if preceding["atr14"] is not None else None,
-                              preceding["atr_seen"],Decimal(preceding["atr_seed_sum"]),Decimal(preceding["last_close"])) if preceding else None)
-                    for row in c.execute("SELECT * FROM fixture_bars WHERE cache_key=? AND start_utc>=? ORDER BY start_utc",
-                                         (key,dirty.isoformat())).fetchall():
-                        b = self._bar(row)
-                        state = advance_checkpoint(b,state)
-                        c.execute("INSERT INTO fixture_checkpoints(cache_key,start_utc,ema20,atr14,atr_seen,atr_seed_sum,last_close) VALUES(?,?,?,?,?,?,?)",
-                                  (key,b.start_utc.isoformat(),_d(state.ema20),
-                                   _d(state.atr14) if state.atr14 is not None else None,
-                                   state.atr_seen,_d(state.atr_seed_sum),_d(state.last_close)))
-                        recomputed += 1
-                prior = c.execute("SELECT * FROM fixture_cursor WHERE cache_key=?",(key,)).fetchone()
-                if prior is not None and _parse_utc(prior["last_checked_utc"]) > now:
-                    raise ValueError("Cannot regress cache observation clock")
-                last_full = (now.isoformat() if full_session_reconciled else
-                             prior["last_full_reconciled_utc"] if prior else None)
-                c.execute("""INSERT INTO fixture_cursor(cache_key,last_checked_utc,last_full_reconciled_utc)
-                    VALUES(?,?,?) ON CONFLICT(cache_key) DO UPDATE SET
-                    last_checked_utc=excluded.last_checked_utc,
-                    last_full_reconciled_utc=excluded.last_full_reconciled_utc""",
-                          (key,now.isoformat(),last_full))
-                latest = c.execute("SELECT MAX(start_utc) FROM fixture_bars WHERE cache_key=?",(key,)).fetchone()[0]
+                    recomputed = self._recompute_dirty_tail(c,key,dirty)
+                latest = self._persist_fixture_cursor(
+                    c,key,now,full_session_reconciled,
+                )
                 c.execute("COMMIT")
             except Exception:
                 c.execute("ROLLBACK")

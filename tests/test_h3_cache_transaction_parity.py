@@ -5,7 +5,6 @@ and full recompute to catch behavior changes across helper extraction.
 """
 from contextlib import closing
 from dataclasses import replace
-from datetime import timedelta
 from pathlib import Path
 import sqlite3
 from tempfile import TemporaryDirectory

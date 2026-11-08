@@ -34,7 +34,7 @@ these require separate consumer, migration and rollback evidence.
 | evidence_checkpoint | evidence_and_rights | 184 | 12 | 36 | 1 | KEEP | none |
 | evidence_recovery | evidence_and_rights | 81 | 4 | 23 | 1 | KEEP | none |
 | fixture_scan | cache_and_persistence | 88 | 8 | 44 | 0 | KEEP | none |
-| incremental_cache | cache_and_persistence | 411 | 49 | 121 | 9 | IMPROVE | FUNCTION_90_PLUS, HIGH_BRANCH_SCORE |
+| incremental_cache | cache_and_persistence | 441 | 23 | 83 | 9 | IMPROVE | HIGH_BRANCH_SCORE |
 | legacy_migration | domain_and_reference | 205 | 24 | 98 | 1 | IMPROVE | FUNCTION_90_PLUS, HIGH_BRANCH_SCORE |
 | market_data | domain_and_reference | 161 | 23 | 29 | 17 | IMPROVE | HIGH_BRANCH_SCORE, HIGH_FAN_IN |
 | migration_archive | domain_and_reference | 126 | 24 | 69 | 0 | IMPROVE | HIGH_BRANCH_SCORE |

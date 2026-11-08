@@ -54,7 +54,9 @@ jobs:
             scripts/h2_architecture_audit.py \
             tests/test_h2_architecture_audit.py \
             scripts/h3_deep_module_review.py \
-            tests/test_h3_deep_module_review.py
+            tests/test_h3_deep_module_review.py \
+            src/swing_trading/incremental_cache.py \
+            tests/test_h3_cache_transaction_parity.py
       - name: Validate installed dependencies
         run: python -m pip check
       - name: Audit all legacy package modules and dependency boundaries
@@ -67,10 +69,10 @@ jobs:
           retention-days: 14
       - name: Deep review of all source modules (offline H3)
         run: python -m scripts.h3_deep_module_review --check --json-out /tmp/st18-h3-review.json --matrix-out /tmp/st18-h3-matrix.md
-      - name: Ensure committed H3 matrix matches regenerated all-module report
-        run: diff -u docs/H3_MODULE_DISPOSITION_PROVISIONAL.md /tmp/st18-h3-matrix.md
       - name: Emit full H3 module matrix for permanent review
         run: cat /tmp/st18-h3-matrix.md
+      - name: Ensure committed H3 matrix matches regenerated all-module report
+        run: diff -u docs/H3_MODULE_DISPOSITION_PROVISIONAL.md /tmp/st18-h3-matrix.md
       - name: Preserve H3 module-by-module review evidence
         uses: actions/upload-artifact@v4
         with:

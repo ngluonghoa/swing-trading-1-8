@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from contextlib import closing
 from dataclasses import dataclass, asdict
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from decimal import Decimal
 from enum import Enum
 from hashlib import sha256

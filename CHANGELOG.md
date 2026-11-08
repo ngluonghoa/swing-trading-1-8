@@ -2,6 +2,12 @@
 
 Entries document engineering source changes only. They do not imply a live release or an approved trading system.
 
+## Unreleased — H3-A deep legacy assessment (2026-11-08)
+
+- AST-based reproducible review/matrix on all 63 existing Python modules: ~31 KEEP and 32 IMPROVE heuristics; 0 automated REPLACE/REMOVE; no live source or deployment claims.
+- CI enforces updated matrix, captures JSON and Markdown review evidence, retains all H2 regression/source-boundary/wheel checks.
+- Manual assessment: pinned-FD missing-file exceptions have intentional fail-closed semantics and must not be deleted mechanically; incremental cache transactional/update complexity is a prioritized change candidate, only with golden tests and strict rollback.
+
 ## Unreleased — H2 legacy modernization (2026-11-08)
 
 - H2-A: CI scans all existing Python source modules, imports, dependencies and test-map audit artifact; protects withdrawn C3C and legacy core boundaries.

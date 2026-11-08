@@ -2,7 +2,7 @@
 
 ## H3 deep legacy module review (in progress)
 
-[H3 review plan](docs/H3_DEEP_ARCHITECTURE_REVIEW.md) and [63-module preliminary disposition matrix](docs/H3_MODULE_DISPOSITION_PROVISIONAL.md) provide static complexity/coupling/duplicate/exception audit. This is NOT completed manual refactoring or production release; REPLACE/REMOVE need independently proven consumers and rollback. H2 source governance remains intact, C3C stays revoked.
+[H3 partial acceptance](docs/H3_PROGRESS_AND_ACCEPTANCE.md) and [actual legacy cache refactor evidence](docs/H3_INCREMENTAL_CACHE_REFACTOR_B.md); [H3 review plan](docs/H3_DEEP_ARCHITECTURE_REVIEW.md) and [63-module preliminary disposition matrix](docs/H3_MODULE_DISPOSITION_PROVISIONAL.md) provide static complexity/coupling/duplicate/exception audit. This is NOT completed manual refactoring or production release; REPLACE/REMOVE need independently proven consumers and rollback. H2 source governance remains intact, C3C stays revoked.
 
 ## H2 retroactive architecture hardening (existing modules)
 
@@ -22,7 +22,7 @@ The system design specifies two separate strategies — SHORT (3–10 trading se
 ## Source of truth
 
 - **Python code, repeatable unit tests and CI:** this private GitHub repository.
-- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.66 (H2); [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
+- **Project design and latest Handoff:** [Google Drive Master Handoff](https://docs.google.com/document/d/1TBGth5NXh-pPYRemsFIKeNjm1_VPhrFAWMsslALq9FI/edit), latest section §27.67 (H3 partial); [full GitHub Handoff text snapshot](docs/source-snapshots/00_MASTER_HANDOFF.txt) was verified against the source, with [snapshot status](docs/source-snapshots/HANDOFF_LATEST_POINTER.md).
 - **Source snapshots:** [docs/source-snapshots](docs/source-snapshots/00_MASTER_HANDOFF.txt) are point-in-time text exports. They are not automatically synchronized and do not replace the original documents.
 - **Approved market data and experiment evidence:** Google Drive where access, licensing, retention and source quality are explicitly verified.
 - **MOCHI:** secondary code clone and document backup, deferred while the device is offline. The plugin must remain independent of MOCHI.

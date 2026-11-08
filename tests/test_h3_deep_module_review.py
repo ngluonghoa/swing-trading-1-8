@@ -41,8 +41,10 @@ class H3ReviewTests(unittest.TestCase):
         self.assertIn("segmented_cache", m)
         self.assertIn("backtest", m)
         self.assertIn("replay", m)
-        self.assertGreaterEqual(m["incremental_cache"]["max_function_lines"], 90)
-        self.assertEqual(m["incremental_cache"]["provisional_action"], "IMPROVE")
+        self.assertGreaterEqual(m["incremental_cache"]["function_count"], 10)
+        self.assertIn(m["incremental_cache"]["provisional_action"], ("KEEP", "IMPROVE"))
+        # Do not freeze a refactor-candidate metric; lower complexity is progress.
+        self.assertTrue(m["incremental_cache"]["statically_imported_by_tests"])
         self.assertGreaterEqual(m["replay"]["consumer_count"], 25)
 
     def test_output_is_complete_and_deterministic(self):

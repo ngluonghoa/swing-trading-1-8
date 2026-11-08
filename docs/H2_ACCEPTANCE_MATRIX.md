@@ -9,7 +9,7 @@
 - H2-A source graph audit: [PR #105](https://github.com/ngluonghoa/swing-trading-1-8/pull/105), main a6d4c1af16226976b75c545ef4719932523dab6c.
 - H2-B older module retrofit: [PR #106](https://github.com/ngluonghoa/swing-trading-1-8/pull/106), main 799d7324e2dc074f76f2ea9dacd12c4570daa301.
 - H2-C cache semantic parity: [PR #107](https://github.com/ngluonghoa/swing-trading-1-8/pull/107), main d1c25ff8d88e98c80138a3c0e58eeaa79ccf6825.
-- H2-D whole-tree QA: [PR #108](https://github.com/ngluonghoa/swing-trading-1-8/pull/108), main 725f2833d1376039666848ef8c821ce1038a2773; [postmerge main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42403127427) SUCCESS. 1,305 unittest PASS **per** Python version (3.11, 3.12), not the two jobs summed. H2-E docs-only sync is this follow-on PR.
+- H2-D whole-tree QA: [PR #108](https://github.com/ngluonghoa/swing-trading-1-8/pull/108), main 725f2833d1376039666848ef8c821ce1038a2773; [postmerge main CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42403127427) SUCCESS. 1,305 unittest PASS **per** Python version (3.11, 3.12), not the two jobs summed. H2-E initial docs sync [PR #109](https://github.com/ngluonghoa/swing-trading-1-8/pull/109) merged main 148cdb08e4816390951311190b0a8bbe5e8a5615; final verified [postmerge CI](https://github.com/ngluonghoa/swing-trading-1-8/actions/runs/42403621437) success 1305/1305 per Python 3.11/3.12 and native/GitHub text snapshots equal. This follow-on docs-only PR records the completed engineering acceptance.
 
 ## Acceptance status
 
@@ -25,7 +25,7 @@
 | Consumer-driven regression | PASS: +55 H2 tests versus H1, full 1,305 suite each Python 3.11/3.12 | No claim of 100% dynamic line/branch/mutation coverage |
 | Version/release review | PARTIAL: SHA identity, PRs, changelog and docs mirrors | No signed release, tag, LKG, branch protection, package lock or live rollback |
 | Full source quality CI | PASS for whole-tree correctness lint E9/F821/F822/F823, strict touched H1/H2 files lint, wheel check and dependency consistency | Not complete strict typing, supply chain/SBOM/security scanning |
-| Canonical Handoff/docs parity | ACCEPT only after separate docs PR and exact main sync | Docs initially ahead of GitHub between native edit and PR merge |
+| Canonical Handoff/docs parity | PASS after PR #109 merged and exact main text comparison; final closeout snapshot resync is separately reviewed | Docs may be briefly ahead during explicitly reviewed edits; no automatic two-way sync |
 | Data rights/real indicators | BLOCKED: P0.29c, C2C and market/calendar rights remain external | H2 does not grant rights, approve real cache, order or trading |
 
 ## What H2 did NOT silently change

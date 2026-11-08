@@ -1,5 +1,9 @@
 # Swing Trading 1.8
 
+## H3 deep legacy module review (in progress)
+
+[H3 review plan](docs/H3_DEEP_ARCHITECTURE_REVIEW.md) and [63-module preliminary disposition matrix](docs/H3_MODULE_DISPOSITION_PROVISIONAL.md) provide static complexity/coupling/duplicate/exception audit. This is NOT completed manual refactoring or production release; REPLACE/REMOVE need independently proven consumers and rollback. H2 source governance remains intact, C3C stays revoked.
+
 ## H2 retroactive architecture hardening (existing modules)
 
 [H2 acceptance matrix](docs/H2_ACCEPTANCE_MATRIX.md) distinguishes verified maintenance gates from remaining production blockers.
